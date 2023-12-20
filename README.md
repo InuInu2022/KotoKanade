@@ -1,1 +1,1 @@
-# KotoKanade
+# KotoKanade （言奏）
