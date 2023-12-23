@@ -17,5 +17,10 @@
         <epoxy:Event EventName="Loaded" Command="{Binding Ready}" />
     </epoxy:EventBinder.Events>
 
-    <TextBlock Text="{Binding Title}" />
+	<Panel Width="100" Height="300">
+
+		<Label Content="bbb aaa" />
+		<Button>Hello World!</Button>
+		<TextBlock Text="{Binding Title}" />
+	</Panel>
 </UserControl>

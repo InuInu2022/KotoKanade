@@ -4,6 +4,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using HotAvalonia;
 
 using KotoKanade.Views;
 
@@ -11,8 +12,11 @@ namespace KotoKanade;
 
 public sealed class App : Application
 {
-	public override void Initialize() =>
+	public override void Initialize()
+	{
+		this.EnableHotReload(); // Ensure this line **precedes** `AvaloniaXamlLoader.Load(this);`
 		AvaloniaXamlLoader.Load(this);
+	}
 
 	public override void OnFrameworkInitializationCompleted()
 	{

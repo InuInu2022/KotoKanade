@@ -10,14 +10,14 @@ namespace KotoKanade.ViewModels;
 public sealed class MainViewModel
 {
 	public Command Ready { get; }
-	public string Title { get; private set; } = string.Empty;
+	public string Title { get; private set; } = "test";
 
 	public MainViewModel()
 	{
 		// A handler for window loaded
 		Ready = Command.Factory.Create(() =>
 		{
-			Title = "Hello Epoxy!";
+			Title = "Hello EpoxyXXX";
 			return default;
 		});
 	}
