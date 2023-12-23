@@ -1,0 +1,14 @@
+{
+	"workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#00ff62",
+        "titleBar.activeForeground": "#000000",
+        "activityBar.background": "#000000",
+        "activityBar.foreground": "#00ff62",
+
+        //outline icons color
+        "symbolIcon.functionForeground":"#fff200c5",
+        "symbolIcon.methodForeground":"#f5f2b4"
+    }//,
+    //"markiscodecoverage.searchCriteria": "test/TestResults/*/coverage.lconv",
+    //"dotnet-test-explorer.testProjectPath": "test/test.csproj"
+}
