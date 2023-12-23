@@ -17,6 +17,10 @@
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\'))</RepoRoot>
     <PathMap>$(RepoRoot)=$(DeterministicSourceRoot)</PathMap>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <!-- 他のデバッグに関連するプロパティがあればここに追加 -->
+  </PropertyGroup>
 
   <!-- analyzers -->
   <ItemGroup>

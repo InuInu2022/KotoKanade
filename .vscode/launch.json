@@ -1,0 +1,37 @@
+{
+	// IntelliSense を使用して利用可能な属性を学べます。
+	// 既存の属性の説明をホバーして表示します。
+	// 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "KotoKanade.UI Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/KotoKanade.Desktop/bin/Debug/net8.0/KotoKanade.Desktop.exe",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"console": "internalConsole",
+			"justMyCode": false, // 自分のコード以外
+            "symbolOptions": {
+                "searchPaths": [],
+                "searchMicrosoftSymbolServer": true, // ここをtrue
+                "searchNuGetOrgSymbolServer": true, // その他の外部ライブラリも見る場合はこちらも
+            }
+		},
+		{
+			"name": "C#: KotoKanade Debug",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}/KotoKanade.Desktop/KotoKanade.Desktop.csproj"
+		},
+		{
+			"name": ".NET Core Attach",
+			"type": "coreclr",
+			"request": "attach"
+		}
+
+	]
+}
