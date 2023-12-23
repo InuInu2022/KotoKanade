@@ -5,6 +5,16 @@
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
 	<ReportAnalyzer>true</ReportAnalyzer>
 
+	<!-- info -->
+    <Product>KotoKanade</Product>
+    <Description></Description>
+    <Copyright>InuInu</Copyright>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
+    <Version>0.1.0.0</Version>
+    <!-- AssemblyInfo プロパティ -->
+    <AssemblyTitle>KotoKanade</AssemblyTitle>
+    <SupportedCultures>en-US;ja</SupportedCultures>
+
 	<!-- MinVer -->
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
