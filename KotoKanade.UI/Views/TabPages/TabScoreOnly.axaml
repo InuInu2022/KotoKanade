@@ -1,0 +1,192 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:epoxy="clr-namespace:Epoxy;assembly=Epoxy.Core"
+             xmlns:views="clr-namespace:KotoKanade.Views"
+             xmlns:viewmodels="clr-namespace:KotoKanade.ViewModels"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             x:DataType="viewmodels:MainViewModel"
+             x:Class="KotoKanade.Views.TabScoreOnly">
+  <Grid
+    RowDefinitions="Auto,3*"
+    >
+    <StackPanel
+      Grid.Row="0" Grid.Column="0"
+      Orientation="Horizontal"
+      VerticalAlignment="Top"
+      DockPanel.Dock="Top"
+      Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
+      Margin="1, 5"
+      ToolTip.Tip="ソングのCeVIOのプロジェクトファイル (.ccs/.ccst) を選択してください。"
+      >
+      <ui:SymbolIcon
+        Symbol="Restore"
+        Margin="5"
+        FontSize="50"
+        Foreground="Gray"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        />
+      <views:FileFormScore DefaultFileName="aaa" />
+    </StackPanel>
+
+    <ScrollViewer
+      Grid.Row="1" Grid.Column="0"
+      VerticalScrollBarVisibility="Visible"
+      >
+      <StackPanel>
+        <ui:SettingsExpander
+          x:Name="ExportTalkVoiceSettings"
+          Header="Talk voice library cast option"
+          IconSource="Setting"
+          Description="歌わせるトークボイスと設定"
+          >
+          <ui:SettingsExpander.Footer>
+            <StackPanel
+              Orientation="Horizontal">
+              <ui:FAComboBox
+                IsEditable="False"
+                IsTextSearchEnabled="True"
+                MinWidth="100"
+                SelectedIndex="0">
+                <ui:FAComboBoxItem Content="VoiSona Talk"/>
+                <ui:FAComboBoxItem Content="CeVIO AI Talk" IsEnabled="False" />
+                <ui:FAComboBoxItem Content="CeVIO CS Talk" IsEnabled="False" />
+              </ui:FAComboBox>
+              <ui:FAComboBox
+                IsEditable="False"
+                IsTextSearchEnabled="True"
+                MinWidth="200"
+                SelectedIndex="0"
+                >
+                <ui:FAComboBoxItem Content="田中傘" />
+                <ui:FAComboBoxItem Content="さとうささら" />
+                <ui:FAComboBoxItem Content="すずきつづみ" />
+                <ui:FAComboBoxItem Content="タカハシ" />
+                <ui:FAComboBoxItem Content="双葉湊音" IsEnabled="False" />
+              </ui:FAComboBox>
+            </StackPanel>
+          </ui:SettingsExpander.Footer>
+          <ui:SettingsExpanderItem
+            IsEnabled="False"
+            Content="Style rates"
+            Description="感情比率を設定">
+            <ui:SettingsExpanderItem.Footer>
+              <StackPanel Margin="20">
+                <TextBlock
+                  Text="感情A"
+                  HorizontalAlignment="Center"
+                  TextAlignment="Center"
+                  Width="40"
+                  />
+                <Slider
+                  x:Name="sliderEmo1"
+                  Maximum="100"
+                  Minimum="0"
+                  TickFrequency="5"
+                  IsSnapToTickEnabled="True"
+                  MaxHeight="50"
+                  Width="40"
+                  Height="50"
+                  Value="100"
+                  Orientation="Vertical"
+                  />
+                <TextBlock
+                  Text="{Binding #sliderEmo1.Value}"
+                  HorizontalAlignment="Center"
+                  TextAlignment="Center"
+                  Width="40"
+                  />
+              </StackPanel>
+            </ui:SettingsExpanderItem.Footer>
+          </ui:SettingsExpanderItem>
+        </ui:SettingsExpander>
+        <ui:SettingsExpander
+          Header="Split notes"
+          IconSource="Setting"
+          Description="長いノートを分割するか"
+          Name="SettingsExpander3">
+          <ui:SettingsExpander.Footer>
+            <ToggleSwitch
+              Name="IsSplitNote"
+              IsChecked="True"
+              OnContent="On"
+              OffContent="OFF"
+              HorizontalAlignment="Right"
+              />
+          </ui:SettingsExpander.Footer>
+          <ui:SettingsExpanderItem
+            IsEnabled="{Binding #IsSplitNote.IsChecked}"
+            Content="Split threthold msec."
+            Description="分割するときに何ミリ秒以上なら分割するか">
+            <ui:SettingsExpanderItem.Footer>
+              <StackPanel
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                  Text="{Binding #thretholdSlider.Value, StringFormat='{}{0:0} msec.'}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  />
+                <Slider
+                  Name="thretholdSlider"
+                  Minimum="100"
+                  Maximum="3000"
+                  Value="250"
+                  TickFrequency="50"
+                  IsSnapToTickEnabled="True"
+                  Width="160"
+                  >
+                </Slider>
+
+              </StackPanel>
+            </ui:SettingsExpanderItem.Footer>
+          </ui:SettingsExpanderItem>
+        </ui:SettingsExpander>
+        <ui:SettingsExpander
+          Header="Consonant offset sec."
+          Description="子音部分をノートの開始時間からオフセットします。"
+          Name="ConsonantOffsetSettings"
+          >
+            <ui:SettingsExpander.Footer>
+              <StackPanel
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                  Text="{Binding #consonantSlider.Value, StringFormat='{}{0:0.00} sec.'}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  />
+                <Slider
+                  Name="consonantSlider"
+                  Minimum="-0.5"
+                  Maximum="0.5"
+                  Value="0.05"
+                  TickFrequency="0.01"
+                  IsSnapToTickEnabled="True"
+                  Width="160"
+                  x:CompileBindings="False"
+                  epoxy:Anchor.Pile="{Binding ConsonantSlider}"
+                  >
+                  <!-- PointerWheelChanged="Slider_PointerWheelChanged" -->
+                  <!--
+                  <epoxy:EventBinder.Events>
+                    <epoxy:Event
+                      EventName="PointerWheelChanged"
+                      Command="{Binding ConsonantSliderWheelEvent}" />
+                  </epoxy:EventBinder.Events>
+                  -->
+                </Slider>
+
+              </StackPanel>
+            </ui:SettingsExpander.Footer>
+        </ui:SettingsExpander>
+      </StackPanel>
+
+    </ScrollViewer>
+  </Grid>
+</UserControl>

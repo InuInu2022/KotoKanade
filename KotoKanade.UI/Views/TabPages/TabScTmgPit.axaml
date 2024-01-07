@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:epoxy="clr-namespace:Epoxy;assembly=Epoxy.Core"
+             xmlns:views="clr-namespace:KotoKanade.Views"
+             xmlns:viewmodels="clr-namespace:KotoKanade.ViewModels"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             x:DataType="viewmodels:MainViewModel"
+             x:Class="KotoKanade.Views.TabScTmgPit">
+  <Grid
+    RowDefinitions="Auto,3*"
+    >
+    <StackPanel
+      Orientation="Horizontal"
+      VerticalAlignment="Top"
+      DockPanel.Dock="Top"
+      Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
+      Margin="5"
+      ToolTip.Tip="ソングのCeVIOのプロジェクトファイル (.ccs) を  ドラッグ＆ドロップしてください。"
+      >
+      <ui:SymbolIcon
+        Symbol="Restore"
+        Margin="5"
+        FontSize="50"
+        Foreground="Gray"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        />
+      <WrapPanel Orientation="Vertical">
+        <views:FileFormScore />
+        <views:FileFormLab />
+        <views:FileFormWav />
+      </WrapPanel>
+    </StackPanel>
+
+    <ScrollViewer
+      Grid.Row="1" Grid.Column="0"
+      VerticalScrollBarVisibility="Visible"
+      >
+      <StackPanel>
+        <ui:SettingsExpander Header="Choose a device for speaking or recording"
+              IconSource="Microphone"
+              Description="Apps might have their own settings"
+              Name="SettingsExpanderSample">
+
+            <ui:SettingsExpanderItem Content="Headset"
+                                    Description="Device Name" />
+            <ui:SettingsExpanderItem Content="This one has footer content"
+                                    Description="Device Name">
+                <ui:SettingsExpanderItem.Footer>
+                    <Button Content="Add new device" />
+                </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
+            <ui:SettingsExpanderItem Content="This one is clickable"
+                                    ActionIconSource="{StaticResource GoIcon}"
+                                    IsClickEnabled="True" />
+
+        </ui:SettingsExpander>
+      </StackPanel>
+
+    </ScrollViewer>
+  </Grid>
+
+</UserControl>
