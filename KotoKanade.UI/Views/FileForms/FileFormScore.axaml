@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:epoxy="clr-namespace:Epoxy;assembly=Epoxy.Core"
+             xmlns:viewmodels="clr-namespace:KotoKanade.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             x:Class="KotoKanade.Views.FileFormScore"
+             x:DataType="viewmodels:MainViewModel">
+  <UserControl.DataContext>
+    <viewmodels:MainViewModel />
+  </UserControl.DataContext>
+
+  <StackPanel>
+    <StackPanel Orientation="Horizontal"
+      HorizontalAlignment="Right">
+      <StackPanel
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Center">
+        <ui:SymbolIcon
+          Symbol="Audio"
+          FontSize="20"
+          />
+        <Label Content="score"
+          VerticalAlignment="Center"
+          />
+      </StackPanel>
+
+      <TextBox Text="{Binding DefaultCcs}"
+        MinWidth="200"
+        IsReadOnly="True"
+        Watermark="select a .ccs/.ccst file"
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        Margin="5" />
+      <!-- Command="{CompiledBinding SelectFile}" -->
+      <Button Content="Select"
+
+        Margin="5,5,0,5" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

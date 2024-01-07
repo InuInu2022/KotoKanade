@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0;</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <IsPublishable>false</IsPublishable>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
-
+  <ItemGroup>
+    <AdditionalFiles Include="*.??proj" Visible="false" />
+    <AdditionalFiles Include="../Directory.Build.props" Link="Properties/Directory.Build.props" />
+  </ItemGroup>
 </Project>

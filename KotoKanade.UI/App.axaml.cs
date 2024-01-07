@@ -4,6 +4,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Converters;
 using HotAvalonia;
 
 using KotoKanade.Views;

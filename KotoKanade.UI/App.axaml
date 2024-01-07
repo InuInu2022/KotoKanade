@@ -3,8 +3,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:KotoKanade"
     x:Class="KotoKanade.App"
+    xmlns:sty="using:FluentAvalonia.Styling"
+    xmlns:ui="using:FluentAvalonia.UI.Controls"
+    xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+    xmlns:aconverters="using:Avalonia.Markup.Xaml.Converters"
     RequestedThemeVariant="Default">
     <Application.Styles>
-        <FluentTheme/>
+      <!-- <FluentTheme/> -->
+      <sty:FluentAvaloniaTheme />
     </Application.Styles>
 </Application>

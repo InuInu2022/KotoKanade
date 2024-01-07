@@ -1,13 +1,16 @@
 <Project>
   <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- net analyzer -->
     <EnableNETAnalyzers
        Condition="'$(Configuration)' == 'Debug'">true</EnableNETAnalyzers>
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
     <ReportAnalyzer>true</ReportAnalyzer>
+    <!-- version hash -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- info -->
     <Product>KotoKanade</Product>
-    <Description></Description>
+    <Description>KotoKanade is singing tool for VoiSona Talk.</Description>
     <Copyright>InuInu</Copyright>
     <NeutralLanguage>ja-JP</NeutralLanguage>
     <Version>0.1.0.0</Version>
@@ -68,15 +71,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference
        Include="Microsoft.VisualStudio.Threading.Analyzers"
        Version="17.8.14">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="DotNetProjectFile.Analyzers" Version="1.1.0">
+    <!-- <PackageReference Include="DotNetProjectFile.Analyzers" Version="1.1.0">
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    </PackageReference> -->
     <PackageReference Include="ParallelHelper" Version="3.6.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
