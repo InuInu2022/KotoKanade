@@ -11,6 +11,10 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.TabScoreOnly">
+  <UserControl.DataContext>
+    <viewmodels:MainViewModel />
+  </UserControl.DataContext>
+
   <Grid
     RowDefinitions="Auto,3*"
     >

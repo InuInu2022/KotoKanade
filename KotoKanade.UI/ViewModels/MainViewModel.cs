@@ -3,6 +3,9 @@
 // </copyright>
 
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,6 +19,8 @@ public sealed class MainViewModel
 	public Command Ready { get; }
 	public Command? ConsonantSliderWheelEvent { get; set; }
 
+	public Command? TabSelectionChanged { get; }
+
 	public Pile<Slider>? ConsonantSlider { get; set; }
 	public string Title { get; private set; } = "test";
 
@@ -28,8 +33,19 @@ public sealed class MainViewModel
 
 	public MainViewModel()
 	{
-		SelectCcs = Command.Factory.Create(() => {
-			return default;
+		SelectCcs = Command.Factory.Create(async () => {
+			var songCcs = await StorageUtil.OpenCevioFileAsync(
+				title:"ソングデータを含むccsファイルを選んでください",
+				allowMultiple: false,
+				path:null
+			).ConfigureAwait(true);
+
+			var pathes = StorageUtil
+				.GetPathesFromOpenedFiles(songCcs);
+			if(pathes is not {Count: >0}){ return; }
+
+			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+			DefaultCcs = Path.GetFileName(pathes[0]);
 		});
 		SelectLab = Command.Factory.Create(() => {
 			return default;
@@ -40,19 +56,37 @@ public sealed class MainViewModel
 
 		// A handler for window loaded
 		Ready = Command.Factory.Create(ReadyFunc());
+
+		TabSelectionChanged = Command.Factory.Create<SelectionChangedEventArgs>( (e) => {
+			Console.WriteLine("...");
+			if(e.Source is not TabControl tabCtrl){
+				return default;
+			}
+			if(tabCtrl.SelectedContent is not UserControl control){
+				return default;
+			}
+			//force update
+			control.UpdateLayout();
+			return default;
+		});
 	}
 
 	private Func<ValueTask> ReadyFunc()
 	{
-		return async () =>
+		return () =>
 		{
+			/*
 			ConsonantSlider = Pile.Factory.Create<Slider>();
+
+			if (ConsonantSlider is null) return;
 
 			await ConsonantSlider.RentAsync(slider =>
 			{
 				AddSliderEvent(slider);
 				return default;
 			}).ConfigureAwait(true);
+			*/
+			return default;
 		};
 	}
 

@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 
@@ -73,6 +76,24 @@ public static class StorageUtil
 		}
 		return await _storage.OpenFilePickerAsync(opt)
 			.ConfigureAwait(true);
+	}
+
+	/// <summary>
+	/// 読み込んだファイル(IStorageFile)からファイルパスのリストを取得する
+	/// </summary>
+	/// <param name="opened"></param>
+	/// <returns></returns>
+	public static IReadOnlyList<string>
+	GetPathesFromOpenedFiles(IReadOnlyList<IStorageFile?>? opened)
+	{
+		if(opened is not {Count: > 0}){
+			return ReadOnlyCollection<string>.Empty;
+		}
+		return opened
+			.Where(v => v is not null)
+			.Select(v => v!.Path.LocalPath)
+			.ToImmutableList()
+			;
 	}
 
 	/// <summary>

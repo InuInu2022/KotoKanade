@@ -11,6 +11,10 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.SettingTalkVoice">
+  <UserControl.DataContext>
+    <viewmodels:MainViewModel />
+  </UserControl.DataContext>
+
   <ui:SettingsExpander
     x:Name="ExportTalkVoiceSettings"
     Header="Talk voice library cast option"

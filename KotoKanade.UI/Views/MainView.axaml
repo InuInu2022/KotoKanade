@@ -30,7 +30,11 @@
       <!-- ==================================content====================================== -->
       <TabControl
         Grid.Row="0" Grid.Column="0"
-        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}">
+        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        >
+        <epoxy:EventBinder.Events>
+            <epoxy:Event EventName="SelectionChanged" Command="{Binding TabSelectionChanged}" />
+        </epoxy:EventBinder.Events>
         <!-- ========================== tab1 =================================== -->
         <TabItem Name="tab1">
           <TabItem.Header>

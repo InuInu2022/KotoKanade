@@ -11,6 +11,10 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.SettingOffsetConso">
+  <UserControl.DataContext>
+    <viewmodels:MainViewModel />
+  </UserControl.DataContext>
+
   <ui:SettingsExpander
     Header="Consonant offset sec."
     Description="子音部分をノートの開始時間からオフセットします。"
