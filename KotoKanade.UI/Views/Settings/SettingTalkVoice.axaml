@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:epoxy="clr-namespace:Epoxy;assembly=Epoxy.Core"
+             xmlns:views="clr-namespace:KotoKanade.Views"
+             xmlns:viewmodels="clr-namespace:KotoKanade.ViewModels"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             x:DataType="viewmodels:MainViewModel"
+             x:Class="KotoKanade.Views.SettingTalkVoice">
+  <ui:SettingsExpander
+    x:Name="ExportTalkVoiceSettings"
+    Header="Talk voice library cast option"
+    IconSource="Setting"
+    Description="歌わせるトークボイスと設定"
+    >
+    <ui:SettingsExpander.Footer>
+      <StackPanel
+        Orientation="Horizontal">
+        <ui:FAComboBox
+          IsEditable="False"
+          IsTextSearchEnabled="True"
+          MinWidth="100"
+          SelectedIndex="0">
+          <ui:FAComboBoxItem Content="VoiSona Talk"/>
+          <ui:FAComboBoxItem Content="CeVIO AI Talk" IsEnabled="False" />
+          <ui:FAComboBoxItem Content="CeVIO CS Talk" IsEnabled="False" />
+        </ui:FAComboBox>
+        <ui:FAComboBox
+          IsEditable="False"
+          IsTextSearchEnabled="True"
+          MinWidth="200"
+          SelectedIndex="0"
+          >
+          <ui:FAComboBoxItem Content="田中傘" />
+          <ui:FAComboBoxItem Content="さとうささら" />
+          <ui:FAComboBoxItem Content="すずきつづみ" />
+          <ui:FAComboBoxItem Content="タカハシ" />
+          <ui:FAComboBoxItem Content="双葉湊音" IsEnabled="False" />
+        </ui:FAComboBox>
+      </StackPanel>
+    </ui:SettingsExpander.Footer>
+    <ui:SettingsExpanderItem
+      IsEnabled="False"
+      Content="Style rates"
+      Description="感情比率を設定">
+      <ui:SettingsExpanderItem.Footer>
+        <StackPanel Margin="20">
+          <TextBlock
+            Text="感情A"
+            HorizontalAlignment="Center"
+            TextAlignment="Center"
+            Width="40"
+            />
+          <Slider
+            x:Name="sliderEmo1"
+            Maximum="100"
+            Minimum="0"
+            TickFrequency="5"
+            IsSnapToTickEnabled="True"
+            MaxHeight="50"
+            Width="40"
+            Height="50"
+            Value="100"
+            Orientation="Vertical"
+            />
+          <TextBlock
+            Text="{Binding #sliderEmo1.Value}"
+            HorizontalAlignment="Center"
+            TextAlignment="Center"
+            Width="40"
+            />
+        </StackPanel>
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
+  </ui:SettingsExpander>
+</UserControl>

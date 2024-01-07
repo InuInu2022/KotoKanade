@@ -19,8 +19,8 @@
       VerticalAlignment="Top"
       DockPanel.Dock="Top"
       Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
-      Margin="5"
       ToolTip.Tip="ソングのCeVIOのプロジェクトファイル (.ccs/.ccst) と歌唱指導用のタイミング情報ファイル(.lab)を選択してください。"
+      Margin="1, 5"
       >
       <ui:SymbolIcon
         Symbol="Restore"
@@ -30,7 +30,10 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         />
-      <WrapPanel Orientation="Vertical">
+      <WrapPanel
+        Orientation="Horizontal"
+        VerticalAlignment="Center"
+        >
         <views:FileFormScore />
         <views:FileFormLab />
       </WrapPanel>
@@ -41,6 +44,8 @@
       VerticalScrollBarVisibility="Visible"
       >
       <StackPanel>
+        <views:SettingTalkVoice />
+        <views:SettingSplitNotes />
         <ui:SettingsExpander Header="Choose a device for speaking or recording"
               IconSource="Microphone"
               Description="Apps might have their own settings"

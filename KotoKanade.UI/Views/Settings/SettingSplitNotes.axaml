@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:epoxy="clr-namespace:Epoxy;assembly=Epoxy.Core"
+             xmlns:views="clr-namespace:KotoKanade.Views"
+             xmlns:viewmodels="clr-namespace:KotoKanade.ViewModels"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             x:DataType="viewmodels:MainViewModel"
+             x:Class="KotoKanade.Views.SettingSplitNotes">
+  <ui:SettingsExpander
+    Header="Split notes"
+    IconSource="Setting"
+    Description="長いノートを分割するか"
+    Name="SettingsExpander3">
+    <ui:SettingsExpander.Footer>
+      <ToggleSwitch
+        Name="IsSplitNote"
+        IsChecked="True"
+        OnContent="On"
+        OffContent="OFF"
+        HorizontalAlignment="Right"
+        />
+    </ui:SettingsExpander.Footer>
+    <ui:SettingsExpanderItem
+      IsEnabled="{Binding #IsSplitNote.IsChecked}"
+      Content="Split threthold msec."
+      Description="分割するときに何ミリ秒以上なら分割するか">
+      <ui:SettingsExpanderItem.Footer>
+        <StackPanel
+          VerticalAlignment="Center"
+          Orientation="Horizontal">
+          <TextBlock
+            Text="{Binding #thretholdSlider.Value, StringFormat='{}{0:0} msec.'}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            />
+          <Slider
+            Name="thretholdSlider"
+            Minimum="100"
+            Maximum="3000"
+            Value="250"
+            TickFrequency="50"
+            IsSnapToTickEnabled="True"
+            Width="160"
+            >
+          </Slider>
+
+        </StackPanel>
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
+  </ui:SettingsExpander>
+</UserControl>
