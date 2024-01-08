@@ -17,6 +17,8 @@ indent_size = 2
 dotnet_diagnostic.Proj0005.severity = none
 
 [*.cs]
+dotnet_diagnostic.MA0026.severity = suggestion
+dotnet_diagnostic.S1135.severity = suggestion
 dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1600.severity = none
 dotnet_diagnostic.S125.severity = none
