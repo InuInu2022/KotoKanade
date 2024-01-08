@@ -1,0 +1,29 @@
+ | Reference                                  | Version                                         | License Type | License                                                                   | 
+ | ------------------------------------------ | ----------------------------------------------- | ------------ | ------------------------------------------------------------------------- | 
+ | Avalonia                                   | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Avalonia.Desktop                           | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Avalonia.Diagnostics                       | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Avalonia.Fonts.Inter                       | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Avalonia.Markup.Xaml.Loader                | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Avalonia.Themes.Fluent                     | 11.0.6                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Epoxy.Avalonia11                           | 1.12.0                                          | Apache-2.0   | https://licenses.nuget.org/Apache-2.0                                     | 
+ | FluentAvaloniaUI                           | 2.0.4                                           | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | HotAvalonia                                | 1.0.1                                           | LICENSE.md   | https://www.nuget.org/packages/HotAvalonia/1.0.1/License                  | 
+ | HotAvalonia.Extensions                     | 1.0.1                                           | LICENSE.md   | https://www.nuget.org/packages/HotAvalonia.Extensions/1.0.1/License       | 
+ | Meziantou.Analyzer                         | 2.0.119                                         | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Microsoft.CodeAnalysis.PublicApiAnalyzers  | 3.3.4                                           | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Microsoft.CSharp                           | 4.7.0                                           | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Microsoft.VisualStudio.Threading.Analyzers | 17.8.14                                         | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | MinVer                                     | 4.3.0                                           | Apache-2.0   | https://licenses.nuget.org/Apache-2.0                                     | 
+ | NetFabric.Hyperlinq.Analyzer               | 2.3.0                                           | LICENSE      | https://www.nuget.org/packages/NetFabric.Hyperlinq.Analyzer/2.3.0/License | 
+ | Newtonsoft.Json                            | 13.0.3                                          | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | PolySharp                                  | 1.14.1+a7a92a9ddd050275c91c42b711d22cb41c3fbf3d | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | Roslynator.Analyzers                       | 4.7.0                                           | Apache-2.0   | https://licenses.nuget.org/Apache-2.0                                     | 
+ | Roslynator.CodeAnalysis.Analyzers          | 4.7.0                                           | Apache-2.0   | https://licenses.nuget.org/Apache-2.0                                     | 
+ | Roslynator.Formatting.Analyzers            | 4.7.0                                           | Apache-2.0   | https://licenses.nuget.org/Apache-2.0                                     | 
+ | SharpOpenJTalk.Lang                        | 1.4.0                                           |              | https://raw.githubusercontent.com/yamachu/SharpOpenJTalk/master/LICENSE   | 
+ | System.Collections.Immutable               | 8.0.0                                           | MIT          | https://licenses.nuget.org/MIT                                            | 
+ | System.Dynamic.Runtime                     | 4.3.0                                           | MS-EULA      | http://go.microsoft.com/fwlink/?LinkId=329770                             | 
+ | System.Memory                              | 4.5.5                                           | MIT          | https://github.com/dotnet/corefx/blob/master/LICENSE.TXT                  | 
+ | System.Threading.Tasks.Extensions          | 4.5.4                                           | MIT          | https://github.com/dotnet/corefx/blob/master/LICENSE.TXT                  | 
+ | WanaKana-net                               | 1.0.0                                           | MIT          | https://licenses.nuget.org/MIT                                            | 

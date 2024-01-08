@@ -1,0 +1,1 @@
+dotnet-project-licenses -f .\licenses\ -m -i .\KotoKanade.sln -u -e -c
