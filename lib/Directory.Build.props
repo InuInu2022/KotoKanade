@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);NU1504;NU1505;NU1701</NoWarn>
+  </PropertyGroup>
+</Project>
