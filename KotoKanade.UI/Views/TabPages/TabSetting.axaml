@@ -9,10 +9,10 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
-             x:DataType="viewmodels:MainViewModel"
+             x:DataType="viewmodels:TabSettingsViewModel"
              x:Class="KotoKanade.Views.TabSetting">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:TabSettingsViewModel />
   </UserControl.DataContext>
 
   <Grid
@@ -35,26 +35,63 @@
       VerticalScrollBarVisibility="Visible"
       >
       <StackPanel>
-        <ui:SettingsExpander Header="Choose a device for speaking or recording"
-              IconSource="Microphone"
-              Description="Apps might have their own settings"
-              Name="SettingsExpanderSample">
-
-            <ui:SettingsExpanderItem Content="Headset"
-                                    Description="Device Name" />
-            <ui:SettingsExpanderItem Content="This one has footer content"
-                                    Description="Device Name">
+        <ui:SettingsExpander Header="{Binding AppName}"
+              Description="KotoKanade is a tool to make VoiSona Talk sing."
+              Name="SettingsExpanderSample1">
+            <ui:SettingsExpander.Footer>
+              <WrapPanel>
+                <TextBox Text="{Binding AppVer}"  Margin="5 0" IsReadOnly="True" />
+                <ui:HyperlinkButton Content="WebSite" NavigateUri="https://github.com/InuInu2022/KotoKanade"  />
+                <ui:HyperlinkButton Content="Manual" NavigateUri="https://github.com/InuInu2022/KotoKanade"  />
+                <Button Content="License" Margin="5 0" Command="{Binding OpenLicense}" />
+              </WrapPanel>
+            </ui:SettingsExpander.Footer>
+        </ui:SettingsExpander>
+        <ui:SettingsExpander Header="Useful links"
+                     IconSource="Globe"
+                     Description="便利なサイトやアプリへのリンク"
+                     Name="Links">
+          <ui:SettingsExpanderItem Content="VoiSona Talk 公式サイト"
+                                    Description="公式サイト">
                 <ui:SettingsExpanderItem.Footer>
-                    <Button Content="Add new device" />
+                  <ui:HyperlinkButton Content="VoiSona Talk 公式サイト" NavigateUri="https://voisona.com/talk/" />
                 </ui:SettingsExpanderItem.Footer>
             </ui:SettingsExpanderItem>
-            <ui:SettingsExpanderItem Content="This one is clickable"
-                                    ActionIconSource="{StaticResource GoIcon}"
-                                    IsClickEnabled="True" />
-
+            <ui:SettingsExpanderItem Content="CeVIO ユーザー互助会wiki"
+                                    Description="ユーザー互助会wiki">
+                <ui:SettingsExpanderItem.Footer>
+                  <ui:HyperlinkButton Content="CeVIO ユーザー互助会wiki" NavigateUri="https://w.atwiki.jp/ceviouser/" />
+                </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
+            <ui:SettingsExpanderItem Content="UtaFormatix"
+                                    Description="各種楽譜データをCCS形式に変換してくれます">
+                <ui:SettingsExpanderItem.Footer>
+                  <ui:HyperlinkButton Content="UtaFormatix" NavigateUri="https://sdercolin.github.io/utaformatix3/" />
+                </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
+            <ui:SettingsExpanderItem Content="NodoAme"
+                                    Description="歌うソフトをしゃべらせる方のツール">
+                <ui:SettingsExpanderItem.Footer>
+                  <ui:HyperlinkButton Content="NodoAme" NavigateUri="https://inuinu2022.github.io/NodoAme.Home/" />
+                </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
+            <ui:SettingsExpanderItem Content="SasaraUtil"
+                                    Description="CeVIO / VoiSona関係の便利ツール">
+                <ui:SettingsExpanderItem.Footer>
+                  <ui:HyperlinkButton Content="SasaraUtil" NavigateUri="https://github.com/InuInu2022/SasaraUtil/" />
+                </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
+            <ui:SettingsExpanderItem>
+              <ui:SettingsExpanderItem.Footer>
+                <WrapPanel Width="{Binding $parent.Bounds.Width}">
+                  <ui:HyperlinkButton Content="CeVIO 公式サイト" NavigateUri="https://cevio.jp/" />
+                  <ui:HyperlinkButton Content="CeVIO AI ユーザーズガイド" NavigateUri="https://cevio.jp/guide/cevio_ai/" />
+                  <ui:HyperlinkButton Content="CeVIO CS ユーザーズガイド" NavigateUri="https://cevio.jp/guide/cevio_cs7/" />
+                </WrapPanel>
+              </ui:SettingsExpanderItem.Footer>
+            </ui:SettingsExpanderItem>
         </ui:SettingsExpander>
       </StackPanel>
-
     </ScrollViewer>
   </Grid>
 

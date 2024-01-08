@@ -20,6 +20,7 @@
     <DebugSymbols>false</DebugSymbols>
     <IlcInstructionSet>native</IlcInstructionSet>
     <IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
+    <WarningsAsErrors>false</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -35,7 +36,9 @@
     <Delete Files="$(OutputPath)/LibSasara.xml" />
     <Delete Files="$(OutputPath)/LibSasara.VoiSona.xml" />
     <Delete Files="$(OutputPath)/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/*.pdb" />
     <Delete Files="$(OutputPath)/publish/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/publish/*.pdb" />
     <Delete Files="$(OutputPath)/publish/*.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.VoiSona.xml" />
@@ -49,7 +52,12 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
-    <Content Include="../licenses/**" LinkBase="licenses">
+    <Content Include="../LICENSE" LinkBase="licenses/KotoKanade/">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Include="../licenses/**" LinkBase="licenses/">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
