@@ -9,9 +9,9 @@
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:Class="KotoKanade.Views.FileFormScore"
-             x:DataType="viewmodels:MainViewModel">
+             x:DataType="viewmodels:FileFormScoreViewModel">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:FileFormScoreViewModel />
   </UserControl.DataContext>
 
   <StackPanel>
@@ -29,7 +29,8 @@
           />
       </StackPanel>
 
-      <TextBox Text="{Binding DefaultCcs}"
+      <!-- $parent[UserControl;1] -->
+      <TextBox Text="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).DefaultCcs}"
         MinWidth="200"
         IsReadOnly="True"
         Watermark="select a .ccs/.ccst file"
@@ -37,8 +38,9 @@
         HorizontalContentAlignment="Stretch"
         Margin="5" />
       <Button Content="Select"
-        Command="{Binding SelectCcs}"
+        Command="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectCcs}"
         Margin="5,5,0,5" />
+
     </StackPanel>
   </StackPanel>
 </UserControl>

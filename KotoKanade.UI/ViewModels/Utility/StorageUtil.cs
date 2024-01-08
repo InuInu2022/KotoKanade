@@ -108,7 +108,8 @@ public static class StorageUtil
 		string path,
 		IReadOnlyList<string> patterns,
 		string title = "保存先を選んでください",
-		string changeExt = ".new.ccs"
+		string changeExt = ".new.ccs",
+		string targetFileTypes = "ccs"
 	)
 	{
 		if(_storage is null){
@@ -127,7 +128,7 @@ public static class StorageUtil
 				fileName,
 				changeExt),
 			FileTypeChoices = new FilePickerFileType[]{
-				new("ccs"){
+				new(targetFileTypes){
 					Patterns = patterns,
 					AppleUniformTypeIdentifiers = appleUniformTypeId,
 				},

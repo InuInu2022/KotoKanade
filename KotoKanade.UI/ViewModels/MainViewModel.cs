@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Epoxy;
+using KotoKanade.Core.Models;
 
 namespace KotoKanade.ViewModels;
 
@@ -25,11 +26,14 @@ public sealed class MainViewModel
 	public string Title { get; private set; } = "test";
 
 	public string DefaultCcs { get; set; } = string.Empty;
+	public string? OpenedCcsPath { get; set; }
 	public Command SelectCcs { get; }
 	public string DefaultLab { get; set; } = string.Empty;
 	public Command SelectLab { get; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
+
+	public Command ExportFile { get; set; }
 
 	public MainViewModel()
 	{
@@ -45,6 +49,7 @@ public sealed class MainViewModel
 			if(pathes is not {Count: >0}){ return; }
 
 			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+			OpenedCcsPath = pathes[0];
 			DefaultCcs = Path.GetFileName(pathes[0]);
 		});
 		SelectLab = Command.Factory.Create(() => {
@@ -67,7 +72,44 @@ public sealed class MainViewModel
 			}
 			//force update
 			control.UpdateLayout();
+			//再度アサインして全タブに反映
+			Debug.WriteLine($"defCcs: {DefaultCcs}, opened: {OpenedCcsPath}");
 			return default;
+		});
+
+		ExportFile = Command.Factory.Create(async ()=>{
+			var path = OpenedCcsPath ?? "";
+
+			var saved = await StorageUtil.SaveAsync(
+				path: OpenedCcsPath ?? "",
+				patterns: ["*.tsrprj"],
+				changeExt: ".tstprj",
+				targetFileTypes: "VoiSonaTalkプロジェクトファイル"
+			).ConfigureAwait(true);
+
+			if(saved is null){
+				//_notify?.Dismiss(loading!);
+				return;
+			}
+			var saveDir = saved.Path.LocalPath;
+			if(saveDir is null){
+				return;
+			}
+
+			var loadedSong = await ScoreParser
+				.ProcessCcsAsync(path)
+				.ConfigureAwait(true);
+
+			await TalkDataConverter
+				.GenerateFileAsync(
+					loadedSong,
+					saveDir,
+					"田中傘",
+					(true, 250),
+					null,
+					0.05m
+				)
+				.ConfigureAwait(false);
 		});
 	}
 

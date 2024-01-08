@@ -15,7 +15,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <AdditionalFiles Include="*.??proj" Visible="false" />
-    <AdditionalFiles Include="../Directory.Build.props" Link="Properties/Directory.Build.props" />
+    <AdditionalFiles Include="../props/Directory.Build.props" Link="Properties/Directory.Build.props" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.0.6" />

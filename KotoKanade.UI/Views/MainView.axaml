@@ -170,7 +170,7 @@
             Classes="accent"
             Foreground="{StaticResource TextOnAccentFillColorPrimaryBrush}"
             FontWeight="DemiBold"
-
+            Command="{Binding ExportFile}"
             >
             <WrapPanel>
               <ui:SymbolIcon

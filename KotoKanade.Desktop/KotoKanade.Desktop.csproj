@@ -11,9 +11,55 @@
     <DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
   </PropertyGroup>
 
+  <Target Name="RemovePublishDirBeforeBuild" BeforeTargets="BeforeBuild">
+    <RemoveDir Directories="$(OutputPath)/publish/" />
+    <Message Text="RemovePublishDirBeforeBuild" Importance="high" />
+  </Target>
+  <Target Name="MakeZipPackage" AfterTargets="Publish">
+    <MakeDir Directories="$(OutputPath)/../../../../../publish/" />
+    <Delete Files="$(OutputPath)/LibSasara.xml" />
+    <Delete Files="$(OutputPath)/LibSasara.VoiSona.xml" />
+    <Delete Files="$(OutputPath)/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/publish/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/publish/*.xml" />
+    <Delete Files="$(OutputPath)/publish/LibSasara.xml" />
+    <Delete Files="$(OutputPath)/publish/LibSasara.VoiSona.xml" />
+    <ZipDirectory SourceDirectory="$(OutputPath)/publish/" DestinationFile="$(OutputPath)/../../../../../SongToTalkVoiSona/publish/$(AssemblyName)-$(RuntimeIdentifier)-v.$(Version).zip" Overwrite="true" />
+    <Message Text="Actions After Publish" Importance="high" />
+  </Target>
+
+  <ItemGroup>
+    <Content Include="../README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Include="../licenses/**" LinkBase="licenses">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Include="../Templates/**" LinkBase="Templates/">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <!-- Cast data definition json -->
+    <Content Include="../lib/cevio-casts/data/data.json" LinkBase="lib/">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Include="../lib/open_jtalk_dic_utf_8-1.11/*" LinkBase="lib/open_jtalk_dic_utf_8-1.11/">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="*.??proj" Visible="false" />
-    <AdditionalFiles Include="../Directory.Build.props" Link="Properties/Directory.Build.props" />
+    <AdditionalFiles Include="../props/Directory.Build.props" Link="Properties/Directory.Build.props" />
   </ItemGroup>
 
   <ItemGroup>

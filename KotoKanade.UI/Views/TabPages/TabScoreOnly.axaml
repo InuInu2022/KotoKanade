@@ -9,10 +9,10 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
-             x:DataType="viewmodels:MainViewModel"
+             x:DataType="viewmodels:TabScoreOnlyViewModel"
              x:Class="KotoKanade.Views.TabScoreOnly">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:TabScoreOnlyViewModel />
   </UserControl.DataContext>
 
   <Grid

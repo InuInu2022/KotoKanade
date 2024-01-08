@@ -8,6 +8,20 @@
   </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="*.??proj" Visible="false" />
-    <AdditionalFiles Include="../Directory.Build.props" Link="Properties/Directory.Build.props" />
+    <AdditionalFiles Include="../props/Directory.Build.props" Link="Properties/Directory.Build.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\LibSasara\LibSasara\LibSasara.csproj" />
+    <ProjectReference Include="..\lib\LibSasara\LibSasara.VoiSona\LibSasara.VoiSona.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PolySharp" Version="1.14.1+a7a92a9ddd050275c91c42b711d22cb41c3fbf3d">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="SharpOpenJTalk.Lang" Version="1.4.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
+    <PackageReference Include="WanaKana-net" Version="1.0.0" />
   </ItemGroup>
 </Project>
