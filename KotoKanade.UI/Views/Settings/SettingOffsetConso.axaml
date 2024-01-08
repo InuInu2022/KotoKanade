@@ -11,9 +11,6 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.SettingOffsetConso">
-  <UserControl.DataContext>
-    <viewmodels:MainViewModel />
-  </UserControl.DataContext>
 
   <ui:SettingsExpander
     Header="Consonant offset sec."
@@ -32,9 +29,9 @@
             />
           <Slider
             Name="consonantSlider"
-            Minimum="-0.5"
-            Maximum="0.5"
-            Value="0.05"
+            Minimum="-0.1"
+            Maximum="0.1"
+            Value="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).ConsonantOffsetSec}"
             TickFrequency="0.01"
             IsSnapToTickEnabled="True"
             Width="160"

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Epoxy;
+using FluentAvalonia.UI.Controls;
 using KotoKanade.Core.Models;
 
 namespace KotoKanade.ViewModels;
@@ -32,6 +33,11 @@ public sealed class MainViewModel
 	public Command SelectLab { get; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
+
+	public FAComboBoxItem? SelectedCastItem { get; set; }
+	public bool IsSplitNotes {get;set;} = true;
+	public double ThretholdSplitNote { get; set; } = 250;
+	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
 
 	public Command ExportFile { get; set; }
 
@@ -104,10 +110,10 @@ public sealed class MainViewModel
 				.GenerateFileAsync(
 					loadedSong,
 					saveDir,
-					"田中傘",
-					(true, 250),
+					SelectedCastItem?.Content?.ToString(),
+					(IsSplitNotes, ThretholdSplitNote),
 					null,
-					0.05m
+					- ConsonantOffsetSec	//表示と逆
 				)
 				.ConfigureAwait(false);
 		});

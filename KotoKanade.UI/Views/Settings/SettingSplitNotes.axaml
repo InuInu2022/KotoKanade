@@ -11,9 +11,6 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.SettingSplitNotes">
-  <UserControl.DataContext>
-    <viewmodels:MainViewModel />
-  </UserControl.DataContext>
 
   <ui:SettingsExpander
     Header="Split notes"
@@ -23,7 +20,7 @@
     <ui:SettingsExpander.Footer>
       <ToggleSwitch
         Name="IsSplitNote"
-        IsChecked="True"
+        IsChecked="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).IsSplitNotes}"
         OnContent="On"
         OffContent="OFF"
         HorizontalAlignment="Right"
@@ -46,7 +43,7 @@
             Name="thretholdSlider"
             Minimum="100"
             Maximum="3000"
-            Value="250"
+            Value="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).ThretholdSplitNote}"
             TickFrequency="50"
             IsSnapToTickEnabled="True"
             Width="160"
