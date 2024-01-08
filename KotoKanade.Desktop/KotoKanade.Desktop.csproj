@@ -5,6 +5,21 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+
+
+    <SelfContained Condition="'$(Configuration)' == 'Debug'">false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- <PublishAot>true</PublishAot> -->
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugSymbols>false</DebugSymbols>
+    <IlcInstructionSet>native</IlcInstructionSet>
+    <IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -24,7 +39,7 @@
     <Delete Files="$(OutputPath)/publish/*.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.VoiSona.xml" />
-    <ZipDirectory SourceDirectory="$(OutputPath)/publish/" DestinationFile="$(OutputPath)/../../../../../SongToTalkVoiSona/publish/$(AssemblyName)-$(RuntimeIdentifier)-v.$(Version).zip" Overwrite="true" />
+    <ZipDirectory SourceDirectory="$(OutputPath)/publish/" DestinationFile="$(OutputPath)/../../../../../publish/$(AssemblyName)-$(RuntimeIdentifier)-v.$(Version).zip" Overwrite="true" />
     <Message Text="Actions After Publish" Importance="high" />
   </Target>
 
