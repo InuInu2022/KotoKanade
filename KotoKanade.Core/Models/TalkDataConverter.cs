@@ -666,8 +666,7 @@ public static partial class TalkDataConverter
 		return $"""<acoustic_phrase><word begin_byte_index="0" chain="0" end_byte_index="{bytes}" hl="{accent}" original="{text}" phoneme="{phoneme}" pos="感動詞" pronunciation="{pronounce}">{text}</word></acoustic_phrase>""";
 	}
 
-	//	とりあえずnoteから算出
-	//	本当は最初の子音分、前にはみ出したほうがいい
+	//	noteから算出
 	private static string GetStartTimeString(
 		SongData data,
 		List<Note> p,
