@@ -23,6 +23,8 @@ public sealed class App : Application
 	{
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
+			//cli here
+			var args = desktop.Args;
 			desktop.MainWindow = new MainWindow();
 		}
 		if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
