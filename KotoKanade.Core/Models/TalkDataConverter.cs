@@ -26,6 +26,8 @@ public static partial class TalkDataConverter
 	[ThreadStatic]
 	private static Cast? _defs;
 
+	private static readonly SortedDictionary<int, decimal> defaultTempo = new() { { 0, 120 } };
+
 	public static async ValueTask GenerateFileAsync(
 		SongData processed,
 		string exportPath,
@@ -43,7 +45,7 @@ public static partial class TalkDataConverter
 		var rates = await CulcEmoRatesAsync(castName, emotions)
 			.ConfigureAwait(false);
 
-		processed.TempoList ??= new() { { 0, 120 } };
+		processed.TempoList ??= defaultTempo;
 		var sw = new Stopwatch();
 		sw.Start();
 
@@ -292,7 +294,7 @@ public static partial class TalkDataConverter
 			var dur = SasaraUtil
 				.ClockToTimeSpan(
 					n.Duration,
-					data.TempoList ?? new() { { 0, 120 } })
+					data.TempoList ?? defaultTempo)
 				.TotalMilliseconds;
 			var th = noteSplit?.threthold ?? 100000;
 			//th = th < 100 ? 100 : th;
@@ -397,7 +399,7 @@ public static partial class TalkDataConverter
 		List<Note> notes,
 		SongData data)
 	{
-		var tempo = data.TempoList ?? new() { { 0, 120 } };
+		var tempo = data.TempoList ?? defaultTempo;
 		List<(TimeSpan start, TimeSpan end, double logF0, int counts)> d = notes
 			.ConvertAll(n =>
 			(
@@ -521,7 +523,7 @@ public static partial class TalkDataConverter
 		decimal offset = 0.0m
 	)
 	{
-		var tempo = song.TempoList ?? new() { { 0, 120 } };
+		var tempo = song.TempoList ?? defaultTempo;
 		var timings = notes
 			.AsParallel().AsSequential()
 			.Select((n,i) =>
