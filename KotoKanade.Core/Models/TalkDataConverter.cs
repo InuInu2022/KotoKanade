@@ -354,13 +354,19 @@ public static partial class TalkDataConverter
 				.Split('|')[^1]
 				.Split(',')[^1]
 				;
-			var last = string.IsNullOrEmpty(ph) ? "a" : ph;
+			var last = IsInvalid(ph) ? "a" : ph;
 			p[i].Lyric = lyric
 				.Replace(
 				"ー",
 				GetPronounce(last));
 		}
 		return p;
+
+		static bool IsInvalid(string ph)
+		{
+			return string.IsNullOrEmpty(ph) ||
+				ph is "cl" or "xx" or "sil" or "pau";
+		}
 	}
 
 	private static readonly WanaKanaOptions kanaOption = new()
