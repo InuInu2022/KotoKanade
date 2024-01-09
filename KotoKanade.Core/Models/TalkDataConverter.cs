@@ -318,10 +318,13 @@ public static partial class TalkDataConverter
 						.Repeat("u", add - 1)
 						.Append("N"),
 				],
+				//っ
+				"cl" => sph,
 				//無効
-				"xx" => sph,
+				"xx" or "sil" or "pau" => sph,
 				//それ以外（母音）
-				string s => [.. sph, .. Enumerable.Repeat(s, add)],
+				string s =>
+					[.. sph, .. Enumerable.Repeat(s, add)],
 			};
 			n.Phonetic = string
 				.Join(",", sph);
