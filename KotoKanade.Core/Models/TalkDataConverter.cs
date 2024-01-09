@@ -285,7 +285,7 @@ public static partial class TalkDataConverter
 		List<Note> p)
 	{
 		//「ー」対応
-		ManageLongVowelSymbols(p);
+		p = ManageLongVowelSymbols(p);
 
 		return p.ConvertAll(n =>
 		{
@@ -335,26 +335,29 @@ public static partial class TalkDataConverter
 	/// 歌詞中の「ー」対応
 	/// </summary>
 	/// <param name="p"></param>
-	private static void ManageLongVowelSymbols(List<Note> p)
+	private static List<Note> ManageLongVowelSymbols(List<Note> p)
 	{
 		for (var i = 1; i < p.Count; i++)
 		{
 			var lyric = p[i].Lyric;
 			if (lyric is null) continue;
-			if (!lyric.Contains('ー'))
+			if (!lyric.StartsWith("ー", StringComparison.Ordinal))
 			{
 				continue;
 			}
 			//「ー」の時は前のノートの母音歌詞に置換
 			var prev = p[i - 1];
 			var ph = GetPhonemeLabel(GetFullContext(new List<Note> { prev }))
-				.Split('|');
-			var last = ph[^1] ?? "a";
+				.Split('|')[^1]
+				.Split(',')[^1]
+				;
+			var last = string.IsNullOrEmpty(ph) ? "a" : ph;
 			p[i].Lyric = lyric
 				.Replace(
 				"ー",
 				GetPronounce(last));
 		}
+		return p;
 	}
 
 	private static readonly WanaKanaOptions kanaOption = new()
