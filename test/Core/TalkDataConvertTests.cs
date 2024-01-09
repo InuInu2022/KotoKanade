@@ -27,6 +27,7 @@ public class TalkDataConvertTests
 	[InlineData(new string[]{"ち","きゅ","ー","は"}, new string[]{"ち","きゅ","ウ","は"})]
 	[InlineData(new string[]{"ち","きゅ","ーは"}, new string[]{"ち","きゅ","ウは"})]
 	[InlineData(new string[]{"あっ","ーっ"}, new string[]{"あっ","アっ"})]
+	[InlineData(new string[]{"ーっ"}, new string[]{"アーっ"})]
     public void Test1(string[] lyricsArray, string[] expectLyrics)
     {
 		List<Note> target = lyricsArray

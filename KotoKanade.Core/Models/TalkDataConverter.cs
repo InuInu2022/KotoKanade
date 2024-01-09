@@ -340,6 +340,12 @@ public static partial class TalkDataConverter
 	/// <param name="p"></param>
 	private static List<Note> ManageLongVowelSymbols(List<Note> p)
 	{
+		//いきなり「ー」で始まるときは「アー」に強制変換
+		if(p[0].Lyric?.StartsWith("ー", StringComparison.Ordinal) ?? false){
+			p[0].Lyric = $"ア{p[0].Lyric}";
+		}
+
+		//途中のノートの「ー」始まり歌詞
 		for (var i = 1; i < p.Count; i++)
 		{
 			var lyric = p[i].Lyric;
