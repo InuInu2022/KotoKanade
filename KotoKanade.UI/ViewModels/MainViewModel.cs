@@ -21,8 +21,6 @@ public sealed class MainViewModel
 	public Command Ready { get; }
 	public Command? ConsonantSliderWheelEvent { get; set; }
 
-	public Command? TabSelectionChanged { get; }
-
 	public Pile<Slider>? ConsonantSlider { get; set; }
 	public string Title { get; private set; } = "test";
 
@@ -67,21 +65,6 @@ public sealed class MainViewModel
 
 		// A handler for window loaded
 		Ready = Command.Factory.Create(ReadyFunc());
-
-		TabSelectionChanged = Command.Factory.Create<SelectionChangedEventArgs>( (e) => {
-			Console.WriteLine("...");
-			if(e.Source is not TabControl tabCtrl){
-				return default;
-			}
-			if(tabCtrl.SelectedContent is not UserControl control){
-				return default;
-			}
-			//force update
-			control.UpdateLayout();
-			//再度アサインして全タブに反映
-			Debug.WriteLine($"defCcs: {DefaultCcs}, opened: {OpenedCcsPath}");
-			return default;
-		});
 
 		ExportFile = Command.Factory.Create(async ()=>{
 			var path = OpenedCcsPath ?? "";
