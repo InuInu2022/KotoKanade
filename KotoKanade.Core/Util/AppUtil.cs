@@ -6,14 +6,14 @@ public static class AppUtil
 {
 	public static string GetAppVer(){
 		return Assembly
-			.GetEntryAssembly()
+			.GetEntryAssembly()?
 			.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute))
 			.Cast<AssemblyInformationalVersionAttribute>()
-			.FirstOrDefault()
-			.InformationalVersion;
+			.FirstOrDefault()?
+			.InformationalVersion ?? string.Empty;
 	}
 
 	public static string GetAppName(){
-		return Assembly.GetEntryAssembly().GetName().Name;
+		return Assembly.GetEntryAssembly()?.GetName().Name ?? string.Empty;
 	}
 }
