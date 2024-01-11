@@ -121,7 +121,7 @@ public static partial class TalkDataConverter
 			cast.Versions[^1]);
 	}
 
-	private static async ValueTask<Cast> GetCastDefAsync(string castName)
+	public static async ValueTask<Cast> GetCastDefAsync(string castName)
 	{
 		if (_defs is not null) return _defs;
 

@@ -3,7 +3,9 @@
 // </copyright>
 
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,6 +35,8 @@ public sealed class MainViewModel
 	public Command SelectWav { get; }
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
+	public int SelectedCastIndex { get; set; }
+	public ObservableCollection<StyleRate>? Styles { get; set; }
 	public bool IsSplitNotes {get;set;} = true;
 	public double ThretholdSplitNote { get; set; } = 250;
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
@@ -41,32 +45,46 @@ public sealed class MainViewModel
 
 	public MainViewModel()
 	{
-		SelectCcs = Command.Factory.Create(async () => {
+		SelectCcs = Command.Factory.Create(async () =>
+		{
 			var songCcs = await StorageUtil.OpenCevioFileAsync(
-				title:"ソングデータを含むccsファイルを選んでください",
+				title: "ソングデータを含むccsファイルを選んでください",
 				allowMultiple: false,
-				path:null
+				path: null
 			).ConfigureAwait(true);
 
 			var pathes = StorageUtil
 				.GetPathesFromOpenedFiles(songCcs);
-			if(pathes is not {Count: >0}){ return; }
+			if (pathes is not { Count: > 0 }) { return; }
 
 			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
 			OpenedCcsPath = pathes[0];
 			DefaultCcs = Path.GetFileName(pathes[0]);
 		});
-		SelectLab = Command.Factory.Create(() => {
+		SelectLab = Command.Factory.Create(() =>
+		{
 			return default;
 		});
-		SelectWav = Command.Factory.Create(() => {
+		SelectWav = Command.Factory.Create(() =>
+		{
 			return default;
 		});
 
 		// A handler for window loaded
-		Ready = Command.Factory.Create(ReadyFunc());
+		Ready = Command.Factory.Create(ReadyFunc);
 
-		ExportFile = Command.Factory.Create(async ()=>{
+		ExportFile = Command.Factory.Create(ExportEvent);
+
+		Styles = [
+			new("Normal", 12.3),
+			new("Fine", 22.3),
+			new("Sad", 32.3),
+		];
+	}
+
+	private Func<ValueTask> ExportEvent =>
+		async () =>
+		{
 			var path = OpenedCcsPath ?? "";
 
 			var saved = await StorageUtil.SaveAsync(
@@ -76,12 +94,14 @@ public sealed class MainViewModel
 				targetFileTypes: "VoiSonaTalkプロジェクトファイル"
 			).ConfigureAwait(true);
 
-			if(saved is null){
+			if (saved is null)
+			{
 				//_notify?.Dismiss(loading!);
 				return;
 			}
 			var saveDir = saved.Path.LocalPath;
-			if(saveDir is null){
+			if (saveDir is null)
+			{
 				return;
 			}
 
@@ -95,17 +115,16 @@ public sealed class MainViewModel
 					saveDir,
 					SelectedCastItem?.Content?.ToString(),
 					(IsSplitNotes, ThretholdSplitNote),
-					null,
-					- ConsonantOffsetSec	//表示と逆
+					Styles?.Select(s => s.Rate).ToArray(),
+					-ConsonantOffsetSec //表示と逆
 				)
 				.ConfigureAwait(false);
-		});
-	}
+		};
 
-	private Func<ValueTask> ReadyFunc()
-	{
-		return () =>
+	private Func<ValueTask> ReadyFunc =>
+		() =>
 		{
+			SelectedCastIndex = 0;
 			/*
 			ConsonantSlider = Pile.Factory.Create<Slider>();
 
@@ -119,7 +138,6 @@ public sealed class MainViewModel
 			*/
 			return default;
 		};
-	}
 
 	private static void AddSliderEvent(Slider slider)
 	{
@@ -145,5 +163,26 @@ public sealed class MainViewModel
 				sl.Value -= tick; // マウスホイールが下向きに動いた場合、値を減少させる
 			}
 		};
+	}
+
+	[PropertyChanged(nameof(SelectedCastItem))]
+	[SuppressMessage("", "IDE0051")]
+	private async ValueTask SelectedCastItemChangedAsync(FAComboBoxItem? value)
+	{
+		if (value is null) return;
+
+		if (value.Content is not string castName) return;
+
+		var def = await TalkDataConverter
+			.GetCastDefAsync(castName)
+			.ConfigureAwait(true);
+
+		var list = def
+			.Emotions
+			.Select(e => e.Names.First(n => n.Lang == CevioCasts.Lang.Japanese).Display)
+			.Select(e => new StyleRate(e, 0))
+			;
+		Styles = new(list);
+		Styles[0].Rate = 100;
 	}
 }

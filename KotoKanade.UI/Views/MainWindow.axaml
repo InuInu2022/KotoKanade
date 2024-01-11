@@ -18,7 +18,7 @@
       ExtendClientAreaChromeHints="PreferSystemChrome"
     Name="MainWindowView"
     Icon="/Assets/appicon/icon.ico"
-    Title="KotoKanade" Width="800" Height="450">
+    Title="KotoKanade" Width="800" Height="500">
 
   <Panel>
     <ExperimentalAcrylicBorder IsHitTestVisible="False">
