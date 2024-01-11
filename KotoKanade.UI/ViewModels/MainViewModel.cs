@@ -21,9 +21,6 @@ namespace KotoKanade.ViewModels;
 public sealed class MainViewModel
 {
 	public Command Ready { get; }
-	public Command? ConsonantSliderWheelEvent { get; set; }
-
-	public Pile<Slider>? ConsonantSlider { get; set; }
 	public string Title { get; private set; } = "test";
 
 	public string DefaultCcs { get; set; } = string.Empty;
