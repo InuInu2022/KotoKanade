@@ -9,8 +9,14 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
-             x:DataType="viewmodels:MainViewModel"
+             x:DataType="viewmodels:SliderViewModel"
              x:Class="KotoKanade.Views.SettingOffsetConso">
+    <UserControl.DataContext>
+        <viewmodels:SliderViewModel />
+    </UserControl.DataContext>
+  <epoxy:EventBinder.Events>
+      <epoxy:Event EventName="Loaded" Command="{Binding Ready}" />
+  </epoxy:EventBinder.Events>
 
   <ui:SettingsExpander
     Header="Consonant offset sec."
