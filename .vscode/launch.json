@@ -22,6 +22,17 @@
             }
 		},
 		{
+			"name": "[WSL] KotoKanade.UI Debug",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceFolder}/KotoKanade.Desktop/bin/Debug/net8.0/KotoKanade.Desktop",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"console": "internalConsole",
+		},
+		{
 			"name": "C#: KotoKanade Debug",
 			"type": "dotnet",
 			"request": "launch",

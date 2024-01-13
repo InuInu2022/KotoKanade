@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
 
-
+    <ServerGarbageCollection>true</ServerGarbageCollection>
     <SelfContained Condition="'$(Configuration)' == 'Debug'">false</SelfContained>
   </PropertyGroup>
 
