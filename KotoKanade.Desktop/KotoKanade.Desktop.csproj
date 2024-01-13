@@ -13,7 +13,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishAot>false</PublishAot>
     <PublishSingleFile>true</PublishSingleFile>
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun>false</PublishReadyToRun>
     <TrimMode>partial</TrimMode>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
@@ -30,6 +30,7 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <IlcInstructionSet>native</IlcInstructionSet>
     <IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
     <WarningsAsErrors>false</WarningsAsErrors>
@@ -48,8 +49,15 @@
     <Delete Files="$(OutputPath)/LibSasara.xml" />
     <Delete Files="$(OutputPath)/LibSasara.VoiSona.xml" />
     <Delete Files="$(OutputPath)/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/$(AssemblyName).*.pdb" />
+    <Delete Files="$(OutputPath)/$(AssemblyName).UI.pdb" />
+    <Delete Files="$(OutputPath)/$(AssemblyName).Core.pdb" />
     <Delete Files="$(OutputPath)/*.pdb" />
     <Delete Files="$(OutputPath)/publish/$(AssemblyName).pdb" />
+    <Delete Files="$(OutputPath)/publish/$(AssemblyName).UI.pdb" />
+    <Delete Files="$(OutputPath)/publish/$(AssemblyName).Core.pdb" />
+    <Delete Files="$(OutputPath)/publish/KotoKanade.UI.pdb" />
+    <Delete Files="$(OutputPath)/publish/KotoKanade.Core.pdb" />
     <Delete Files="$(OutputPath)/publish/*.pdb" />
     <Delete Files="$(OutputPath)/publish/*.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.xml" />
