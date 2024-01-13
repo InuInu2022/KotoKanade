@@ -1,7 +1,9 @@
 # KotoKanade (言奏)
 
-<p align="center" style="background-color:lightgreen;">
-	<img src="./KotoKanade.UI/Assets/appicon/katokanade.svg" alt="logo" width="256" />
+<p align="center" style="background-color:lightgreen;padding:2em 0px;">
+	<img src="KotoKanade.UI/Assets/appicon/kotokanade.svg" alt="logo" width="200" style="filter: drop-shadow(0 0 3px #000);" />
+	<br />
+	<strong style="font-family:sans-serif;font-size:2em;color:#03763e;text-shadow:0 0 2px #000;">KotoKanade</strong>
 </p>
 
 **KotoKanade** は[VoiSona Talk](https://voisona.com/talk/)を”歌わせる”ツールです。
@@ -22,9 +24,12 @@
   - 上から一番新しい物を選んでzipファイルをダウンロードして展開して使ってください
   - アップデートはそのまま上書きしてください
   - アンインストールは解凍したフォルダをまるごと消してください
-- [ニコニ・コモンズ nc29686](https://commons.nicovideo.jp/material/nc296868)
+
+<!--
+- [ニコニ・コモンズ nc*****](https://commons.nicovideo.jp/material/nc)
   - ニコニコ動画等で投稿する作品で使用した場合、利用登録してくださるとうれしいです
   - ※登録は必須ではありません
+-->
 
 ## Sample
 
@@ -49,6 +54,16 @@
 - CeVIOの楽譜ファイル(`.ccs` or `.ccst`)
   - [VoiSona(song)](https://voisona.com/) または [Utaformatix](https://sdercolin.github.io/utaformatix3/)でMIDIなどから変換してください
 
+#### つかいかた
+
+1. ソング用の`ccs` or `ccst`ファイルを用意します
+   1. 現在は1トラックのみ対応
+2. 読み込みます
+3. 歌わせるトークボイスライブラリを選択します
+4. 必要ならば細かい設定を行います
+5. 「Save」ボタンで出力します
+6. 出力された`tstprj`ファイルをVoiSona Talkで読み取り、再生します
+
 #### 制限
 
 - 歌詞は日本語のみ
@@ -68,9 +83,9 @@
 
 #### コツ
 
-- 「は」を[w,a]と読んでしまう時
+- 「は」を`[w,a]`と読んでしまう時
   - 歌詞をカタカナの「ハ」にかえる
-- 「きょう」を[k,y,o]ではなく[k,y,u]とよんでしまう時
+- 「きょう」を`[k,y,o]`ではなく`[k,y,u]`とよんでしまう時
   - 歌詞を「きょー」にかえる
 
 ### [WIP]B. Score + Timing
@@ -88,16 +103,6 @@ WIP
 [github Release](https://github.com/InuInu2022/KotoKanade/releases/latest)からDL
 
 ## Usage
-
-### A. Score Only
-
-1. ソング用の`ccs` or `ccst`ファイルを用意します
-   1. 現在は1トラックのみ対応
-2. 読み込みます
-3. 歌わせるトークボイスライブラリを選択します
-4. 必要ならば細かい設定を行います
-5. 「Save」ボタンで出力します
-6. 出力された`tstprj`ファイルをVoiSona Talkで読み取り、再生します
 
 ## Build
 
