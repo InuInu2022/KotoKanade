@@ -34,6 +34,7 @@ public sealed class MainViewModel
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
 	public ObservableCollection<StyleRate>? Styles { get; set; }
+	public ObservableCollection<GlobalParam>? GlobalParams { get; set; }
 	public bool IsSplitNotes {get;set;} = true;
 	public double ThretholdSplitNote { get; set; } = 250;
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
@@ -77,6 +78,14 @@ public sealed class MainViewModel
 			new("Fine", 22.3),
 			new("Sad", 32.3),
 		];
+
+		GlobalParams = [
+			new("Speed", 1.5, 0.75, 1, 0.01 ),
+			new("Volume", 7.0, -7.0, 0, 0.01 ),
+			new("Pitch", 600.0, -600.0, 0, 1 ),
+			new("Alpha", 1.0, -1.0, 0, 0.01 ),
+			new("Into.", 2.0, 0.0, 1.0, 0.01 ),
+		];
 	}
 
 	private Func<ValueTask> ExportEvent =>
@@ -113,9 +122,27 @@ public sealed class MainViewModel
 					SelectedCastItem?.Content?.ToString(),
 					(IsSplitNotes, ThretholdSplitNote),
 					Styles?.Select(s => s.Rate).ToArray(),
+					globalParams:new()
+					{
+						SpeedRatio = GetParam("Speed"),
+						C0Shift = GetParam("Volume"),
+						LogF0Shift = GetParam("Pitch"),
+						AlphaShift = GetParam("Alpha"),
+						LogF0Scale = GetParam("Into."),
+					},
 					-ConsonantOffsetSec //表示と逆
 				)
 				.ConfigureAwait(false);
+
+			decimal GetParam(string name)
+			{
+				return (decimal?)GlobalParams?
+					.FirstOrDefault(p => string.Equals(
+						p.Name,
+						name,
+						StringComparison.Ordinal))?
+					.Value ?? 0m;
+			}
 		};
 
 	private Func<ValueTask> ReadyFunc =>

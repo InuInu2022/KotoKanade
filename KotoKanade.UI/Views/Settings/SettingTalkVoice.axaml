@@ -80,15 +80,15 @@
                       Minimum="0"
                       TickFrequency="5"
                       IsSnapToTickEnabled="True"
-                      MaxHeight="50"
-                      Height="50"
+                      MaxHeight="60"
+                      Height="60"
                       HorizontalAlignment="Center"
 
                       Orientation="Vertical"
                       />
                     <TextBlock
                       Text="{Binding #sliderEmo1.Value}"
-                      HorizontalAlignment="Center"
+                      HorizontalAlignment="Stretch"
                       TextAlignment="Center"
                       />
                   </StackPanel>
@@ -112,6 +112,64 @@
             <GridSplitter Grid.Column="7" ResizeDirection="Columns" />
             <Rectangle Grid.Column="8" Fill="MediumPurple" />
           </Grid>
+        </StackPanel>
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
+    <ui:SettingsExpanderItem
+      Content="Global parameters"
+      Description="グローバルパラメータ"
+      >
+      <ui:SettingsExpanderItem.Footer>
+        <StackPanel Margin="20">
+          <ItemsControl ItemsSource="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).GlobalParams}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel
+                      Orientation="Horizontal"
+                      HorizontalAlignment="Right"
+                      Spacing="4" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border CornerRadius="5">
+                  <StackPanel
+                    Width="75"
+                    >
+                    <TextBlock
+                      Text="{Binding Name}"
+                      HorizontalAlignment="Center"
+                      TextAlignment="Center"
+                      />
+                    <Slider
+                      x:Name="sliderParam"
+                      Value="{Binding Value}"
+                      Maximum="{Binding Max}"
+                      Minimum="{Binding Min}"
+                      TickFrequency="{Binding Tick}"
+                      IsSnapToTickEnabled="True"
+                      MaxHeight="60"
+                      Height="60"
+                      HorizontalAlignment="Center"
+
+                      Orientation="Vertical"
+                      />
+                    <ui:NumberBox
+                      Value="{Binding #sliderParam.Value}"
+                      Maximum="{Binding #sliderParam.Maximum}"
+                      Minimum="{Binding #sliderParam.Minimum}"
+                      SmallChange="{Binding #sliderParam.TickFrequency}"
+                      SpinButtonPlacementMode="Hidden"
+                      HorizontalAlignment="Stretch"
+                      TextAlignment="Center"
+                      FontSize="11.5"
+                      />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </StackPanel>
       </ui:SettingsExpanderItem.Footer>
     </ui:SettingsExpanderItem>

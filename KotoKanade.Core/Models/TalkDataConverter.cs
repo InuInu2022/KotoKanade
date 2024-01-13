@@ -1,22 +1,22 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
 using CevioCasts;
+
 using KotoKanade.Core.Util;
+
 using LibSasara;
 using LibSasara.Model;
 using LibSasara.Model.FullContextLabel;
 using LibSasara.VoiSona;
 using LibSasara.VoiSona.Model.Talk;
+
 using SharpOpenJTalk.Lang;
+
 using WanaKanaNet;
 
 namespace KotoKanade.Core.Models;
@@ -34,6 +34,7 @@ public static partial class TalkDataConverter
 		string? castName = null,
 		(bool isSplit, double threthold)? splitNote = null,
 		double[]? emotions = null,
+		TalkGlobalParam? globalParams = null,
 		decimal consonantOffset = 0.0m
 	)
 	{
@@ -51,7 +52,7 @@ public static partial class TalkDataConverter
 
 		var us = processed.PhraseList?
 			.AsParallel().AsOrdered()
-			.Select(ToUtterance(processed, rates, splitNote, consonantOffset))
+			.Select(ToUtterance(processed, rates, globalParams, splitNote, consonantOffset))
 			.ToImmutableList()
 			;
 
@@ -177,6 +178,7 @@ public static partial class TalkDataConverter
 	ToUtterance(
 		SongData data,
 		double[]? emotionRates = null,
+		TalkGlobalParam? globalParams = null,
 		(bool isSplit, double threthold)? noteSplit = null,
 		decimal consonantOffset = 0.0m
 	)
@@ -231,7 +233,9 @@ public static partial class TalkDataConverter
 				accent,
 				timing,
 				pitch,
-				offset);
+				offset,
+				globalParams
+				);
 		};
 	}
 
@@ -246,7 +250,8 @@ public static partial class TalkDataConverter
 		string accent,
 		string timing,
 		string pitch,
-		decimal offset
+		decimal offset,
+		TalkGlobalParam? globalParams = null
 	)
 	{
 		var nu = new Utterance(
@@ -256,7 +261,7 @@ public static partial class TalkDataConverter
 			//開始時刻
 			start: GetStartTimeString(data, p, offset),
 			//書き出しファイル名、とりあえずセリフ
-			export_name: $"{text}"
+			exportName: $"{text}"
 		)
 		{
 			//感情比率
@@ -276,6 +281,15 @@ public static partial class TalkDataConverter
 		if (!string.IsNullOrEmpty(pitch))
 		{
 			nu.RawFrameLogF0 = pitch;
+		}
+		//global params
+		if (globalParams is not null)
+		{
+			nu.SpeedRatio = globalParams.SpeedRatio;
+			nu.C0Shift = globalParams.C0Shift;
+			nu.LogF0Shift = globalParams.LogF0Shift;
+			nu.LogF0Scale = globalParams.LogF0Scale;
+			nu.AlphaShift = globalParams.AlphaShift;
 		}
 		Debug.WriteLine($"u[{text}], start:{nu.Start}");
 		return nu;
