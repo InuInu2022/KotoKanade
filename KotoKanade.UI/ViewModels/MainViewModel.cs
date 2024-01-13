@@ -21,6 +21,7 @@ namespace KotoKanade.ViewModels;
 public sealed class MainViewModel
 {
 	public Command Ready { get; }
+	public Command Close { get; }
 	public string Title { get; private set; } = "test";
 
 	public string DefaultCcs { get; set; } = string.Empty;
@@ -70,6 +71,8 @@ public sealed class MainViewModel
 
 		// A handler for window loaded
 		Ready = Command.Factory.Create(ReadyFunc);
+
+		Close = Command.Factory.Create(CloseEvent);
 
 		ExportFile = Command.Factory.Create(ExportEvent);
 
@@ -143,6 +146,15 @@ public sealed class MainViewModel
 						StringComparison.Ordinal))?
 					.Value ?? 0m;
 			}
+		};
+
+	private static Func<ValueTask> CloseEvent =>
+		async () =>
+		{
+			//dispose openjtalk
+			await TalkDataConverter
+				.DisposeOpenJTalkAsync()
+				.ConfigureAwait(false);
 		};
 
 	private Func<ValueTask> ReadyFunc =>

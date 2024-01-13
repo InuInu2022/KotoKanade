@@ -20,6 +20,10 @@
     <epoxy:EventBinder.Events>
         <epoxy:Event EventName="Loaded" Command="{Binding Ready}" />
     </epoxy:EventBinder.Events>
+    <epoxy:EventBinder.Events>
+        <epoxy:Event EventName="DetachedFromLogicalTree" Command="{Binding Close}" />
+    </epoxy:EventBinder.Events>
+
 
 	<Grid Opacity="0.90"
     VerticalAlignment="Stretch"
@@ -62,7 +66,7 @@
           <views:TabScoreOnly />
         </TabItem>
         <!-- ========================== tab2 =================================== -->
-        <TabItem>
+        <TabItem IsEnabled="False">
           <TabItem.Header>
             <StackPanel Orientation="Horizontal">
               <ui:FontIcon
@@ -91,7 +95,7 @@
           <views:TabScoreTmg />
         </TabItem>
         <!-- ========================== tab3 =================================== -->
-        <TabItem IsEnabled="True">
+        <TabItem IsEnabled="False">
           <TabItem.Header>
             <StackPanel Orientation="Horizontal">
               <ui:FontIcon

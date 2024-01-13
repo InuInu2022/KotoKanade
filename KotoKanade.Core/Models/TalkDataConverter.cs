@@ -161,6 +161,10 @@ public static partial class TalkDataConverter
 		}
 	}
 
+	/// <summary>
+	/// initialize openjtalk
+	/// </summary>
+	/// <seealso cref="DisposeOpenJTalkAsync"/>
 	private static async ValueTask InitOpenJTalkAsync()
 	{
 		var path = Path.Combine(
@@ -171,6 +175,12 @@ public static partial class TalkDataConverter
 				//_jtalk = new OpenJTalkAPI();
 				return _jtalk.Initialize(path);
 			})
+			.ConfigureAwait(false);
+	}
+
+	public static async ValueTask DisposeOpenJTalkAsync()
+	{
+		await Task.Run(_jtalk.Dispose)
 			.ConfigureAwait(false);
 	}
 
