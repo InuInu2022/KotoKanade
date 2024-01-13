@@ -364,6 +364,7 @@ public static partial class TalkDataConverter
 	/// 歌詞中の「ー」対応
 	/// </summary>
 	/// <param name="p"></param>
+	[SuppressMessage("","CA1865")]
 	private static List<Note> ManageLongVowelSymbols(List<Note> p)
 	{
 		//いきなり「ー」で始まるときは「アー」に強制変換
