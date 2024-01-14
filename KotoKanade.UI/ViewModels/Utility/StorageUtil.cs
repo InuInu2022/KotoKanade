@@ -39,6 +39,13 @@ public static class StorageUtil
 			MimeTypes = [ "text/xml" ],
 			AppleUniformTypeIdentifiers = appleUniformTypeId,
 		};
+	private static readonly FilePickerFileType labFiles =
+		new("Timing label files")
+		{
+			Patterns = [ "*.lab" ],
+			MimeTypes = [ "text/plain" ],
+			AppleUniformTypeIdentifiers = appleUniformTypeId,
+		};
 	#endregion
 
 	/// <summary>
@@ -62,6 +69,33 @@ public static class StorageUtil
 			OpenCcsType.CsstOnly => [cevioTrackFile],
 			_ => [cevioFiles,cevioProjFile,cevioTrackFile]
 		};
+
+		var opt = new FilePickerOpenOptions()
+		{
+			Title = title,
+			AllowMultiple = allowMultiple,
+			FileTypeFilter = types,
+		};
+		if(path is not null){
+			opt.SuggestedStartLocation = await _storage
+				.TryGetFolderFromPathAsync(path)
+				.ConfigureAwait(true);
+		}
+		return await _storage.OpenFilePickerAsync(opt)
+			.ConfigureAwait(true);
+	}
+
+	public static async ValueTask<IReadOnlyList<IStorageFile?>?> OpenLabFileAsync(
+		bool allowMultiple,
+		string? path,
+		string title = "開くファイルを選んでください"
+	)
+	{
+		if(_storage is null){
+			return default;
+		}
+
+		FilePickerFileType[] types = [labFiles];
 
 		var opt = new FilePickerOpenOptions()
 		{

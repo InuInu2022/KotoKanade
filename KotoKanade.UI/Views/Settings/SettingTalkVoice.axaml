@@ -35,7 +35,6 @@
           IsTextSearchEnabled="True"
           MinWidth="200"
           SelectedIndex="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectedCastIndex}"
-          SelectedItem="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectedCastItem}"
           >
           <ui:FAComboBoxItem Content="田中傘" />
           <ui:FAComboBoxItem Content="さとうささら" />

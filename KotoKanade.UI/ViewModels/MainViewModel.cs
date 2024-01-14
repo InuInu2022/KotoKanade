@@ -2,15 +2,10 @@
 // Copyright (c) InuInu. All rights reserved.
 // </copyright>
 
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Input;
+using CevioCasts;
 using Epoxy;
 using FluentAvalonia.UI.Controls;
 using KotoKanade.Core.Models;
@@ -29,11 +24,13 @@ public sealed class MainViewModel
 	public Command SelectCcs { get; }
 	public string DefaultLab { get; set; } = string.Empty;
 	public Command SelectLab { get; }
+	public string? OpenedLabPath { get; set; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
+	public ObservableCollection<Cast>? TalkCasts {get;set;}
 	public ObservableCollection<StyleRate>? Styles { get; set; }
 	public ObservableCollection<GlobalParam>? GlobalParams { get; set; }
 	public bool IsSplitNotes {get;set;} = true;
@@ -41,6 +38,7 @@ public sealed class MainViewModel
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
 
 	public Command ExportFile { get; set; }
+	public bool CanExport { get; set; }
 
 	public MainViewModel()
 	{
@@ -60,9 +58,20 @@ public sealed class MainViewModel
 			OpenedCcsPath = pathes[0];
 			DefaultCcs = Path.GetFileName(pathes[0]);
 		});
-		SelectLab = Command.Factory.Create(() =>
+		SelectLab = Command.Factory.Create(async () =>
 		{
-			return default;
+			var selectedLab = await StorageUtil.OpenLabFileAsync(
+				title: "歌唱指導のタイミング情報ファイルを選んでください。",
+				allowMultiple: false,
+				path: null
+			).ConfigureAwait(true);
+
+			var pathes = StorageUtil.GetPathesFromOpenedFiles(selectedLab);
+			if (pathes is not { Count: > 0 }) { return; }
+
+			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+			OpenedLabPath = pathes[0];
+			DefaultLab = Path.GetFileName(pathes[0]);
 		});
 		SelectWav = Command.Factory.Create(() =>
 		{
@@ -95,6 +104,8 @@ public sealed class MainViewModel
 		async () =>
 		{
 			var path = OpenedCcsPath ?? "";
+			var labPath = OpenedLabPath ?? "";
+			CanExport = false;
 
 			var saved = await StorageUtil.SaveAsync(
 				path: OpenedCcsPath ?? "",
@@ -106,16 +117,18 @@ public sealed class MainViewModel
 			if (saved is null)
 			{
 				//_notify?.Dismiss(loading!);
+				CanExport = true;
 				return;
 			}
 			var saveDir = saved.Path.LocalPath;
 			if (saveDir is null)
 			{
+				CanExport = true;
 				return;
 			}
 
 			var loadedSong = await ScoreParser
-				.ProcessCcsAsync(path)
+				.ProcessCcsAsync(path, labPath)
 				.ConfigureAwait(true);
 
 			await TalkDataConverter
@@ -136,6 +149,8 @@ public sealed class MainViewModel
 					-ConsonantOffsetSec //表示と逆
 				)
 				.ConfigureAwait(false);
+
+			CanExport = true;
 
 			decimal GetParam(string name)
 			{
@@ -158,36 +173,27 @@ public sealed class MainViewModel
 		};
 
 	private Func<ValueTask> ReadyFunc =>
-		() =>
+		async () =>
 		{
+			var defs = await TalkDataConverter
+				.GetCastDefinitionsAsync()
+				.ConfigureAwait(true);
+			var targets = defs
+				.Casts
+				.Where(c => c.Product is Product.VoiSona && c.Category is Category.TextVocal);
+			TalkCasts = new(targets);
+
 			SelectedCastIndex = 0;
-			/*
-			ConsonantSlider = Pile.Factory.Create<Slider>();
-
-			if (ConsonantSlider is null) return;
-
-			await ConsonantSlider.RentAsync(slider =>
-			{
-				AddSliderEvent(slider);
-				return default;
-			}).ConfigureAwait(true);
-			*/
-			return default;
+			CanExport = true;
 		};
 
-
-
-	[PropertyChanged(nameof(SelectedCastItem))]
+	[PropertyChanged(nameof(SelectedCastIndex))]
 	[SuppressMessage("", "IDE0051")]
-	private async ValueTask SelectedCastItemChangedAsync(FAComboBoxItem? value)
+	private ValueTask SelectedCastIndexChangedAsync(int value)
 	{
-		if (value is null) return;
+		if (TalkCasts is null) return default;
 
-		if (value.Content is not string castName) return;
-
-		var def = await TalkDataConverter
-			.GetCastDefAsync(castName)
-			.ConfigureAwait(true);
+		var def = TalkCasts[value];
 
 		var list = def
 			.Emotions
@@ -196,5 +202,7 @@ public sealed class MainViewModel
 			;
 		Styles = new(list);
 		Styles[0].Rate = 100;
+
+		return default;
 	}
 }

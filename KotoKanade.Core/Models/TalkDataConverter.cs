@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -122,17 +123,17 @@ public static partial class TalkDataConverter
 			cast.Versions[^1]);
 	}
 
-	public static async ValueTask<Cast> GetCastDefAsync(string castName)
+	[ThreadStatic]
+	private static Definitions? loadedDefinitions;
+
+	public static async ValueTask<Definitions> GetCastDefinitionsAsync()
 	{
-		if (_defs is not null) return _defs;
+		if(loadedDefinitions is not null){ return loadedDefinitions; }
 
 		var path = Path.Combine(
 			AppDomain.CurrentDomain.BaseDirectory,
 			"lib/data.json"
 		);
-		/*var jsonString = await File
-			.ReadAllTextAsync(path)
-			.ConfigureAwait(false);*/
 		var jsonString = await Task
 			.Run(() => File.ReadAllText(path))
 			.ConfigureAwait(false);
@@ -143,6 +144,29 @@ public static partial class TalkDataConverter
 				.ConfigureAwait(false);
 			ThrowInvalidException(path);
 		}
+		loadedDefinitions = defs;
+		return defs;
+
+		[DoesNotReturn]
+		static void ThrowInvalidException(string path)
+		{
+			throw new InvalidDataException($"invalid cast definitions data: {path}");
+		}
+	}
+
+	public static async ValueTask<Cast> GetCastDefAsync(string castName)
+	{
+		if (_defs is not null &&
+			Array.Exists(_defs.Names,n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
+		)
+		{
+			//読み込み済みならそのまま返す
+			return _defs;
+		}
+
+		var defs = await GetCastDefinitionsAsync()
+			.ConfigureAwait(false);
+
 		_defs = Array.Find(defs.Casts,
 				c => c.Product == Product.VoiSona
 				&& c.Category == CevioCasts.Category.TextVocal
@@ -152,13 +176,6 @@ public static partial class TalkDataConverter
 				$"cast name {castName} is not found in cast data. please check https://github.com/InuInu2022/cevio-casts/ ",
 				nameof(castName));
 		return _defs;
-
-		// use polyfill for netstandard 2.0
-		[DoesNotReturn]
-		static void ThrowInvalidException(string path)
-		{
-			throw new InvalidDataException($"invalid cast definitions data: {path}");
-		}
 	}
 
 	/// <summary>

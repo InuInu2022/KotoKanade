@@ -66,7 +66,7 @@
           <views:TabScoreOnly />
         </TabItem>
         <!-- ========================== tab2 =================================== -->
-        <TabItem IsEnabled="False">
+        <TabItem >
           <TabItem.Header>
             <StackPanel Orientation="Horizontal">
               <ui:FontIcon
@@ -172,6 +172,7 @@
             Foreground="{StaticResource TextOnAccentFillColorPrimaryBrush}"
             FontWeight="DemiBold"
             Command="{Binding ExportFile}"
+            IsEnabled="{Binding CanExport}"
             >
             <WrapPanel>
               <ui:SymbolIcon

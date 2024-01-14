@@ -22,7 +22,10 @@ public static class ScoreParser
 	/// </remarks>
 	/// <param name="path"></param>
 	/// <returns></returns>
-	public static async ValueTask<SongData> ProcessCcsAsync(string path)
+	public static async ValueTask<SongData> ProcessCcsAsync(
+		string path,
+		string? labPath = null
+	)
 	{
 		var ccs = await SasaraCcs.LoadAsync(path)
 			.ConfigureAwait(false);
@@ -38,8 +41,7 @@ public static class ScoreParser
 			return new SongData();
 		}
 
-		//中間データに解析・変換
-		return new SongData()
+		var songData = new SongData()
 		{
 			//トラック名
 			SongTrackName = trackset.Name,
@@ -52,6 +54,17 @@ public static class ScoreParser
 
 			//TODO:tmgやf0を渡す
 		};
+
+		if(!string.IsNullOrEmpty(labPath)){
+			songData.Label = await SasaraLabel
+				.LoadAsync(labPath!)
+				.ConfigureAwait(false);
+			songData.TimingList
+				= SplitLabByPhrase(songData.Label);
+		}
+
+		//中間データに解析・変換
+		return songData;
 	}
 
 	/// <summary>
@@ -104,6 +117,58 @@ public static class ScoreParser
 		static bool IsOverThrethold(int threthold, Note note, Note last)
 		{
 			return Math.Abs(note.Clock - (last.Clock + last.Duration)) > threthold;
+		}
+	}
+
+	/// <summary>
+	/// labをフレーズ単位で分割。<see cref="Lab.SplitToSentence(double)"/>とは別基準で分割します。
+	/// </summary>
+	/// <returns></returns>
+	private static ReadOnlyCollection<List<LabLine>>
+	SplitLabByPhrase(
+		Lab lab,
+		int threthold = 0
+	)
+	{
+		List<List<LabLine>> list = [];
+
+		//pau,silを除外
+		IEnumerable<LabLine> lines = lab
+			.Lines?
+			.Where(ln => PhonemeUtil.IsNoSounds(ln))
+			?? [];
+
+		var phrase = Enumerable.Empty<LabLine>().ToList();
+
+		foreach(var line in lines)
+		{
+			if(phrase.Count > 0)
+			{
+				var last = phrase[^1];
+				var isOver = IsOverThrethold(threthold, line, last);
+				//閾値以下
+				//ブレス指定はpauを生むのでここでは判定不要
+				if(isOver)
+				{
+					list.Add(phrase);
+					phrase = Enumerable
+						.Empty<LabLine>()
+						.ToList();
+				}
+			}
+			phrase.Add(line);
+		}
+		list.Add(phrase);
+
+		return new ReadOnlyCollection<List<LabLine>>(list);
+
+		static bool IsOverThrethold(
+			int threthold,
+			LabLine line,
+			LabLine last
+		)
+		{
+			return Math.Abs(line.From - last.To) > threthold;
 		}
 	}
 }
