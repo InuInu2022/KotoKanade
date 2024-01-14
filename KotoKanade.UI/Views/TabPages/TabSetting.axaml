@@ -35,17 +35,28 @@
       VerticalScrollBarVisibility="Visible"
       >
       <StackPanel>
-        <ui:SettingsExpander Header="{Binding AppName}"
-              Description="KotoKanade is a tool to make VoiSona Talk sing."
-              Name="SettingsExpanderSample1">
-            <ui:SettingsExpander.Footer>
+        <ui:SettingsExpander
+          Header="{Binding AppName}"
+          Description="KotoKanade is a tool to make VoiSona Talk sing."
+          IconSource="AllApps"
+          Name="SettingsExpanderAppNameVer">
+          <ui:SettingsExpander.Footer>
+            <WrapPanel>
+              <TextBox Text="{Binding AppVer}"  Margin="5 0" IsReadOnly="True" />
+            </WrapPanel>
+          </ui:SettingsExpander.Footer>
+          <ui:SettingsExpanderItem
+            Content="About"
+            Description="Webサイトやマニュアル・ライセンス等">
+            <ui:SettingsExpanderItem.Footer>
               <WrapPanel>
-                <TextBox Text="{Binding AppVer}"  Margin="5 0" IsReadOnly="True" />
                 <ui:HyperlinkButton Content="WebSite" NavigateUri="https://github.com/InuInu2022/KotoKanade"  />
                 <ui:HyperlinkButton Content="Manual" NavigateUri="https://github.com/InuInu2022/KotoKanade"  />
+                <ui:HyperlinkButton Content="ニコニ・コモンズ" NavigateUri="https://commons.nicovideo.jp/works/nc326561" />
                 <Button Content="License" Margin="5 0" Command="{Binding OpenLicense}" />
               </WrapPanel>
-            </ui:SettingsExpander.Footer>
+            </ui:SettingsExpanderItem.Footer>
+          </ui:SettingsExpanderItem>
         </ui:SettingsExpander>
         <ui:SettingsExpander Header="Useful links"
                      IconSource="Globe"
