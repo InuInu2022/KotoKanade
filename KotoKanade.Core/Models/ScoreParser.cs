@@ -55,6 +55,7 @@ public static class ScoreParser
 			//TODO:tmgやf0を渡す
 		};
 
+		//labファイルのパスを指定したとき
 		if(!string.IsNullOrEmpty(labPath)){
 			songData.Label = await SasaraLabel
 				.LoadAsync(labPath!)
@@ -135,7 +136,7 @@ public static class ScoreParser
 		//pau,silを除外
 		IEnumerable<LabLine> lines = lab
 			.Lines?
-			.Where(ln => PhonemeUtil.IsNoSounds(ln))
+			.Where(ln => !PhonemeUtil.IsNoSounds(ln))
 			?? [];
 
 		var phrase = Enumerable.Empty<LabLine>().ToList();

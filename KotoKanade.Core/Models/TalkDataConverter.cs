@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -41,21 +42,46 @@ public static partial class TalkDataConverter
 	{
 		var TemplateTalk = await TemplateLoader
 			.LoadVoiSonaTalkTemplateAsync()
-			.ConfigureAwait(false);
+			.ConfigureAwait(true);
 		await InitOpenJTalkAsync()
-			.ConfigureAwait(false);
+			.ConfigureAwait(true);
 		var rates = await CulcEmoRatesAsync(castName, emotions)
-			.ConfigureAwait(false);
+			.ConfigureAwait(true);
 
 		processed.TempoList ??= defaultTempo;
 		var sw = new Stopwatch();
 		sw.Start();
 
-		var us = processed.PhraseList?
-			.AsParallel().AsOrdered()
-			.Select(ToUtterance(processed, rates, globalParams, splitNote, consonantOffset))
-			.ToImmutableList()
-			;
+
+
+		ImmutableList<Utterance> us;
+		if (processed.TimingList?.Any() is not true)
+		{
+			us = processed
+				.PhraseList
+				.AsParallel().AsOrdered()
+				.Select(ToUtteranceWithoutLab(processed, rates, globalParams, splitNote, consonantOffset))
+				.ToImmutableList()
+				;
+		}
+		else
+		{
+			var zipped = processed
+				.PhraseList.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
+
+			us = zipped
+				//.AsParallel().AsOrdered()
+				.Select( tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					rates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.ToImmutableList()
+				;
+		}
 
 		if (us is null)
 		{
@@ -128,7 +154,7 @@ public static partial class TalkDataConverter
 
 	public static async ValueTask<Definitions> GetCastDefinitionsAsync()
 	{
-		if(loadedDefinitions is not null){ return loadedDefinitions; }
+		if (loadedDefinitions is not null) { return loadedDefinitions; }
 
 		var path = Path.Combine(
 			AppDomain.CurrentDomain.BaseDirectory,
@@ -138,7 +164,7 @@ public static partial class TalkDataConverter
 			.Run(() => File.ReadAllText(path))
 			.ConfigureAwait(false);
 		var defs = Definitions.FromJson(jsonString);
-		if(defs is null)
+		if (defs is null)
 		{
 			await Console.Error.WriteLineAsync($"invalid cast definitions data: {path}")
 				.ConfigureAwait(false);
@@ -157,7 +183,7 @@ public static partial class TalkDataConverter
 	public static async ValueTask<Cast> GetCastDefAsync(string castName)
 	{
 		if (_defs is not null &&
-			Array.Exists(_defs.Names,n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
+			Array.Exists(_defs.Names, n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
 		)
 		{
 			//読み込み済みならそのまま返す
@@ -170,7 +196,7 @@ public static partial class TalkDataConverter
 		_defs = Array.Find(defs.Casts,
 				c => c.Product == Product.VoiSona
 				&& c.Category == CevioCasts.Category.TextVocal
-				&& Array.Exists(c.Names,n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
+				&& Array.Exists(c.Names, n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
 			)
 			?? throw new ArgumentException(
 				$"cast name {castName} is not found in cast data. please check https://github.com/InuInu2022/cevio-casts/ ",
@@ -188,7 +214,8 @@ public static partial class TalkDataConverter
 			System.AppDomain.CurrentDomain.BaseDirectory,
 			"lib/open_jtalk_dic_utf_8-1.11/");
 		_ = await Task
-			.Run(()=> {
+			.Run(() =>
+			{
 				//_jtalk = new OpenJTalkAPI();
 				return _jtalk.Initialize(path);
 			})
@@ -201,8 +228,9 @@ public static partial class TalkDataConverter
 			.ConfigureAwait(false);
 	}
 
+
 	private static Func<List<Note>, Utterance>
-	ToUtterance(
+	ToUtteranceWithoutLab(
 		SongData data,
 		double[]? emotionRates = null,
 		TalkGlobalParam? globalParams = null,
@@ -210,60 +238,82 @@ public static partial class TalkDataConverter
 		decimal consonantOffset = 0.0m
 	)
 	{
-		return p =>
+		return p => ToUtteranceCore(
+			data,
+			p,
+			labLines: null,
+			emotionRates,
+			globalParams,
+			noteSplit,
+			consonantOffset);
+	}
+
+	private static Utterance ToUtteranceCore(
+		SongData data,
+		List<Note> notes,
+		List<LabLine>? labLines = null,
+		double[]? emotionRates = null,
+		TalkGlobalParam? globalParams = null,
+		(bool isSplit, double threthold)? noteSplit = null,
+		decimal consonantOffset = 0.0m
+	)
+	{
+		//フレーズをセリフ化
+		var text = GetPhraseText(notes);
+
+		//分割
+		if (noteSplit?.isSplit is true)
 		{
-			//フレーズをセリフ化
-			var text = GetPhraseText(p);
+			notes = SplitNoteIfSetOption(data, noteSplit, notes);
+		}else{
+			//「ー」処理
+			notes = ManageLongVowelSymbols(notes);
+			//「っ」対応
+			notes = ManageCloseConsonant(notes);
+		}
 
-			//分割
-			if (noteSplit?.isSplit is true)
-			{
-				p = SplitNoteIfSetOption(data, noteSplit, p);
-			}
+		var fcLabel = GetFullContext(notes);
 
-			var fcLabel = GetFullContext(p);
+		//フレーズの音素
+		var phoneme = GetPhonemeLabel(fcLabel);
 
-			//フレーズの音素
-			var phoneme = GetPhonemeLabel(fcLabel);
+		//読み
+		var pronounce = GetPronounce(phoneme);
+		//アクセントの高低
+		//TODO: ノートの高低に合わせる
+		//とりあえず数だけ合わせる
+		var accent = MakeAccText(fcLabel);
+		//調整後LEN
+		var timing = labLines is null ? "" : GetDurationsFromLab(labLines);
+		//PIT
+		//楽譜データだけならnote高さから計算
+		//TODO:ccsやwavがあるなら解析して割当
+		var pitch = GetPitches(notes, data);
 
-			//読み
-			var pronounce = GetPronounce(phoneme);
-			//アクセントの高低
-			//TODO: ノートの高低に合わせる
-			//とりあえず数だけ合わせる
-			var accent = MakeAccText(fcLabel);
-			//調整後LEN
-			//TODO:ccsやlabから割当
-			var timing = "";
-			//PIT
-			//楽譜データだけならnote高さから計算
-			//TODO:ccsやwavがあるなら解析して割当
-			var pitch = GetPitches(p, data);
+		//フレーズ最初が子音の時のオフセット
+		var offset = 0.0m;
+		var firstPh = phoneme.Split('|')[0].Split(',')[0];
+		if (PhonemeUtil.IsConsonant(firstPh))
+		{
+			//とりあえず 固定値
+			offset = consonantOffset;
+		}
 
-			//フレーズ最初が子音の時のオフセット
-			var offset = 0.0m;
-			var firstPh = phoneme.Split('|')[0].Split(',')[0];
-			if (PhonemeUtil.IsConsonant(firstPh))
-			{
-				//とりあえず 固定値
-				offset = consonantOffset;
-			}
-
-			return CreateUtterance(
-				data,
-				emotionRates,
-				consonantOffset,
-				p,
-				text,
-				phoneme,
-				pronounce,
-				accent,
-				timing,
-				pitch,
-				offset,
-				globalParams
-				);
-		};
+		return CreateUtterance(
+			data,
+			emotionRates,
+			consonantOffset,
+			notes,
+			text,
+			phoneme,
+			pronounce,
+			accent,
+			timing,
+			pitch,
+			offset,
+			globalParams,
+			labLines
+		);
 	}
 
 	private static Utterance CreateUtterance(
@@ -278,15 +328,20 @@ public static partial class TalkDataConverter
 		string timing,
 		string pitch,
 		decimal offset,
-		TalkGlobalParam? globalParams = null
+		TalkGlobalParam? globalParams = null,
+		List<LabLine>? labLines = null
 	)
 	{
+		var start = labLines is null
+			? GetStartTimeString(data, p, offset)
+			: FormattableString
+				.Invariant($"{labLines[0].From/10000000:F3}");
 		var nu = new Utterance(
 			text: text,
 			//tsmlを無理やり生成
 			tsml: GetTsml(text, pronounce, phoneme, accent),
 			//開始時刻
-			start: GetStartTimeString(data, p, offset),
+			start:start,
 			//書き出しファイル名、とりあえずセリフ
 			exportName: $"{text}"
 		)
@@ -302,7 +357,7 @@ public static partial class TalkDataConverter
 		//timing
 		if (!string.IsNullOrEmpty(timing))
 		{
-			nu.PhonemeDuration = nu.PhonemeOriginalDuration;
+			nu.PhonemeDuration = timing;
 		}
 		//pitch
 		if (!string.IsNullOrEmpty(pitch))
@@ -329,6 +384,8 @@ public static partial class TalkDataConverter
 	{
 		//「ー」対応
 		p = ManageLongVowelSymbols(p);
+		//「っ」対応
+		p = ManageCloseConsonant(p);
 
 		return p.ConvertAll(n =>
 		{
@@ -381,11 +438,12 @@ public static partial class TalkDataConverter
 	/// 歌詞中の「ー」対応
 	/// </summary>
 	/// <param name="p"></param>
-	[SuppressMessage("","CA1865")]
+	[SuppressMessage("", "CA1865")]
 	private static List<Note> ManageLongVowelSymbols(List<Note> p)
 	{
 		//いきなり「ー」で始まるときは「アー」に強制変換
-		if(p[0].Lyric?.StartsWith("ー", StringComparison.Ordinal) ?? false){
+		if (p[0].Lyric?.StartsWith("ー", StringComparison.Ordinal) ?? false)
+		{
 			p[0].Lyric = $"ア{p[0].Lyric}";
 		}
 
@@ -409,6 +467,37 @@ public static partial class TalkDataConverter
 				.Replace(
 				"ー",
 				GetPronounce(last));
+		}
+		return p;
+
+		static bool IsInvalid(string ph)
+		{
+			return string.IsNullOrEmpty(ph) ||
+				ph is "cl" or "xx" or "sil" or "pau";
+		}
+	}
+
+	private static List<Note> ManageCloseConsonant(List<Note> p)
+	{
+		//途中のノートの「っ」始まり歌詞
+		for (var i = 1; i < p.Count; i++)
+		{
+			var lyric = p[i].Lyric;
+			if (lyric is null) continue;
+			if (
+				lyric[0] is not ('っ' or 'ッ')
+			)
+			{
+				continue;
+			}
+			//「っ」始まりの時は前のノートの最後の母音を冒頭に付与
+			var prev = p[i - 1];
+			var ph = GetPhonemeLabel(GetFullContext([prev]))
+				.Split('|')[^1]
+				.Split(',')[^1]
+				;
+			var last = IsInvalid(ph) ? "a" : ph;
+			p[i].Lyric = $"{GetPronounce(last)}{lyric}";
 		}
 		return p;
 
@@ -463,7 +552,7 @@ public static partial class TalkDataConverter
 
 		var pitches = Enumerable.Empty<(double ph, double logF0)>().ToList();
 		//var offset = d[0].start.TotalMilliseconds;
-		var total = 1;	//冒頭sil分offset
+		var total = 1;  //冒頭sil分offset
 		foreach (var (start, end, logF0, counts) in d)
 		{
 			//TODO:時間を見て分割数を決める？
@@ -487,7 +576,7 @@ public static partial class TalkDataConverter
 				.ToString("F2", CultureInfo.InvariantCulture);
 			var logF0 = pitches[i].logF0;
 			sb.Append(sf).Append(':').Append(logF0);
-			if(i<pitches.Count-1)sb.Append(',');
+			if (i < pitches.Count - 1) sb.Append(',');
 		}
 		return sb.ToString();
 	}
@@ -528,13 +617,13 @@ public static partial class TalkDataConverter
 		return string.Join("|", splited);
 	}
 
-	[SuppressMessage("","S1854")]
+	[SuppressMessage("", "S1854")]
 	private static FullContextLab GetFullContext(IEnumerable<Note> notes)
 	{
 		//_jtalk ??= new OpenJTalkAPI();
 
 		var lyrics = GetPhraseText(notes);
-		if(fcLabelCache
+		if (fcLabelCache
 			.TryGetValue(lyrics, out var cachedLabel))
 		{
 			//キャッシュがあればキャッシュを返す
@@ -542,7 +631,8 @@ public static partial class TalkDataConverter
 		}
 
 		var text = Enumerable.Empty<string>();
-		lock(_jtalk){
+		lock (_jtalk)
+		{
 			text = _jtalk.GetLabels(lyrics);
 		}
 
@@ -568,7 +658,7 @@ public static partial class TalkDataConverter
 		var tempo = song.TempoList ?? defaultTempo;
 		var timings = notes
 			.AsParallel().AsSequential()
-			.Select((n,i) =>
+			.Select((n, i) =>
 			{
 				//オフセット準備
 				//var is1stNote = i is 0;
@@ -620,6 +710,17 @@ public static partial class TalkDataConverter
 		return $"0.005,{s},0.125";
 	}
 
+	private static string GetDurationsFromLab(List<LabLine> lines)
+	{
+		var s = lines
+			.Select((line, i)
+				=> FormattableString
+					.Invariant($"{i+1}:{line.Length / 10000000:F3}")
+			)
+			;
+		return string.Join(",", s);
+	}
+
 	private static bool CheckNextConsoPhoneme(List<Note> p, int i)
 	{
 		var isConsoNext = false;
@@ -648,12 +749,13 @@ public static partial class TalkDataConverter
 	private static int CountPhonemes(Note n)
 	{
 		//ノート歌詞が「ー」の時はOpenJTalkでエラーになるので解析しない
-		if(string.Equals(n.Lyric, "ー", StringComparison.Ordinal))
+		if (string.Equals(n.Lyric, "ー", StringComparison.Ordinal))
 		{
 			//母音音素一つになるので1
 			return 1;
 		}
-		if(n.Lyric is null){
+		if (n.Lyric is null)
+		{
 			return 1;
 		}
 
@@ -690,7 +792,8 @@ public static partial class TalkDataConverter
 			.Replace(
 			"クヮ", "クワ");
 
-		if(string.IsNullOrEmpty(concated)){
+		if (string.IsNullOrEmpty(concated))
+		{
 			concated = "ラ";
 		}
 
@@ -713,7 +816,8 @@ public static partial class TalkDataConverter
 		SongData data,
 		List<Note> p,
 		decimal offset = 0.0m
-	){
+	)
+	{
 		var time = SasaraUtil
 			.ClockToTimeSpan(
 				data.TempoList!,

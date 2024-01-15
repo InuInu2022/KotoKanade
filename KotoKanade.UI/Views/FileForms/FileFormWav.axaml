@@ -9,9 +9,9 @@
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:Class="KotoKanade.Views.FileFormWav"
-             x:DataType="viewmodels:MainViewModel">
+             x:DataType="viewmodels:FileFormScoreViewModel">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:FileFormScoreViewModel />
   </UserControl.DataContext>
 
   <StackPanel>
@@ -29,7 +29,7 @@
           />
       </StackPanel>
 
-      <TextBox Text="{Binding DefaultWav}"
+      <TextBox Text="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).DefaultWav}"
         MinWidth="200"
         IsReadOnly="True"
         Watermark="select a .wav file"
@@ -37,7 +37,7 @@
         HorizontalContentAlignment="Stretch"
         Margin="5" />
       <Button Content="Select"
-        Command="{Binding SelectWav}"
+        Command="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectWav}"
         Margin="5,5,0,5" />
     </StackPanel>
   </StackPanel>

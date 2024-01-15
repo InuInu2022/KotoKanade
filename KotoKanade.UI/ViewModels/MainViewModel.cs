@@ -131,12 +131,14 @@ public sealed class MainViewModel
 				.ProcessCcsAsync(path, labPath)
 				.ConfigureAwait(true);
 
+			var isSplit = IsSplitNotes;
+
 			await TalkDataConverter
 				.GenerateFileAsync(
 					loadedSong,
 					saveDir,
 					SelectedCastItem?.Content?.ToString(),
-					(IsSplitNotes, ThretholdSplitNote),
+					(isSplit, ThretholdSplitNote),
 					Styles?.Select(s => s.Rate).ToArray(),
 					globalParams:new()
 					{
@@ -148,7 +150,7 @@ public sealed class MainViewModel
 					},
 					-ConsonantOffsetSec //表示と逆
 				)
-				.ConfigureAwait(false);
+				.ConfigureAwait(true);
 
 			CanExport = true;
 

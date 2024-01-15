@@ -9,10 +9,11 @@
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:Class="KotoKanade.Views.FileFormLab"
-             x:DataType="viewmodels:MainViewModel">
+             x:DataType="viewmodels:FileFormScoreViewModel">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:FileFormScoreViewModel />
   </UserControl.DataContext>
+
 
   <StackPanel>
     <StackPanel Orientation="Horizontal"
@@ -30,7 +31,7 @@
           />
       </StackPanel>
 
-      <TextBox Text="{Binding DefaultLab}"
+      <TextBox Text="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).DefaultLab}"
         MinWidth="200"
         IsReadOnly="True"
         Watermark="select a .lab file"
@@ -38,7 +39,7 @@
         HorizontalContentAlignment="Stretch"
         Margin="5" />
       <Button Content="Select"
-        Command="{Binding SelectLab}"
+        Command="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectLab}"
         Margin="5,5,0,5" />
     </StackPanel>
   </StackPanel>
