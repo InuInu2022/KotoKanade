@@ -137,7 +137,7 @@ public sealed class MainViewModel
 				.GenerateFileAsync(
 					loadedSong,
 					saveDir,
-					SelectedCastItem?.Content?.ToString(),
+					TalkCasts?[SelectedCastIndex].Names[0].Display,
 					(isSplit, ThretholdSplitNote),
 					Styles?.Select(s => s.Rate).ToArray(),
 					globalParams:new()
