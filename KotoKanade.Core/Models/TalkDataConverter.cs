@@ -52,24 +52,24 @@ public static partial class TalkDataConverter
 		var sw = new Stopwatch();
 		sw.Start();
 
-
-
 		ImmutableList<Utterance> us;
 		if (processed.TimingList?.Any() is not true)
 		{
 			us = processed
-				.PhraseList
+				.PhraseList?
 				.AsParallel().AsOrdered()
 				.Select(ToUtteranceWithoutLab(processed, rates, globalParams, splitNote, consonantOffset))
 				.ToImmutableList()
+				?? []
 				;
 		}
 		else
 		{
 			var zipped = processed
-				.PhraseList.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
+				.PhraseList?
+				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
 
-			us = zipped
+			us = zipped?
 				//.AsParallel().AsOrdered()
 				.Select( tuple => ToUtteranceCore(
 					processed,
@@ -80,6 +80,7 @@ public static partial class TalkDataConverter
 					splitNote,
 					consonantOffset))
 				.ToImmutableList()
+				?? []
 				;
 		}
 
@@ -316,6 +317,7 @@ public static partial class TalkDataConverter
 		);
 	}
 
+	[SuppressMessage("","S6618")]
 	private static Utterance CreateUtterance(
 		SongData data,
 		double[]? emotionRates,
@@ -350,7 +352,7 @@ public static partial class TalkDataConverter
 			//感情数に合わせる
 			RawFrameStyle = emotionRates is null
 				? "0:1:1.000:0.000:0.000:0.000:0.000"
-				: $"0:1:{string.Join(":", emotionRates)}",
+				: $"0:1:{string.Join(":", emotionRates.Select(em => em / 100.0))}",
 			//調整前LEN
 			PhonemeOriginalDuration = GetSplittedTiming(p, data, consonantOffset),
 		};
@@ -387,6 +389,7 @@ public static partial class TalkDataConverter
 		//「っ」対応
 		p = ManageCloseConsonant(p);
 
+		//TODO: labも一緒に分割
 		return p.ConvertAll(n =>
 		{
 			var dur = SasaraUtil
@@ -500,6 +503,41 @@ public static partial class TalkDataConverter
 			p[i].Lyric = $"{GetPronounce(last)}{lyric}";
 		}
 		return p;
+	}
+
+	private static (List<Note> notes, List<LabLine> lines) ManageSameNoteVowels(
+		(List<Note> notes, List<LabLine> lines) nl
+	)
+	{
+		//同じノートで母音が続いている場合はlab側の母音を分割
+
+		char[] sep = ['|', ','];
+		int notePhIndex = 0;
+
+		for(var i = 1; i < nl.notes.Count; i++)
+		{
+			var lyric = nl.notes[i].Lyric;
+			if (lyric is null) continue;
+			var ph = GetPhonemeLabel(GetFullContext([nl.notes[i]]));
+			ReadOnlySpan<string> span = ph.Split(sep);
+			if (HasSameVowels(span))
+			{
+
+			}
+			notePhIndex += span.Length;
+		}
+
+		return (nl.notes,nl.lines);
+
+		static bool HasSameVowels(ReadOnlySpan<string> ph)
+		{
+			if (ph.Length <= 1) return false;
+			for(var i = 0; i < ph.Length; i++)
+			{
+				if (string.Equals(ph[i], ph[i + 1], StringComparison.Ordinal)) return true;
+			}
+			return false;
+		}
 	}
 
 	private static readonly WanaKanaOptions kanaOption = new()
@@ -704,6 +742,7 @@ public static partial class TalkDataConverter
 		return $"0.005,{s},0.125";
 	}
 
+	[SuppressMessage("", "S6618")]
 	private static string GetDurationsFromLab(List<LabLine> lines)
 	{
 		var s = lines
