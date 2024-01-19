@@ -1,14 +1,15 @@
  | Reference                                 | Version                                         | License Type    | License                                                                 | 
  | ----------------------------------------- | ----------------------------------------------- | --------------- | ----------------------------------------------------------------------- | 
- | Avalonia                                  | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Desktop                          | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Diagnostics                      | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Fonts.Inter                      | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Markup.Xaml.Loader               | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Themes.Fluent                    | 11.0.6                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia                                  | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Desktop                          | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Diagnostics                      | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Fonts.Inter                      | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Markup.Xaml.Loader               | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Themes.Fluent                    | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
  | coverlet.collector                        | 6.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | Epoxy.Avalonia11                          | 1.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                   | 
- | FluentAvaloniaUI                          | 2.0.4                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | FluentAssertions                          | 6.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                   | 
+ | FluentAvaloniaUI                          | 2.0.5                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | HotAvalonia                               | 1.0.1                                           | LICENSE.md      | https://www.nuget.org/packages/HotAvalonia/1.0.1/License                | 
  | HotAvalonia.Extensions                    | 1.0.1                                           | LICENSE.md      | https://www.nuget.org/packages/HotAvalonia.Extensions/1.0.1/License     | 
  | Microsoft.Bcl.AsyncInterfaces             | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
