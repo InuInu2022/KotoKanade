@@ -40,7 +40,7 @@
           <ui:FAComboBoxItem Content="さとうささら" />
           <ui:FAComboBoxItem Content="すずきつづみ" />
           <ui:FAComboBoxItem Content="タカハシ" />
-          <ui:FAComboBoxItem Content="双葉湊音" IsEnabled="False" />
+          <ui:FAComboBoxItem Content="双葉湊音" />
         </ui:FAComboBox>
       </StackPanel>
     </ui:SettingsExpander.Footer>
