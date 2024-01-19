@@ -2,6 +2,7 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using FluentAssertions;
 using KotoKanade.Core.Models;
 using LibSasara.Model;
 
@@ -49,6 +50,63 @@ public class TalkDataConvertTests
 			{
 				throw ex.InnerException ?? new InvalidDataException(ex.Message);
 			}
+		}
+	}
+
+	public static TheoryData<
+		List<Note>,
+		List<LabLine>,
+		(List<Note>, List<LabLine>)
+	> SameNoteVowelsData
+		=> new(){
+			{
+				[
+					new(){Lyric="かー"},
+				],
+				[
+					new(0,10,"k"),
+					new(10,15, "a"),
+				],
+				(
+					[
+						new(){Lyric="かー"},
+					],
+					[
+						new(0,10,"k"),
+						new(10,20, "a"),
+						new(15,20, "a"),
+					]
+				)
+			},
+		};
+
+	[Theory]
+	[MemberData(nameof(SameNoteVowelsData))]
+	[SuppressMessage("","MA0016")]
+	public void ManageSameNoteVowels(
+		List<Note> notes,
+		List<LabLine> lines,
+		(List<Note>, List<LabLine>) expect
+	)
+	{
+		var result = CallMethodWithReturn<(List<Note>, List<LabLine>), (List<Note>, List<LabLine>)>(nameof(ManageSameNoteVowels), (notes, lines));
+		result.Should().Be(expect);
+	}
+
+	private static TRet? CallMethodWithReturn<TRet, TArg>(
+		string methodName,
+		TArg arg
+	)
+	{
+		var method = typeof(TalkDataConverter).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static) ?? throw new DataException();
+		try
+		{
+			var ret = method.Invoke(methodName, [arg]);
+			return (TRet?) ret;
+		}
+		catch (Exception ex)
+		{
+			throw ex.InnerException ?? new InvalidDataException(ex.Message);
 		}
 	}
 }
