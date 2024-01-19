@@ -166,13 +166,8 @@ public sealed class MainViewModel
 		};
 
 	private static Func<ValueTask> CloseEvent =>
-		async () =>
-		{
-			//dispose openjtalk
-			await TalkDataConverter
-				.DisposeOpenJTalkAsync()
-				.ConfigureAwait(false);
-		};
+		TalkDataConverter
+				.DisposeOpenJTalkAsync;
 
 	private Func<ValueTask> ReadyFunc =>
 		async () =>
