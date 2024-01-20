@@ -462,13 +462,14 @@ public static partial class TalkDataConverter
 		var resultPhonemes = check switch
 		{
 			//ん
-			"N" =>
+			"N" => add > 1 ?
 			[
 				.. sph,
 				.. Enumerable
 					.Repeat("u", add - 1)
 					.Append("N"),
-			],
+			]
+			: sph,
 			//っ
 			"cl" => sph,
 			//無効
@@ -489,14 +490,16 @@ public static partial class TalkDataConverter
 		{
 			case "N":
 			{
+				if (add <= 1){ break;}
 				if(labLines.Count <= phonemeIndex){
 						phonemeIndex = labLines.Count - 1;
 				}
 				var line = labLines[phonemeIndex];
-				var lines = DivideLabLine(line, add)
+				var lines = DivideLabLine(line, add+1)
 					.Select(ln => new LabLine(ln.From, ln.To, "u"))
 					.ToList()
 					;
+				lines[0] = new(lines[0].From, lines[0].To, "N");
 				lines[^1] = new(lines[^1].From, lines[^1].To, "N");
 
 				labLines = [
