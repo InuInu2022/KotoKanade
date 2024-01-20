@@ -262,24 +262,22 @@ public static partial class TalkDataConverter
 		//フレーズをセリフ化
 		var text = GetPhraseText(notes);
 
-		//分割
-		if (noteSplit?.isSplit is true)
-		{
-			notes = SplitNoteIfSetOption(data, noteSplit, notes);
-		}else{
-			//「ー」処理
-			notes = ManageLongVowelSymbols(notes);
-			//「っ」対応
-			notes = ManageCloseConsonant(notes);
-		}
-
+		//notes,lablines事前処理
+		//「ー」処理
+		notes = ManageLongVowelSymbols(notes);
+		//「っ」対応
+		notes = ManageCloseConsonant(notes);
 		//lab音素をnote由来に合わせて分割
-		//TODO: note分割のときにうまくいくかチェック
 		if(labLines is not null)
 		{
 			var (nNotes, nLines) = ManageSameNoteVowels((notes, labLines));
 			notes = nNotes;
 			labLines = nLines;
+		}
+		//分割
+		if (noteSplit?.isSplit is true)
+		{
+			notes = SplitNoteIfSetOption(data, noteSplit, notes, labLines);
 		}
 
 		var fcLabel = GetFullContext(notes);
@@ -391,15 +389,12 @@ public static partial class TalkDataConverter
 	private static List<Note> SplitNoteIfSetOption(
 		SongData data,
 		(bool isSplit, double threthold)? noteSplit,
-		List<Note> p)
+		List<Note> notes,
+		List<LabLine>? labLines = null
+	)
 	{
-		//「ー」対応
-		p = ManageLongVowelSymbols(p);
-		//「っ」対応
-		p = ManageCloseConsonant(p);
-
 		//TODO: labも一緒に分割
-		return p.ConvertAll(n =>
+		return notes.ConvertAll(n =>
 		{
 			var dur = SasaraUtil
 				.ClockToTimeSpan(
