@@ -130,6 +130,50 @@ public class TalkDataConvertTests
 
 	}
 
+	public static TheoryData<
+		LabLine,
+		int,
+		IEnumerable<LabLine>
+	> DivideLabLineData
+	=> new()
+	{
+		{
+			new(0,10,"a"),
+			2,
+			[
+				new(0, 5, "a"),
+				new(5, 10, "a"),
+			]
+		},
+		{
+			new(0,100,"a"),
+			4,
+			[
+				new(0, 25, "a"),
+				new(25, 50, "a"),
+				new(50, 75, "a"),
+				new(75, 100, "a"),
+			]
+		},
+	};
+
+	[Theory]
+	[MemberData(nameof(DivideLabLineData))]
+	public void DivideLabLine(
+		LabLine actual,
+		int n,
+		IEnumerable<LabLine> expect
+	)
+	{
+		var result = CallMethodWithReturn<
+			IEnumerable<LabLine>,
+			object[]
+		>(nameof(DivideLabLine), [actual, n]);
+
+		result
+			.Should().BeEquivalentTo(expect);
+	}
+
 	private static TRet? CallMethodWithReturn<TRet, TArg>(
 		string methodName,
 		TArg arg
@@ -138,7 +182,9 @@ public class TalkDataConvertTests
 		var method = typeof(TalkDataConverter).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static) ?? throw new DataException();
 		try
 		{
-			var ret = method.Invoke(methodName, [arg]);
+			var ret = arg is object[] objArg
+				? method.Invoke(methodName, objArg)
+				: method.Invoke(methodName, [arg]);
 			return (TRet?) ret;
 		}
 		catch (Exception ex)

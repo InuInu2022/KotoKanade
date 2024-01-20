@@ -277,7 +277,9 @@ public static partial class TalkDataConverter
 		//分割
 		if (noteSplit?.isSplit is true)
 		{
-			notes = SplitNoteIfSetOption(data, noteSplit, notes, labLines);
+			var (ns,ln) = SplitNoteIfSetOption(data, noteSplit, notes, labLines);
+			notes = ns;
+			labLines = ln;
 		}
 
 		var fcLabel = GetFullContext(notes);
@@ -386,15 +388,16 @@ public static partial class TalkDataConverter
 		return nu;
 	}
 
-	private static List<Note> SplitNoteIfSetOption(
+	private static (List<Note>, List<LabLine>?) SplitNoteIfSetOption(
 		SongData data,
 		(bool isSplit, double threthold)? noteSplit,
 		List<Note> notes,
 		List<LabLine>? labLines = null
 	)
 	{
+		var phonemeIndex = 0;
 		//TODO: labも一緒に分割
-		return notes.ConvertAll(n =>
+		var n = notes.Select((n,i) =>
 		{
 			var dur = SasaraUtil
 				.ClockToTimeSpan(
@@ -402,10 +405,17 @@ public static partial class TalkDataConverter
 					data.TempoList ?? defaultTempo)
 				.TotalMilliseconds;
 			var th = noteSplit?.threthold ?? 100000;
-			//th = th < 100 ? 100 : th;
 			th = Math.Max(th, 100);
 
-			if (dur < th) return n;
+			if (dur < th) {
+				if (labLines is not null)
+				{
+					phonemeIndex += GetPhonemeLabel(GetFullContext([n]))
+						.Split([",","|"], StringSplitOptions.None)
+						.Length;
+				}
+				return n;
+			}
 
 			var spCount = (int)Math.Floor(dur / th) + 1;
 
@@ -413,32 +423,121 @@ public static partial class TalkDataConverter
 			var sph = ph.Split('|');
 			var add = spCount - sph.Length;
 
-			if (add <= 0) return n;
+			// If no additional phonemes are needed, return the original note
+			if (add <= 0) {
+				if (labLines is not null)
+				{
+					phonemeIndex += ph.Split([",","|"], StringSplitOptions.None).Length;
+				}
+				return n;
+			}
 
-			sph = sph[^1].Split(',')[^1] switch
-			{
-				//ん
-				"N" =>
-				[
-					.. sph,
-					.. Enumerable
-						.Repeat("u", add - 1)
-						.Append("N"),
-				],
-				//っ
-				"cl" => sph,
-				//無効
-				"xx" or "sil" or "pau" => sph,
-				//それ以外（母音）
-				string s =>
-					[.. sph, .. Enumerable.Repeat(s, add)],
-			};
+			// 音素分割拡張
+			var (sp, ln) = ExtendPhonemesWithPattern(sph, add, labLines, phonemeIndex);
+			sph = sp;
+			labLines = ln;
 			n.Phonetic = string
 				.Join(',', sph);
 			n.Lyric = GetPronounce(string.Join('|', sph));
+			phonemeIndex += n.Phonetic.Split(',').Length;
 			return n;
 		})
+		.ToList()
 		;
+		return (n, labLines);
+	}
+
+	private static (string[] ph,List<LabLine>? lines) ExtendPhonemesWithPattern(
+		string[] sph,
+		int add,
+		List<LabLine>? labLines,
+		int phonemeIndex
+	)
+	{
+		var check = sph[^1].Split(',')[^1];
+		phonemeIndex += string.Concat(sph)
+			.Replace(",","", StringComparison.Ordinal)
+			.Length - 1;
+		phonemeIndex = phonemeIndex < 0 ? 0 : phonemeIndex;
+		var resultPhonemes = check switch
+		{
+			//ん
+			"N" =>
+			[
+				.. sph,
+				.. Enumerable
+					.Repeat("u", add - 1)
+					.Append("N"),
+			],
+			//っ
+			"cl" => sph,
+			//無効
+			"xx" or "sil" or "pau" => sph,
+			//それ以外（母音）
+			string s =>
+			[
+				.. sph,
+				.. Enumerable.Repeat(s, add),
+			],
+		};
+		if(labLines is null){
+			return (resultPhonemes, labLines);
+		}
+
+		//split lablines
+		switch (check)
+		{
+			case "N":
+			{
+				if(labLines.Count <= phonemeIndex){
+						phonemeIndex = labLines.Count - 1;
+				}
+				var line = labLines[phonemeIndex];
+				var lines = DivideLabLine(line, add)
+					.Select(ln => new LabLine(ln.From, ln.To, "u"))
+					.ToList()
+					;
+				lines[^1] = new(lines[^1].From, lines[^1].To, "N");
+
+				labLines = [
+					..labLines[..phonemeIndex],
+					..lines,
+					..labLines[(phonemeIndex+1)..],
+				];
+				break;
+			}
+			case "cl":
+				break;
+			case "xx" or "sil" or "pau":
+				break;
+			case string:
+			{
+				if(labLines.Count <= phonemeIndex){
+					phonemeIndex = labLines.Count - 1;
+				}
+				var line = labLines[phonemeIndex];
+				var lines = DivideLabLine(line, add+1);
+				labLines = [
+					..labLines[..phonemeIndex],
+					..lines,
+					..labLines[(phonemeIndex+1)..],
+				];
+				break;
+			}
+		}
+		return (resultPhonemes, labLines);
+	}
+
+	private static IEnumerable<LabLine> DivideLabLine(LabLine line, int n)
+	{
+		var timeStep = (line.To - line.From) / n;
+
+		for (int i = 0; i < n; i++)
+		{
+			var from = line.From + (timeStep * i);
+			var to = (i == n - 1) ? line.To : from + timeStep;
+			yield return new LabLine(from, to, line.Phoneme);
+		}
 	}
 
 	/// <summary>
