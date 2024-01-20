@@ -455,9 +455,8 @@ public static partial class TalkDataConverter
 	)
 	{
 		var check = sph[^1].Split(',')[^1];
-		phonemeIndex += string.Concat(sph)
-			.Replace(",","", StringComparison.Ordinal)
-			.Length - 1;
+		phonemeIndex += sph
+			.Sum(s => s.Split(",").Length) - 1;
 		phonemeIndex = phonemeIndex < 0 ? 0 : phonemeIndex;
 		var resultPhonemes = check switch
 		{
