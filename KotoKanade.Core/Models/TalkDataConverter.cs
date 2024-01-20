@@ -409,7 +409,7 @@ public static partial class TalkDataConverter
 
 			var spCount = (int)Math.Floor(dur / th) + 1;
 
-			var ph = GetPhonemeLabel(GetFullContext(new List<Note> { n }));
+			var ph = GetPhonemeLabel(GetFullContext([n]));
 			var sph = ph.Split('|');
 			var add = spCount - sph.Length;
 
@@ -434,8 +434,8 @@ public static partial class TalkDataConverter
 					[.. sph, .. Enumerable.Repeat(s, add)],
 			};
 			n.Phonetic = string
-				.Join(",", sph);
-			n.Lyric = GetPronounce(string.Join("|", sph));
+				.Join(',', sph);
+			n.Lyric = GetPronounce(string.Join('|', sph));
 			return n;
 		})
 		;
