@@ -54,19 +54,12 @@ public class TalkDataConvertTests
 	}
 
 	public static TheoryData<
-		List<Note>,
-		List<LabLine>,
-		(List<Note>, List<LabLine>)
+		(List<Note>, List<LabLine>),	//talk
+		(List<Note>, List<LabLine>)		//song
 	> SameNoteVowelsData
 		=> new(){
+			//case 1 かー
 			{
-				[
-					new(){Lyric="かー"},
-				],
-				[
-					new(0,10,"k"),
-					new(10,15, "a"),
-				],
 				(
 					[
 						new(){Lyric="かー"},
@@ -74,7 +67,42 @@ public class TalkDataConvertTests
 					[
 						new(0,10,"k"),
 						new(10,20, "a"),
+					]
+				),
+				(
+					[
+						new(){Lyric="かー"},
+					],
+					[
+						new(0,10,"k"),
+						new(10,15, "a"),
 						new(15,20, "a"),
+					]
+				)
+			},
+			//case 2 ふうに
+			{
+				(
+					[
+						new(){Lyric="ふうに"},
+					],
+					[
+						new(0,10,"f"),
+						new(10,15, "u"),
+						new(15,20, "n"),
+						new(20,25, "i"),
+					]
+				),
+				(
+					[
+						new(){Lyric="ふうに"},
+					],
+					[
+						new(0,10,"f"),
+						new(10,12.5, "u"),
+						new(12.5,15, "u"),
+						new(15,20, "n"),
+						new(20,25, "i"),
 					]
 				)
 			},
@@ -84,13 +112,22 @@ public class TalkDataConvertTests
 	[MemberData(nameof(SameNoteVowelsData))]
 	[SuppressMessage("","MA0016")]
 	public void ManageSameNoteVowels(
-		List<Note> notes,
-		List<LabLine> lines,
+		(List<Note>, List<LabLine>) actual,
 		(List<Note>, List<LabLine>) expect
 	)
 	{
-		var result = CallMethodWithReturn<(List<Note>, List<LabLine>), (List<Note>, List<LabLine>)>(nameof(ManageSameNoteVowels), (notes, lines));
-		result.Should().Be(expect);
+		var result = CallMethodWithReturn<(List<Note>, List<LabLine>), (List<Note>, List<LabLine>)>(nameof(ManageSameNoteVowels), actual);
+
+		//count
+		result.Item1.Count.Should().Be(expect.Item1.Count);
+		result.Item2.Count.Should().Be(expect.Item2.Count);
+		//lyrics
+		result.Item1.Select(n => n.Lyric).ToString()
+			.Should().Be(expect.Item1.Select(n => n.Lyric).ToString());
+		//phonemes
+		result.Item2
+			.Should().BeEquivalentTo(expect.Item2);
+
 	}
 
 	private static TRet? CallMethodWithReturn<TRet, TArg>(

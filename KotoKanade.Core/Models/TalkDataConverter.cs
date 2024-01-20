@@ -273,6 +273,15 @@ public static partial class TalkDataConverter
 			notes = ManageCloseConsonant(notes);
 		}
 
+		//lab音素をnote由来に合わせて分割
+		//TODO: note分割のときにうまくいくかチェック
+		if(labLines is not null)
+		{
+			var (nNotes, nLines) = ManageSameNoteVowels((notes, labLines));
+			notes = nNotes;
+			labLines = nLines;
+		}
+
 		var fcLabel = GetFullContext(notes);
 
 		//フレーズの音素
@@ -514,30 +523,71 @@ public static partial class TalkDataConverter
 		char[] sep = ['|', ','];
 		int notePhIndex = 0;
 
-		for(var i = 1; i < nl.notes.Count; i++)
+		for(var i = 0; i < nl.notes.Count; i++)
 		{
 			var lyric = nl.notes[i].Lyric;
 			if (lyric is null) continue;
 			var ph = GetPhonemeLabel(GetFullContext([nl.notes[i]]));
 			ReadOnlySpan<string> span = ph.Split(sep);
-			if (HasSameVowels(span))
-			{
+			for(var j = 0; j < span.Length; j++){
+				if (span[j] is not string tPh) continue;
 
+				var labPh = nl.lines
+					.ElementAtOrDefault(notePhIndex + j)?
+					.Phoneme;
+
+				if(labPh is null)
+				{
+					//lab側の長さが短いときは最後の音素を分割
+					var (last1, last2) = SplitLabLine(nl.lines[^1]);
+					nl.lines = [
+						..nl.lines[..^1],
+						last1,
+						last2,
+					];
+					labPh = last2.Phoneme;
+				}
+
+				if (!string.Equals(tPh, labPh, StringComparison.Ordinal)
+					&& IsSameVowels(j, tPh, nl.lines, notePhIndex))
+				{
+					//lab側が違っていれば前の音素を分割して長さ合わせる
+					var prevIndex = notePhIndex + j - 1;
+					var prev = nl.lines[prevIndex];
+
+					//前後に分ける
+					var (bPrev, aPrev) = SplitLabLine(prev);
+
+					//分割した音素を差し込む
+					var next = notePhIndex + j;
+					nl.lines = [
+						..nl.lines[..prevIndex],
+							bPrev, aPrev,
+							..nl.lines[next..],
+						];
+				}
 			}
 			notePhIndex += span.Length;
 		}
 
 		return (nl.notes,nl.lines);
+	}
 
-		static bool HasSameVowels(ReadOnlySpan<string> ph)
-		{
-			if (ph.Length <= 1) return false;
-			for(var i = 0; i < ph.Length; i++)
-			{
-				if (string.Equals(ph[i], ph[i + 1], StringComparison.Ordinal)) return true;
-			}
-			return false;
-		}
+	private static bool IsSameVowels(int j, string tPh, List<LabLine> ln, int notePhIndex)
+	{
+		return j != 0
+			&& PhonemeUtil.IsVowel(tPh)
+			&& string.Equals(
+				ln[notePhIndex + j - 1].Phoneme,
+				tPh,
+				StringComparison.Ordinal);
+	}
+
+	private static (LabLine first, LabLine second) SplitLabLine(LabLine line)
+	{
+		var f = new LabLine(line.From, line.To - (line.Length / 2), line.Phoneme);
+		var s = new LabLine(line.To - (line.Length / 2), line.To, line.Phoneme);
+		return (f, s);
 	}
 
 	private static readonly WanaKanaOptions kanaOption = new()
