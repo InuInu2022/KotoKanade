@@ -18,8 +18,9 @@
 
 ## Video
 
+- タカハシを歌わせるソフト作ってみた 【KotoKanade】
 [![タカハシを歌わせるソフト作ってみた 【KotoKanade】](http://img.youtube.com/vi/UzbBSFkNrrE/mqdefault.jpg)](https://youtu.be/UzbBSFkNrrE?si=YhKhG1W6iTgN99QX)
-タカハシを歌わせるソフト作ってみた 【KotoKanade】
+
 
 ## 最新版ダウンロード / Download latest
 
