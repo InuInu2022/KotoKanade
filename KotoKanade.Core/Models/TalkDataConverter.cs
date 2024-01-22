@@ -37,7 +37,8 @@ public static partial class TalkDataConverter
 		(bool isSplit, double threthold)? splitNote = null,
 		double[]? emotions = null,
 		TalkGlobalParam? globalParams = null,
-		decimal consonantOffset = 0.0m
+		decimal consonantOffset = 0.0m,
+		string castVersion = ""
 	)
 	{
 		var TemplateTalk = await TemplateLoader
@@ -99,7 +100,7 @@ public static partial class TalkDataConverter
 
 		if (castName is not null)
 		{
-			var voice = await GetVoiceByCastNameAsync(castName)
+			var voice = await GetVoiceByCastNameAsync(castName, castVersion)
 				.ConfigureAwait(false);
 			tstprj = tstprj
 				.ReplaceVoiceAsPrj(voice);
@@ -139,15 +140,21 @@ public static partial class TalkDataConverter
 		return rates;
 	}
 
-	private static async ValueTask<Voice> GetVoiceByCastNameAsync(string castName)
+	private static async ValueTask<Voice> GetVoiceByCastNameAsync(
+		string castName,
+		string version
+	)
 	{
 		var cast = await GetCastDefAsync(castName)
 			.ConfigureAwait(false);
 
+		var selectedVer = cast.Versions.Contains(version, StringComparer.Ordinal)
+			? version : cast.Versions[^1];
+
 		return new Voice(
 			Array.Find(cast.Names, n => n.Lang == Lang.English)?.Display ?? "error",
 			cast.Cname,
-			cast.Versions[^1]);
+			selectedVer);
 	}
 
 	[ThreadStatic]
