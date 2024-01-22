@@ -33,6 +33,10 @@ public sealed class MainViewModel
 	public ObservableCollection<Cast>? TalkCasts {get;set;}
 	public ObservableCollection<StyleRate>? Styles { get; set; }
 	public ObservableCollection<GlobalParam>? GlobalParams { get; set; }
+
+	public int SelectedCastVersionIndex { get;set;}
+	public ObservableCollection<string>? TalkCastVersions { get; set; }
+
 	public bool IsSplitNotes {get;set;} = true;
 	public double ThretholdSplitNote { get; set; } = 250;
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
@@ -148,7 +152,8 @@ public sealed class MainViewModel
 						AlphaShift = GetParam("Alpha"),
 						LogF0Scale = GetParam("Into."),
 					},
-					-ConsonantOffsetSec //表示と逆
+					-ConsonantOffsetSec, //表示と逆
+					TalkCastVersions?[SelectedCastVersionIndex] ?? ""
 				)
 				.ConfigureAwait(true);
 
@@ -192,6 +197,7 @@ public sealed class MainViewModel
 
 		var def = TalkCasts[value];
 
+		//style
 		var list = def
 			.Emotions
 			.Select(e => e.Names.First(n => n.Lang == CevioCasts.Lang.Japanese).Display)
@@ -199,6 +205,10 @@ public sealed class MainViewModel
 			;
 		Styles = new(list);
 		Styles[0].Rate = 100;
+
+		//version
+		TalkCastVersions = new(def.Versions.OrderDescending());
+		SelectedCastVersionIndex = 0;	//reset
 
 		return default;
 	}
