@@ -16,6 +16,11 @@
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/inuinu2022/KotoKanade?include_prereleases&label=%F0%9F%9A%80release) ![GitHub all releases](https://img.shields.io/github/downloads/InuInu2022/KotoKanade/total?color=green&label=%E2%AC%87%20downloads) ![GitHub Repo stars](https://img.shields.io/github/stars/InuInu2022/KotoKanade?label=%E2%98%85&logo=github)
 [![VoiSona Talk](https://img.shields.io/badge/VoiSona_Talk-1.1-53abdb.svg?logo=&style=flat)](https://voisona.com/talk/)
 
+## Video
+
+[![タカハシを歌わせるソフト作ってみた 【KotoKanade】](http://img.youtube.com/vi/UzbBSFkNrrE/mqdefault.jpg)](https://youtu.be/UzbBSFkNrrE?si=YhKhG1W6iTgN99QX)
+タカハシを歌わせるソフト作ってみた 【KotoKanade】
+
 ## 最新版ダウンロード / Download latest
 
 - **[Download KotoKanade](https://github.com/InuInu2022/KotoKanade/releases/latest)**
