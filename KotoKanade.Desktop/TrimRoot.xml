@@ -1,0 +1,42 @@
+<linker>
+  <assembly fullname="KotoKanade.Desktop" preserve="all" />
+
+  <assembly fullname="Avalonia.Base">
+    <type fullname="Avalonia.Animation.Animators.TransformAnimator" />
+  </assembly>
+
+  <!-- for all assemblies that have xaml code -->
+  <assembly fullname="KotoKanade.Desktop">
+    <type fullname="CompiledAvaloniaXaml.!AvaloniaResources" />
+    <type fullname="CompiledAvaloniaXaml.!IndexerAccessorFactoryClosure" />
+    <type fullname="CompiledAvaloniaXaml.!XamlLoader" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext/ParentStackEnumerable/Enumerator" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlHelpers" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlTrampolines" />
+  </assembly>
+  <assembly fullname="KotoKanade.UI">
+    <type fullname="CompiledAvaloniaXaml.!AvaloniaResources" />
+    <type fullname="CompiledAvaloniaXaml.!IndexerAccessorFactoryClosure" />
+    <type fullname="CompiledAvaloniaXaml.!XamlLoader" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext/ParentStackEnumerable/Enumerator" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlHelpers" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlTrampolines" />
+  </assembly>
+  <assembly fullname="FluentAvalonia">
+    <type fullname="CompiledAvaloniaXaml.!AvaloniaResources" />
+    <type fullname="CompiledAvaloniaXaml.!IndexerAccessorFactoryClosure" />
+    <type fullname="CompiledAvaloniaXaml.!XamlLoader" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlContext/ParentStackEnumerable/Enumerator" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlHelpers" />
+    <type fullname="CompiledAvaloniaXaml.XamlIlTrampolines" />
+  </assembly>
+
+  <assembly fullname="Avalonia.Themes.Fluent" preserve="All" />
+
+  <assembly fullname="System.Private.CoreLib">
+    <type fullname="System.StubHelpers.InterfaceMarshaler" preserve="all" />
+  </assembly>
+</linker>

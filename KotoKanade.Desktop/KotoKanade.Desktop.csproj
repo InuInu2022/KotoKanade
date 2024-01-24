@@ -14,7 +14,7 @@
     <PublishAot>false</PublishAot>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>false</PublishReadyToRun>
-    <TrimMode>partial</TrimMode>
+    <TrimMode>full</TrimMode>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
 	  <SatelliteResourceLanguages>en-US;ja-JP</SatelliteResourceLanguages>
@@ -23,6 +23,7 @@
     <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
     <EventSourceSupport>false</EventSourceSupport>
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
     <StackTraceSupport>false</StackTraceSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <OptimizationPreference>Speed</OptimizationPreference>
@@ -31,9 +32,11 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
+    <StripSymbols>true</StripSymbols>
     <IlcInstructionSet>native</IlcInstructionSet>
     <IlcMaxVectorTBitWidth>512</IlcMaxVectorTBitWidth>
     <WarningsAsErrors>false</WarningsAsErrors>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -108,6 +111,7 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <TrimmableAssembly Include="Avalonia.Themes.Fluent" />
 		<TrimmableAssembly Include="Avalonia.Themes.Default" />
+    <TrimmerRootDescriptor Include="TrimRoot.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -117,6 +121,7 @@
 	<PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" Version="1.0.1" />
 	<PackageReference Include="HotAvalonia.Extensions" Version="1.0.1" PrivateAssets="All" />
 	<PackageReference Include="NLog" Version="5.2.8" />
+	<PackageReference Include="PublishAotCompressed" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
