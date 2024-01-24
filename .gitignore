@@ -239,3 +239,7 @@ _Pvt_Extensions
 
 # added
 KotoKanade.UI/Views/temp.txt
+lib/open_jtalk_dic_utf_8-1.11/*.def
+lib/open_jtalk_dic_utf_8-1.11/*.bin
+lib/open_jtalk_dic_utf_8-1.11/*.dic
+!lib/open_jtalk_dic_utf_8-1.11/.gitkeep
