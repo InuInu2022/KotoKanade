@@ -41,6 +41,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
   </PropertyGroup>
 
   <Target Name="RemovePublishDirBeforeBuild" BeforeTargets="BeforeBuild">
