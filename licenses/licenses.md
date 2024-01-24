@@ -20,6 +20,7 @@
  | Newtonsoft.Json                           | 13.0.3                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
  | NLog                                      | 5.2.8                                           | BSD-3-Clause    | https://licenses.nuget.org/BSD-3-Clause                                 | 
  | PolySharp                                 | 1.14.1+a7a92a9ddd050275c91c42b711d22cb41c3fbf3d | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | PublishAotCompressed                      | 1.0.3                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | SharpOpenJTalk.Lang                       | 1.4.0                                           |                 | https://raw.githubusercontent.com/yamachu/SharpOpenJTalk/master/LICENSE | 
  | System.Collections.Immutable              | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | System.Dynamic.Runtime                    | 4.3.0                                           | MS-EULA         | http://go.microsoft.com/fwlink/?LinkId=329770                           | 
