@@ -16,4 +16,11 @@ public static class AppUtil
 	public static string GetAppName(){
 		return Assembly.GetEntryAssembly()?.GetName().Name ?? string.Empty;
 	}
+
+	public const bool IsDebug
+#if DEBUG
+		= true;
+#else
+		= false;
+#endif
 }
