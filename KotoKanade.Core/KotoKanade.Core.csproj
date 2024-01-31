@@ -15,6 +15,7 @@
     <ProjectReference Include="..\lib\LibSasara\LibSasara.VoiSona\LibSasara.VoiSona.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DotnetWorld" Version="1.2.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="PolySharp" Version="1.14.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,5 +24,7 @@
     <PackageReference Include="SharpOpenJTalk.Lang" Version="1.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageReference Include="WanaKana-net" Version="1.0.0" />
+    <PackageReference Include="Xabe.FFmpeg" Version="5.2.6" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.6" />
   </ItemGroup>
 </Project>

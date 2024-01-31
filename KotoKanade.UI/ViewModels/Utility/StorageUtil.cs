@@ -112,6 +112,33 @@ public static class StorageUtil
 			.ConfigureAwait(true);
 	}
 
+	public static async ValueTask<IReadOnlyList<IStorageFile?>?> OpenWavFileAsync(
+		bool allowMultiple,
+		string? path,
+		string title = "開く音声ファイルを選んでください"
+	)
+	{
+		if(_storage is null){
+			return default;
+		}
+
+		FilePickerFileType[] types = [FilePickerFileTypes.All];
+
+		var opt = new FilePickerOpenOptions()
+		{
+			Title = title,
+			AllowMultiple = allowMultiple,
+			FileTypeFilter = types,
+		};
+		if(path is not null){
+			opt.SuggestedStartLocation = await _storage
+				.TryGetFolderFromPathAsync(path)
+				.ConfigureAwait(true);
+		}
+		return await _storage.OpenFilePickerAsync(opt)
+			.ConfigureAwait(true);
+	}
+
 	/// <summary>
 	/// 読み込んだファイル(IStorageFile)からファイルパスのリストを取得する
 	/// </summary>

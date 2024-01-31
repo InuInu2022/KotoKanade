@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using LibSasara;
 using LibSasara.Model;
+using SasaraUtil.Models;
 
 namespace KotoKanade.Core.Models;
 
@@ -24,7 +26,8 @@ public static class ScoreParser
 	/// <returns></returns>
 	public static async ValueTask<SongData> ProcessCcsAsync(
 		string path,
-		string? labPath = null
+		string? labPath = null,
+		string? wavPath = null
 	)
 	{
 		var ccs = await SasaraCcs.LoadAsync(path)
@@ -35,8 +38,9 @@ public static class ScoreParser
 		var song = trackset?
 			.Units
 			.FirstOrDefault();
-		if(trackset is null || song is null){
-			await Console.Error.WriteLineAsync($"Error!: ソングデータがありません: { path }")
+		if (trackset is null || song is null)
+		{
+			await Console.Error.WriteLineAsync($"Error!: ソングデータがありません: {path}")
 				.ConfigureAwait(false);
 			return new SongData();
 		}
@@ -56,7 +60,8 @@ public static class ScoreParser
 		};
 
 		//labファイルのパスを指定したとき
-		if(!string.IsNullOrEmpty(labPath)){
+		if (!string.IsNullOrEmpty(labPath))
+		{
 			songData.Label = await SasaraLabel
 				.LoadAsync(labPath!)
 				.ConfigureAwait(false);
@@ -64,8 +69,63 @@ public static class ScoreParser
 				= SplitLabByPhrase(songData.Label);
 		}
 
+		//音声ファイルを指定したとき
+		if (!string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
+		{
+			var mc = await MediaConverter
+				.FactoryAsync()
+				.ConfigureAwait(false);
+			var wav = await mc
+				.ConvertAsync(wavPath)
+				.ConfigureAwait(false);
+			//estimate by world
+			var (fs, _, len, x) = await WorldUtil
+				.ReadWavAsync(wav.Path)
+				.ConfigureAwait(false);
+			var wp = new WorldParam(fs);
+			var estimated = await WorldUtil
+				.EstimateF0Async(x, len, wp)
+				.ConfigureAwait(false);
+			songData.PitchList = SplitF0ByTiming(estimated, songData.TimingList);
+		}
+
 		//中間データに解析・変換
 		return songData;
+	}
+
+	private static ImmutableList<List<decimal>>
+	SplitF0ByTiming(
+		WorldParam estimated,
+		IEnumerable<List<LabLine>> timing
+	)
+	{
+		ReadOnlySpan<double> f0 = estimated.F0;
+		var fp = estimated.FramePeriod * 10000;
+
+		var timingByPhrase = timing
+			.AsEnumerable()
+			.Select(phrase =>
+			{
+				var start = phrase[0];
+				var end = phrase[^1];
+				var sidx = (int)Math.Round(start.From / fp, MidpointRounding.ToNegativeInfinity);
+				var eidx = (int)Math.Round(end.To / fp, MidpointRounding.ToPositiveInfinity);
+				return (Start:sidx, End:eidx);
+			});
+
+		var ret = ImmutableList.CreateBuilder<List<decimal>>();
+		foreach (var (Start, End) in timingByPhrase)
+		{
+			if(f0.Length - 1 < End){ continue; }
+			var phraseF0 = f0[Start..End];
+			var list = phraseF0
+				.ToArray()
+				.Select(f => (decimal)f)
+				.ToList()
+				;
+			ret.Add(list);
+		}
+		return [.. ret];
 	}
 
 	/// <summary>
@@ -91,7 +151,7 @@ public static class ScoreParser
 		var phrase = Enumerable.Empty<Note>().ToList();
 		foreach (var note in notes)
 		{
-			if(phrase.Count > 0)
+			if (phrase.Count > 0)
 			{
 				var last = phrase[^1];
 				var isOver = IsOverThrethold(threthold, note, last);
@@ -141,15 +201,15 @@ public static class ScoreParser
 
 		var phrase = Enumerable.Empty<LabLine>().ToList();
 
-		foreach(var line in lines)
+		foreach (var line in lines)
 		{
-			if(phrase.Count > 0)
+			if (phrase.Count > 0)
 			{
 				var last = phrase[^1];
 				var isOver = IsOverThrethold(threthold, line, last);
 				//閾値以下
 				//ブレス指定はpauを生むのでここでは判定不要
-				if(isOver)
+				if (isOver)
 				{
 					list.Add(phrase);
 					phrase = Enumerable

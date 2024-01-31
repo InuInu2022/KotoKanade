@@ -27,6 +27,7 @@ public sealed class MainViewModel
 	public string? OpenedLabPath { get; set; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
+	public string? OpenedWavPath { get; set; }
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
@@ -77,9 +78,21 @@ public sealed class MainViewModel
 			OpenedLabPath = pathes[0];
 			DefaultLab = Path.GetFileName(pathes[0]);
 		});
-		SelectWav = Command.Factory.Create(() =>
+		SelectWav = Command.Factory.Create(async () =>
 		{
-			return default;
+			var selectedWav = await StorageUtil.OpenWavFileAsync(
+				title: "歌唱指導の音声ファイルを選んでください。",
+				allowMultiple: false,
+				path: null
+			).ConfigureAwait(true);
+
+			var pathes = StorageUtil
+				.GetPathesFromOpenedFiles(selectedWav);
+			if (pathes is not { Count: > 0 }) { return; }
+
+			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+			OpenedWavPath = pathes[0];
+			DefaultWav = Path.GetFileName(pathes[0]);
 		});
 
 		// A handler for window loaded
@@ -109,6 +122,7 @@ public sealed class MainViewModel
 		{
 			var path = OpenedCcsPath ?? "";
 			var labPath = OpenedLabPath ?? "";
+			var wavPath = OpenedWavPath ?? "";
 			CanExport = false;
 
 			var saved = await StorageUtil.SaveAsync(
@@ -132,7 +146,7 @@ public sealed class MainViewModel
 			}
 
 			var loadedSong = await ScoreParser
-				.ProcessCcsAsync(path, labPath)
+				.ProcessCcsAsync(path, labPath, wavPath)
 				.ConfigureAwait(true);
 
 			var isSplit = IsSplitNotes;

@@ -95,7 +95,7 @@
           <views:TabScoreTmg />
         </TabItem>
         <!-- ========================== tab3 =================================== -->
-        <TabItem IsEnabled="False">
+        <TabItem IsEnabled="True">
           <TabItem.Header>
             <StackPanel Orientation="Horizontal">
               <ui:FontIcon
@@ -162,8 +162,6 @@
               </StackPanel>
             </ToggleSwitch.OffContent>
           </ToggleSwitch>
-          <!-- IsEnabled="{Binding IsConvertable}"
-          Command="{CompiledBinding SaveFile}" -->
           <Button
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"

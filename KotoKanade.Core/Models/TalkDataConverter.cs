@@ -64,7 +64,7 @@ public static partial class TalkDataConverter
 				?? []
 				;
 		}
-		else
+		else if(processed.PitchList?.Any() is not true)
 		{
 			var zipped = processed
 				.PhraseList?
@@ -76,6 +76,31 @@ public static partial class TalkDataConverter
 					processed,
 					tuple.note,
 					tuple.LabLine,
+					null,
+					rates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.ToImmutableList()
+				?? []
+				;
+		}else{
+			var zipped = processed
+				.PhraseList?
+				.Zip(
+					processed.TimingList,
+					(note, LabLine) => (note, LabLine))
+				.Zip(
+					processed.PitchList,
+					(tuple, f0) => (tuple.note, tuple.LabLine, f0));
+
+			us = zipped?
+				//.AsParallel().AsOrdered()
+				.Select( tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					tuple.f0,
 					rates,
 					globalParams,
 					splitNote,
@@ -250,6 +275,7 @@ public static partial class TalkDataConverter
 			data,
 			p,
 			labLines: null,
+			f0: null,
 			emotionRates,
 			globalParams,
 			noteSplit,
@@ -260,6 +286,7 @@ public static partial class TalkDataConverter
 		SongData data,
 		List<Note> notes,
 		List<LabLine>? labLines = null,
+		List<decimal>? f0 = null,
 		double[]? emotionRates = null,
 		TalkGlobalParam? globalParams = null,
 		(bool isSplit, double threthold)? noteSplit = null,
@@ -275,7 +302,7 @@ public static partial class TalkDataConverter
 		//「っ」対応
 		notes = ManageCloseConsonant(notes);
 		//lab音素をnote由来に合わせて分割
-		if(labLines is not null)
+		if (labLines is not null)
 		{
 			var (nNotes, nLines) = ManageSameNoteVowels((notes, labLines));
 			notes = nNotes;
@@ -284,7 +311,7 @@ public static partial class TalkDataConverter
 		//分割
 		if (noteSplit?.isSplit is true)
 		{
-			var (ns,ln) = SplitNoteIfSetOption(data, noteSplit, notes, labLines);
+			var (ns, ln) = SplitNoteIfSetOption(data, noteSplit, notes, labLines);
 			notes = ns;
 			labLines = ln;
 		}
@@ -305,7 +332,7 @@ public static partial class TalkDataConverter
 		//PIT
 		//楽譜データだけならnote高さから計算
 		//TODO:ccsやwavがあるなら解析して割当
-		var pitch = GetPitches(notes, data);
+		var pitch = f0 is null ? GetPitches(notes, data) : GetF0(f0);
 
 		//フレーズ最初が子音の時のオフセット
 		var offset = 0.0m;
@@ -368,7 +395,7 @@ public static partial class TalkDataConverter
 			//感情数に合わせる
 			RawFrameStyle = emotionRates is null
 				? "0:1:1.000:0.000:0.000:0.000:0.000"
-				: $"0:1:{string.Join(":", emotionRates.Select(em => em / 100.0))}",
+				: $"0:1:{string.Join(':', emotionRates.Select(em => em / 100.0))}",
 			//調整前LEN
 			PhonemeOriginalDuration = GetSplittedTiming(p, data, consonantOffset),
 		};
@@ -406,7 +433,7 @@ public static partial class TalkDataConverter
 		//TODO: labも一緒に分割
 		var n = notes.Select((n,i) =>
 		{
-			var dur = SasaraUtil
+			var dur = LibSasara.SasaraUtil
 				.ClockToTimeSpan(
 					n.Duration,
 					data.TempoList ?? defaultTempo)
@@ -719,17 +746,17 @@ public static partial class TalkDataConverter
 		List<(TimeSpan start, TimeSpan end, double logF0, int counts)> d = notes
 			.ConvertAll(n =>
 			(
-				start: SasaraUtil
+				start: LibSasara.SasaraUtil
 					.ClockToTimeSpan(
 						tempo,
 						n.Clock
 					),
-				end: SasaraUtil
+				end: LibSasara.SasaraUtil
 					.ClockToTimeSpan(
 						tempo,
 						n.Clock + n.Duration
 					),
-				logF0: Math.Log(SasaraUtil
+				logF0: Math.Log(LibSasara.SasaraUtil
 					.OctaveStepToFreq(n.PitchOctave, n.PitchStep)),
 				counts: CountPhonemes(n)
 			))
@@ -762,6 +789,20 @@ public static partial class TalkDataConverter
 			var logF0 = pitches[i].logF0;
 			sb.Append(sf).Append(':').Append(logF0);
 			if (i < pitches.Count - 1) sb.Append(',');
+		}
+		return sb.ToString();
+	}
+
+	private static string GetF0(List<decimal> f0)
+	{
+		var sb = new StringBuilder(100000);
+		for (int i = 0; i < f0.Count; i++)
+		{
+			var sf = (1.00 + i*0.035)
+				.ToString("F2", CultureInfo.InvariantCulture);
+			var logF0 = Math.Log((double)f0[i]);
+			sb.Append(sf).Append(':').Append(logF0);
+			if (i < f0.Count - 1) sb.Append(',');
 		}
 		return sb.ToString();
 	}
@@ -855,7 +896,7 @@ public static partial class TalkDataConverter
 				int count = CountPhonemes(n);
 
 				//開始時間
-				var start = SasaraUtil.ClockToTimeSpan(
+				var start = LibSasara.SasaraUtil.ClockToTimeSpan(
 					tempo,
 					n.Clock
 				).TotalMilliseconds;
@@ -865,7 +906,7 @@ public static partial class TalkDataConverter
 				}
 
 				//終了時間
-				var end = SasaraUtil.ClockToTimeSpan(
+				var end = LibSasara.SasaraUtil.ClockToTimeSpan(
 					tempo,
 					n.Clock + n.Duration
 				).TotalMilliseconds;
@@ -1004,7 +1045,7 @@ public static partial class TalkDataConverter
 		decimal offset = 0.0m
 	)
 	{
-		var time = SasaraUtil
+		var time = LibSasara.SasaraUtil
 			.ClockToTimeSpan(
 				data.TempoList!,
 				p[0].Clock
