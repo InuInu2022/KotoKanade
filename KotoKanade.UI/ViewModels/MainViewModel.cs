@@ -22,23 +22,27 @@ public sealed class MainViewModel
 	public string DefaultCcs { get; set; } = string.Empty;
 	public string? OpenedCcsPath { get; set; }
 	public Command SelectCcs { get; }
+
+	public bool IsUseLabFile { get; set; }
 	public string DefaultLab { get; set; } = string.Empty;
 	public Command SelectLab { get; }
 	public string? OpenedLabPath { get; set; }
+
+	public bool IsUseWavFile { get; set; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
 	public string? OpenedWavPath { get; set; }
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
-	public ObservableCollection<Cast>? TalkCasts {get;set;}
+	public ObservableCollection<Cast>? TalkCasts { get; set; }
 	public ObservableCollection<StyleRate>? Styles { get; set; }
 	public ObservableCollection<GlobalParam>? GlobalParams { get; set; }
 
-	public int SelectedCastVersionIndex { get;set;}
+	public int SelectedCastVersionIndex { get; set; }
 	public ObservableCollection<string>? TalkCastVersions { get; set; }
 
-	public bool IsSplitNotes {get;set;} = true;
+	public bool IsSplitNotes { get; set; } = true;
 	public double ThretholdSplitNote { get; set; } = 250;
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
 	public double TimeScaleFactor { get; set; } = 0.030;
@@ -48,53 +52,9 @@ public sealed class MainViewModel
 
 	public MainViewModel()
 	{
-		SelectCcs = Command.Factory.Create(async () =>
-		{
-			var songCcs = await StorageUtil.OpenCevioFileAsync(
-				title: "ソングデータを含むccsファイルを選んでください",
-				allowMultiple: false,
-				path: null
-			).ConfigureAwait(true);
-
-			var pathes = StorageUtil
-				.GetPathesFromOpenedFiles(songCcs);
-			if (pathes is not { Count: > 0 }) { return; }
-
-			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
-			OpenedCcsPath = pathes[0];
-			DefaultCcs = Path.GetFileName(pathes[0]);
-		});
-		SelectLab = Command.Factory.Create(async () =>
-		{
-			var selectedLab = await StorageUtil.OpenLabFileAsync(
-				title: "歌唱指導のタイミング情報ファイルを選んでください。",
-				allowMultiple: false,
-				path: null
-			).ConfigureAwait(true);
-
-			var pathes = StorageUtil.GetPathesFromOpenedFiles(selectedLab);
-			if (pathes is not { Count: > 0 }) { return; }
-
-			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
-			OpenedLabPath = pathes[0];
-			DefaultLab = Path.GetFileName(pathes[0]);
-		});
-		SelectWav = Command.Factory.Create(async () =>
-		{
-			var selectedWav = await StorageUtil.OpenWavFileAsync(
-				title: "歌唱指導の音声ファイルを選んでください。",
-				allowMultiple: false,
-				path: null
-			).ConfigureAwait(true);
-
-			var pathes = StorageUtil
-				.GetPathesFromOpenedFiles(selectedWav);
-			if (pathes is not { Count: > 0 }) { return; }
-
-			pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
-			OpenedWavPath = pathes[0];
-			DefaultWav = Path.GetFileName(pathes[0]);
-		});
+		SelectCcs = Command.Factory.Create(SelectCcsAsync);
+		SelectLab = Command.Factory.Create(SelectLabAsync);
+		SelectWav = Command.Factory.Create(SelectWavAsync);
 
 		// A handler for window loaded
 		Ready = Command.Factory.Create(ReadyFunc);
@@ -116,6 +76,85 @@ public sealed class MainViewModel
 			new("Alpha", 1.0, -1.0, 0, 0.01 ),
 			new("Into.", 2.0, 0.0, 1.0, 0.01 ),
 		];
+	}
+
+	private async ValueTask SelectCcsAsync()
+	{
+		var songCcs = await StorageUtil.OpenCevioFileAsync(
+			title: "ソングデータを含むccsファイルを選んでください",
+			allowMultiple: false,
+			path: null
+		).ConfigureAwait(true);
+
+		var pathes = StorageUtil
+			.GetPathesFromOpenedFiles(songCcs);
+		if (pathes is not { Count: > 0 }) { return; }
+
+		pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+		OpenedCcsPath = pathes[0];
+		DefaultCcs = Path.GetFileName(pathes[0]);
+
+		//auto file select (same name file only)
+		if (IsUseWavFile)
+		{
+			AutoSearchFile("wav");
+		}
+		if (IsUseLabFile || IsUseWavFile){
+			AutoSearchFile("lab");
+		}
+
+		void AutoSearchFile(string extension)
+		{
+			var search = Path.ChangeExtension(OpenedCcsPath, extension);
+			var isExists = File.Exists(search);
+			if(isExists){
+				if(string.Equals(extension, "wav", StringComparison.Ordinal))
+				{
+					OpenedWavPath = search;
+					DefaultWav = Path.GetFileName(search);
+				}
+				else if(string.Equals(extension, "lab", StringComparison.Ordinal))
+				{
+					OpenedLabPath = search;
+					DefaultLab = Path.GetFileName(search);
+				}
+			}
+		}
+	}
+
+	private async ValueTask SelectLabAsync()
+	{
+		var selectedLab = await StorageUtil.OpenLabFileAsync(
+			title: "歌唱指導のタイミング情報ファイルを選んでください。",
+			allowMultiple: false,
+			path: null
+		).ConfigureAwait(true);
+
+		var pathes = StorageUtil.GetPathesFromOpenedFiles(selectedLab);
+		if (pathes is not { Count: > 0 }) { return; }
+
+		pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+		OpenedLabPath = pathes[0];
+		DefaultLab = Path.GetFileName(pathes[0]);
+	}
+
+	private async ValueTask SelectWavAsync()
+	{
+		var selectedWav = await StorageUtil.OpenWavFileAsync(
+			title: "歌唱指導の音声ファイルを選んでください。",
+			allowMultiple: false,
+			path: null
+		).ConfigureAwait(true);
+
+		var pathes = StorageUtil
+			.GetPathesFromOpenedFiles(selectedWav);
+		if (pathes is not { Count: > 0 }) { return; }
+
+		pathes
+			.ToList()
+			.ForEach(f => Debug.WriteLine($"path: {f}"));
+		OpenedWavPath = pathes[0];
+		DefaultWav = Path.GetFileName(pathes[0]);
 	}
 
 	private Func<ValueTask> ExportEvent =>
@@ -159,7 +198,7 @@ public sealed class MainViewModel
 					TalkCasts?[SelectedCastIndex].Names[0].Display,
 					(isSplit, ThretholdSplitNote),
 					Styles?.Select(s => s.Rate).ToArray(),
-					globalParams:new()
+					globalParams: new()
 					{
 						SpeedRatio = GetParam("Speed"),
 						C0Shift = GetParam("Volume"),
@@ -169,7 +208,7 @@ public sealed class MainViewModel
 					},
 					-ConsonantOffsetSec, //表示と逆
 					TalkCastVersions?[SelectedCastVersionIndex] ?? "",
-					timeScaleFactor:TimeScaleFactor
+					timeScaleFactor: TimeScaleFactor
 				)
 				.ConfigureAwait(true);
 
@@ -224,7 +263,7 @@ public sealed class MainViewModel
 
 		//version
 		TalkCastVersions = new(def.Versions.OrderDescending());
-		SelectedCastVersionIndex = 0;	//reset
+		SelectedCastVersionIndex = 0;   //reset
 
 		return default;
 	}

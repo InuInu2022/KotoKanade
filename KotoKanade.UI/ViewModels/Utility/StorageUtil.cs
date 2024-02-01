@@ -199,12 +199,12 @@ public static class StorageUtil
 			SuggestedFileName = Path.ChangeExtension(
 				fileName,
 				changeExt),
-			FileTypeChoices = new FilePickerFileType[]{
+			FileTypeChoices = [
 				new(targetFileTypes){
 					Patterns = patterns,
 					AppleUniformTypeIdentifiers = appleUniformTypeId,
 				},
-			},
+			],
 		}).ConfigureAwait(true);
 	}
 }
