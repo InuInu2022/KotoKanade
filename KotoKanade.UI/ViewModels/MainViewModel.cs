@@ -41,7 +41,7 @@ public sealed class MainViewModel
 	public bool IsSplitNotes {get;set;} = true;
 	public double ThretholdSplitNote { get; set; } = 250;
 	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
-	public double TimeScaleFactor { get; set; } = 0.035;
+	public double TimeScaleFactor { get; set; } = 0.030;
 
 	public Command ExportFile { get; set; }
 	public bool CanExport { get; set; }

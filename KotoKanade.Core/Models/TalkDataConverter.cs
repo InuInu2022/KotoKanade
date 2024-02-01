@@ -39,7 +39,7 @@ public static partial class TalkDataConverter
 		TalkGlobalParam? globalParams = null,
 		decimal consonantOffset = 0.0m,
 		string castVersion = "",
-		double timeScaleFactor = 0.035
+		double timeScaleFactor = 0.030
 	)
 	{
 		var TemplateTalk = await TemplateLoader
