@@ -46,6 +46,13 @@ public static class StorageUtil
 			MimeTypes = [ "text/plain" ],
 			AppleUniformTypeIdentifiers = appleUniformTypeId,
 		};
+	private static readonly FilePickerFileType audioFiles =
+		new("Audio files")
+		{
+			Patterns = ["*.wav", "*.mp3", "*.aac", "*.ogg", "*.opus", "*.weba"],
+			MimeTypes = ["audio/*"],
+			AppleUniformTypeIdentifiers = appleUniformTypeId,
+		};
 	#endregion
 
 	/// <summary>
@@ -122,7 +129,11 @@ public static class StorageUtil
 			return default;
 		}
 
-		FilePickerFileType[] types = [FilePickerFileTypes.All];
+		FilePickerFileType[] types =
+		[
+			audioFiles,
+			FilePickerFileTypes.All,
+		];
 
 		var opt = new FilePickerOpenOptions()
 		{
@@ -148,7 +159,7 @@ public static class StorageUtil
 	GetPathesFromOpenedFiles(IReadOnlyList<IStorageFile?>? opened)
 	{
 		if(opened is not {Count: > 0}){
-			return ReadOnlyCollection<string>.Empty;
+			return [];
 		}
 		return opened
 			.Where(v => v is not null)
