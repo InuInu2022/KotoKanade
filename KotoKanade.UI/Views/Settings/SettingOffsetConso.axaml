@@ -11,9 +11,9 @@
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
              x:DataType="viewmodels:SliderViewModel"
              x:Class="KotoKanade.Views.SettingOffsetConso">
-    <UserControl.DataContext>
-        <viewmodels:SliderViewModel />
-    </UserControl.DataContext>
+  <UserControl.DataContext>
+      <viewmodels:SliderViewModel />
+  </UserControl.DataContext>
   <epoxy:EventBinder.Events>
       <epoxy:Event EventName="Loaded" Command="{Binding Ready}" />
   </epoxy:EventBinder.Events>
