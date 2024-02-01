@@ -38,7 +38,8 @@ public static partial class TalkDataConverter
 		double[]? emotions = null,
 		TalkGlobalParam? globalParams = null,
 		decimal consonantOffset = 0.0m,
-		string castVersion = ""
+		string castVersion = "",
+		double timeScaleFactor = 0.035
 	)
 	{
 		var TemplateTalk = await TemplateLoader
@@ -59,7 +60,12 @@ public static partial class TalkDataConverter
 			us = processed
 				.PhraseList?
 				.AsParallel().AsOrdered()
-				.Select(ToUtteranceWithoutLab(processed, rates, globalParams, splitNote, consonantOffset))
+				.Select(ToUtteranceWithoutLab(
+					processed,
+					rates,
+					globalParams,
+					splitNote,
+					consonantOffset))
 				.ToImmutableList()
 				?? []
 				;
@@ -104,7 +110,8 @@ public static partial class TalkDataConverter
 					rates,
 					globalParams,
 					splitNote,
-					consonantOffset))
+					consonantOffset,
+					timeScaleFactor))
 				.ToImmutableList()
 				?? []
 				;
@@ -290,7 +297,8 @@ public static partial class TalkDataConverter
 		double[]? emotionRates = null,
 		TalkGlobalParam? globalParams = null,
 		(bool isSplit, double threthold)? noteSplit = null,
-		decimal consonantOffset = 0.0m
+		decimal consonantOffset = 0.0m,
+		double timeScaleFactor = 0.035
 	)
 	{
 		//フレーズをセリフ化
@@ -332,7 +340,7 @@ public static partial class TalkDataConverter
 		//PIT
 		//楽譜データだけならnote高さから計算
 		//TODO:ccsやwavがあるなら解析して割当
-		var pitch = f0 is null ? GetPitches(notes, data) : GetF0(f0);
+		var pitch = f0 is null ? GetPitches(notes, data) : GetF0(f0, timeScaleFactor);
 
 		//フレーズ最初が子音の時のオフセット
 		var offset = 0.0m;
@@ -793,12 +801,15 @@ public static partial class TalkDataConverter
 		return sb.ToString();
 	}
 
-	private static string GetF0(List<decimal> f0)
+	private static string GetF0(
+		List<decimal> f0,
+		double timeScaleFactor = 0.035
+	)
 	{
 		var sb = new StringBuilder(100000);
 		for (int i = 0; i < f0.Count; i++)
 		{
-			var sf = (1.00 + i*0.035)
+			var sf = (1.00 + (i * timeScaleFactor))
 				.ToString("F2", CultureInfo.InvariantCulture);
 			var logF0 = Math.Log((double)f0[i]);
 			sb.Append(sf).Append(':').Append(logF0);
