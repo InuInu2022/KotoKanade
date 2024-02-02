@@ -73,7 +73,7 @@ public static class ScoreParser
 		return songData;
 	}
 
-	private static async Task ProcessPitchAndTimingFromWavAsync(
+	private static async ValueTask ProcessPitchAndTimingFromWavAsync(
 		string? wavPath,
 		bool useWav,
 		SongData songData
@@ -99,7 +99,7 @@ public static class ScoreParser
 		}
 	}
 
-	private static async Task LoadAndSetTimingListAsync(
+	private static async ValueTask LoadAndSetTimingListAsync(
 		string? labPath,
 		bool useLab,
 		bool useWav,
