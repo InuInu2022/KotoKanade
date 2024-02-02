@@ -186,7 +186,13 @@ public sealed class MainViewModel
 			}
 
 			var loadedSong = await ScoreParser
-				.ProcessCcsAsync(path, labPath, wavPath)
+				.ProcessCcsAsync(
+					path,
+					labPath,
+					wavPath,
+					IsUseLabFile,
+					IsUseWavFile
+				)
 				.ConfigureAwait(true);
 
 			var isSplit = IsSplitNotes;

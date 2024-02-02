@@ -27,7 +27,9 @@ public static class ScoreParser
 	public static async ValueTask<SongData> ProcessCcsAsync(
 		string path,
 		string? labPath = null,
-		string? wavPath = null
+		string? wavPath = null,
+		bool useLab = false,
+		bool useWav = false
 	)
 	{
 		var ccs = await SasaraCcs.LoadAsync(path)
@@ -60,7 +62,7 @@ public static class ScoreParser
 		};
 
 		//labファイルのパスを指定したとき
-		if (!string.IsNullOrEmpty(labPath))
+		if ((useLab || useWav) && !string.IsNullOrEmpty(labPath))
 		{
 			songData.Label = await SasaraLabel
 				.LoadAsync(labPath!)
@@ -70,7 +72,7 @@ public static class ScoreParser
 		}
 
 		//音声ファイルを指定したとき
-		if (!string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
+		if (useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
 		{
 			var mc = await MediaConverter
 				.FactoryAsync()
