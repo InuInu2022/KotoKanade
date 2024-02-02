@@ -62,16 +62,23 @@ public static class ScoreParser
 		};
 
 		//labファイルのパスを指定したとき
-		if ((useLab || useWav) && !string.IsNullOrEmpty(labPath))
-		{
-			songData.Label = await SasaraLabel
-				.LoadAsync(labPath!)
-				.ConfigureAwait(false);
-			songData.TimingList
-				= SplitLabByPhrase(songData.Label);
-		}
+		await LoadAndSetTimingListAsync(labPath, useLab, useWav, songData)
+			.ConfigureAwait(false);
 
 		//音声ファイルを指定したとき
+		await ProcessPitchAndTimingFromWavAsync(wavPath, useWav, songData)
+			.ConfigureAwait(false);
+
+		//中間データに解析・変換
+		return songData;
+	}
+
+	private static async Task ProcessPitchAndTimingFromWavAsync(
+		string? wavPath,
+		bool useWav,
+		SongData songData
+	)
+	{
 		if (useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
 		{
 			var mc = await MediaConverter
@@ -90,9 +97,23 @@ public static class ScoreParser
 				.ConfigureAwait(false);
 			songData.PitchList = SplitF0ByTiming(estimated, songData.TimingList);
 		}
+	}
 
-		//中間データに解析・変換
-		return songData;
+	private static async Task LoadAndSetTimingListAsync(
+		string? labPath,
+		bool useLab,
+		bool useWav,
+		SongData songData
+	)
+	{
+		if ((useLab || useWav) && !string.IsNullOrEmpty(labPath))
+		{
+			songData.Label = await SasaraLabel
+				.LoadAsync(labPath!)
+				.ConfigureAwait(false);
+			songData.TimingList
+				= SplitLabByPhrase(songData.Label);
+		}
 	}
 
 	private static ImmutableList<List<decimal>>
