@@ -774,10 +774,12 @@ public static partial class TalkDataConverter
 
 		if (text is null)
 		{
-			return new FullContextLab(string.Empty);
+			return new(string.Empty);
 		}
-
-		return new FullContextLab(string.Join('\n', text));
+		//キャッシュを残して保存
+		var ret = new FullContextLab(string.Join('\n', text));
+		fcLabelCache.TryAdd(lyrics, ret);
+		return ret;
 	}
 
 	/// <summary>
@@ -871,10 +873,13 @@ public static partial class TalkDataConverter
 
 	private static bool Check1stConsoPhoneme(Note n)
 	{
-		var result = GetPhonemeLabel(
-				GetFullContext(new List<Note>() { n })
-			).Split('|')[0].Split(',')[0];
-		return PhonemeUtil.IsConsonant(result) && !string.Equals(result, "N", StringComparison.Ordinal);
+		var result = GetPhonemeLabel(GetFullContext([n]))
+			.Split('|')[0]
+			.Split(',')[0];
+		return PhonemeUtil
+				.IsConsonant(result)
+			&& !string
+				.Equals(result, "N", StringComparison.Ordinal);
 	}
 
 	/// <summary>
@@ -898,9 +903,13 @@ public static partial class TalkDataConverter
 
 		var isCached = fcLabelCache
 			.TryGetValue(n.Lyric, out var fullContextLab);
+		if(fullContextLab is null){
+			isCached = false;
+		}
 		var fcLabel = isCached
 			? fullContextLab!
-			: GetFullContext(new List<Note> { n });
+			: GetFullContext([n]);
+		fcLabelCache.TryAdd(n.Lyric, fcLabel);
 
 		return fcLabel
 			.Lines
