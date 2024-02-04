@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -879,7 +880,7 @@ public static partial class TalkDataConverter
 	/// <summary>
 	/// フルコンテクストラベルのキャッシュ
 	/// </summary>
-	private static Dictionary<string, FullContextLab> fcLabelCache = [];
+	private static ConcurrentDictionary<string, FullContextLab> fcLabelCache = [];
 	private static readonly OpenJTalkAPI _jtalk = new();
 
 	private static int CountPhonemes(Note n)
