@@ -491,7 +491,7 @@ public static partial class TalkDataConverter
 	private static List<Note> ManageLongVowelSymbols(List<Note> p)
 	{
 		//いきなり「ー」で始まるときは「アー」に強制変換
-		if (p[0].Lyric?.StartsWith("ー", StringComparison.Ordinal) ?? false)
+		if (p[0].Lyric?.StartsWith('ー') ?? false)
 		{
 			p[0].Lyric = $"ア{p[0].Lyric}";
 		}
@@ -501,7 +501,7 @@ public static partial class TalkDataConverter
 		{
 			var lyric = p[i].Lyric;
 			if (lyric is null) continue;
-			if (!lyric.StartsWith("ー", StringComparison.Ordinal))
+			if (!lyric.StartsWith('ー'))
 			{
 				continue;
 			}
@@ -746,11 +746,11 @@ public static partial class TalkDataConverter
 			.Select(s => s
 				.Select(s2 => s2.Phoneme)
 				.Where(s2 => !string.Equals(s2, "sil", StringComparison.Ordinal)))
-			.Select(s => string.Join(",", s))
+			.Select(s => string.Join(',', s))
 			.Where(s => !string.IsNullOrEmpty(s))
 			;
 
-		return string.Join("|", splited);
+		return string.Join('|', splited);
 	}
 
 	[SuppressMessage("", "S1854")]
@@ -777,7 +777,7 @@ public static partial class TalkDataConverter
 			return new FullContextLab(string.Empty);
 		}
 
-		return new FullContextLab(string.Join("\n", text));
+		return new FullContextLab(string.Join('\n', text));
 	}
 
 	/// <summary>
@@ -838,11 +838,11 @@ public static partial class TalkDataConverter
 				len = isConso1stPh && offset > 0 ? [offset, .. len] : len;
 
 				var str = len.Select(v => v.ToString("N3", CultureInfo.InvariantCulture));
-				return string.Join(",", str);
+				return string.Join(',', str);
 			})
 			;
 		var s = string
-			.Join(",", timings);
+			.Join(',', timings);
 		return $"0.005,{s},0.125";
 	}
 
@@ -855,7 +855,7 @@ public static partial class TalkDataConverter
 					.Invariant($"{i+1}:{line.Length / 10000000:F3}")
 			)
 			;
-		return string.Join(",", s);
+		return string.Join(',', s);
 	}
 
 	private static bool CheckNextConsoPhoneme(List<Note> p, int i)
