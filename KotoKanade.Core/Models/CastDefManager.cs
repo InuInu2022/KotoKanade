@@ -12,7 +12,9 @@ public static class CastDefManager
 	private static Definitions? loadedDefinitions;
 
 	public static async ValueTask<Definitions>
-	GetAllCastDefsAsync()
+	GetAllCastDefsAsync(
+		CancellationToken token = default
+	)
 	{
 		if (loadedDefinitions is not null) { return loadedDefinitions; }
 
@@ -20,14 +22,16 @@ public static class CastDefManager
 			AppDomain.CurrentDomain.BaseDirectory,
 			"lib/data.json"
 		);
-		var jsonString = await Task
-			.Run(() => File.ReadAllText(path))
+		var jsonString = await File
+			.ReadAllTextAsync(path, token)
 			.ConfigureAwait(false);
 		var defs = Definitions.FromJson(jsonString);
 		if (defs is null)
 		{
+			#pragma warning disable PH_P007 // Unused Cancellation Token
 			await Console.Error.WriteLineAsync($"invalid cast definitions data: {path}")
 				.ConfigureAwait(false);
+			#pragma warning restore PH_P007 // Unused Cancellation Token
 			ThrowInvalidException(path);
 		}
 		loadedDefinitions = defs;
