@@ -12,7 +12,7 @@ public static class CastDefManager
 	private static Definitions? loadedDefinitions;
 
 	public static async ValueTask<Definitions>
-	GetCastDefinitionsAsync()
+	GetAllCastDefsAsync()
 	{
 		if (loadedDefinitions is not null) { return loadedDefinitions; }
 
@@ -41,7 +41,7 @@ public static class CastDefManager
 	}
 
 	public static async ValueTask<Cast>
-	GetCastDefAsync(string castName)
+	GetSingleCastDefAsync(string castName)
 	{
 		if (_cast is not null &&
 			Array.Exists(_cast.Names, n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
@@ -52,7 +52,7 @@ public static class CastDefManager
 		}
 
 		var defs = await CastDefManager
-			.GetCastDefinitionsAsync()
+			.GetAllCastDefsAsync()
 			.ConfigureAwait(false);
 
 		_cast = Array.Find(defs.Casts,
@@ -72,7 +72,7 @@ public static class CastDefManager
 		string version
 	)
 	{
-		var cast = await GetCastDefAsync(castName)
+		var cast = await GetSingleCastDefAsync(castName)
 			.ConfigureAwait(false);
 
 		var selectedVer = cast.Versions.Contains(version, StringComparer.Ordinal)
@@ -92,11 +92,11 @@ public static class CastDefManager
 		{
 			//感情数を調べる
 			var cast = await CastDefManager
-				.GetCastDefAsync(castName)
+				.GetSingleCastDefAsync(castName)
 				.ConfigureAwait(false);
 			rates = cast
 				.Emotions
-				.Select(e => 0.00)
+				.Select(_ => 0.00)
 				.ToArray();
 			//とりあえず最初の感情だけMAX
 			rates[0] = 1.00;

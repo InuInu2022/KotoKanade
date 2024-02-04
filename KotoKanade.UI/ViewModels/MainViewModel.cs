@@ -239,7 +239,7 @@ public sealed class MainViewModel
 		async () =>
 		{
 			var defs = await CastDefManager
-				.GetCastDefinitionsAsync()
+				.GetAllCastDefsAsync()
 				.ConfigureAwait(true);
 			var targets = defs
 				.Casts
