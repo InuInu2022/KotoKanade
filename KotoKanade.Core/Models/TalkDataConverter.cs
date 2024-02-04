@@ -885,7 +885,7 @@ public static partial class TalkDataConverter
 	/// <summary>
 	/// フルコンテクストラベルのキャッシュ
 	/// </summary>
-	private static ConcurrentDictionary<string, FullContextLab> fcLabelCache = [];
+	private static readonly ConcurrentDictionary<string, FullContextLab> fcLabelCache = [];
 	private static readonly OpenJTalkAPI _jtalk = new();
 
 	private static int CountPhonemes(Note n)
