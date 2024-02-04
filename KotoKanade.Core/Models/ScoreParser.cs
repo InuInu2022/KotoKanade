@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using LibSasara;
@@ -24,7 +26,8 @@ public static class ScoreParser
 	/// </remarks>
 	/// <param name="path"></param>
 	/// <returns></returns>
-	public static async ValueTask<SongData> ProcessCcsAsync(
+	public static async ValueTask<SongData>
+	ProcessCcsAsync(
 		string path,
 		string? labPath = null,
 		string? wavPath = null,
@@ -57,8 +60,6 @@ public static class ScoreParser
 			//1note=1uttranceは重いはず
 			//なので休符で区切ったphrase単位に
 			PhraseList = SplitByPhrase(song, 0),
-
-			//TODO:tmgやf0を渡す
 		};
 
 		//labファイルのパスを指定したとき
@@ -73,33 +74,72 @@ public static class ScoreParser
 		return songData;
 	}
 
-	private static async ValueTask ProcessPitchAndTimingFromWavAsync(
+	// caches
+	static readonly ConcurrentDictionary<string, (int, int, int, double[])> WavCache = [];
+	static readonly ConcurrentDictionary<string, WorldParam> EstimatedCache = [];
+
+	private static async ValueTask
+	ProcessPitchAndTimingFromWavAsync(
 		string? wavPath,
 		bool useWav,
 		SongData songData
 	)
 	{
+		//TODO: optimization
 		if (useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
 		{
+				var sw = new Stopwatch();
+				Debug.WriteLine($" ★★Start: {Path.GetFileName(wavPath)}");
+				sw.Start();
 			var mc = await MediaConverter
 				.FactoryAsync()
 				.ConfigureAwait(false);
+				sw.Stop();
+				Debug.WriteLine($" ★★ Factory {sw.ElapsedMilliseconds}");
+				sw.Reset();
+				sw.Start();
 			var wav = await mc
 				.ConvertAsync(wavPath)
 				.ConfigureAwait(false);
+				sw.Stop();
+				Debug.WriteLine($" ★★ Convert {sw.ElapsedMilliseconds}");
+				sw.Reset();
+				sw.Start();
 			//estimate by world
-			var (fs, _, len, x) = await WorldUtil
-				.ReadWavAsync(wav.Path)
-				.ConfigureAwait(false);
+			var hasCached = WavCache
+				.TryGetValue(wavPath, out (int, int, int, double[]) value);
+			var (fs, nbit, len, x) = hasCached
+				? value
+				: await WorldUtil
+					.ReadWavAsync(wav.Path)
+					.ConfigureAwait(false);
+			if(!hasCached){
+				WavCache.TryAdd(wavPath, (fs, nbit, len, x));
+			}
+				sw.Stop();
+				Debug.WriteLine($" ★★ ReadWav {sw.ElapsedMilliseconds}");
+				sw.Reset();
+				sw.Start();
 			var wp = new WorldParam(fs);
-			var estimated = await WorldUtil
-				.EstimateF0Async(x, len, wp)
-				.ConfigureAwait(false);
-			songData.PitchList = SplitF0ByTiming(estimated, songData.TimingList);
+			var hasCachedEstimated = EstimatedCache
+				.TryGetValue(wavPath, out var cachedEstimated);
+			var estimated = hasCachedEstimated
+				? cachedEstimated
+				: await WorldUtil
+					.EstimateF0Async(x, len, wp)
+					.ConfigureAwait(false);
+			if(!hasCachedEstimated){
+				EstimatedCache.TryAdd(wavPath, estimated!);
+			}
+				sw.Stop();
+				Debug.WriteLine($" ★★ Estimate {sw.ElapsedMilliseconds}");
+				sw.Reset();
+			songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList);
 		}
 	}
 
-	private static async ValueTask LoadAndSetTimingListAsync(
+	private static async ValueTask
+	LoadAndSetTimingListAsync(
 		string? labPath,
 		bool useLab,
 		bool useWav,
