@@ -25,9 +25,6 @@ namespace KotoKanade.Core.Models;
 
 public static partial class TalkDataConverter
 {
-	[ThreadStatic]
-	private static Cast? _defs;
-
 	private static readonly SortedDictionary<int, decimal> defaultTempo = new() { { 0, 120 } };
 
 	public static async ValueTask GenerateFileAsync(
@@ -47,7 +44,8 @@ public static partial class TalkDataConverter
 			.ConfigureAwait(true);
 		await InitOpenJTalkAsync()
 			.ConfigureAwait(true);
-		var rates = await CulcEmoRatesAsync(castName, emotions)
+		var rates = await CastDefManager
+			.CulcEmoRatesAsync(castName, emotions)
 			.ConfigureAwait(true);
 
 		processed.TempoList ??= defaultTempo;
@@ -77,7 +75,7 @@ public static partial class TalkDataConverter
 				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
 
 			us = zipped?
-				//.AsParallel().AsOrdered()
+				.AsParallel().AsOrdered()
 				.Select( tuple => ToUtteranceCore(
 					processed,
 					tuple.note,
@@ -101,7 +99,7 @@ public static partial class TalkDataConverter
 					(tuple, f0) => (tuple.note, tuple.LabLine, f0));
 
 			us = zipped?
-				//.AsParallel().AsOrdered()
+				.AsParallel().AsOrdered()
 				.Select( tuple => ToUtteranceCore(
 					processed,
 					tuple.note,
@@ -132,7 +130,8 @@ public static partial class TalkDataConverter
 
 		if (castName is not null)
 		{
-			var voice = await GetVoiceByCastNameAsync(castName, castVersion)
+			var voice = await CastDefManager
+				.GetVoiceByCastNameAsync(castName, castVersion)
 				.ConfigureAwait(false);
 			tstprj = tstprj
 				.ReplaceVoiceAsPrj(voice);
@@ -141,107 +140,6 @@ public static partial class TalkDataConverter
 		await LibVoiSona
 			.SaveAsync(exportPath, tstprj.Data.ToArray())
 			.ConfigureAwait(false);
-	}
-
-	private static async Task<double[]?> CulcEmoRatesAsync(string? castName, double[]? emotions)
-	{
-		double[]? rates = null;
-		if (castName is not null && emotions is null)
-		{
-			//感情数を調べる
-			var cast = await GetCastDefAsync(castName)
-				.ConfigureAwait(false);
-			rates = cast
-				.Emotions
-				.Select(e => 0.00)
-				.ToArray();
-			//とりあえず最初の感情だけMAX
-			rates[0] = 1.00;
-		}
-		if (emotions is not null)
-		{
-			//感情比率設定可能に
-			if (emotions.Length == 0)
-			{
-				await Console.Error.WriteLineAsync($"emotion {emotions} is length 0.")
-					.ConfigureAwait(false);
-			}
-			rates = emotions;
-		}
-
-		return rates;
-	}
-
-	private static async ValueTask<Voice> GetVoiceByCastNameAsync(
-		string castName,
-		string version
-	)
-	{
-		var cast = await GetCastDefAsync(castName)
-			.ConfigureAwait(false);
-
-		var selectedVer = cast.Versions.Contains(version, StringComparer.Ordinal)
-			? version : cast.Versions[^1];
-
-		return new Voice(
-			Array.Find(cast.Names, n => n.Lang == Lang.English)?.Display ?? "error",
-			cast.Cname,
-			selectedVer);
-	}
-
-	[ThreadStatic]
-	private static Definitions? loadedDefinitions;
-
-	public static async ValueTask<Definitions> GetCastDefinitionsAsync()
-	{
-		if (loadedDefinitions is not null) { return loadedDefinitions; }
-
-		var path = Path.Combine(
-			AppDomain.CurrentDomain.BaseDirectory,
-			"lib/data.json"
-		);
-		var jsonString = await Task
-			.Run(() => File.ReadAllText(path))
-			.ConfigureAwait(false);
-		var defs = Definitions.FromJson(jsonString);
-		if (defs is null)
-		{
-			await Console.Error.WriteLineAsync($"invalid cast definitions data: {path}")
-				.ConfigureAwait(false);
-			ThrowInvalidException(path);
-		}
-		loadedDefinitions = defs;
-		return defs;
-
-		[DoesNotReturn]
-		static void ThrowInvalidException(string path)
-		{
-			throw new InvalidDataException($"invalid cast definitions data: {path}");
-		}
-	}
-
-	public static async ValueTask<Cast> GetCastDefAsync(string castName)
-	{
-		if (_defs is not null &&
-			Array.Exists(_defs.Names, n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
-		)
-		{
-			//読み込み済みならそのまま返す
-			return _defs;
-		}
-
-		var defs = await GetCastDefinitionsAsync()
-			.ConfigureAwait(false);
-
-		_defs = Array.Find(defs.Casts,
-				c => c.Product == Product.VoiSona
-				&& c.Category == CevioCasts.Category.TextVocal
-				&& Array.Exists(c.Names, n => string.Equals(n.Display, castName, StringComparison.OrdinalIgnoreCase))
-			)
-			?? throw new ArgumentException(
-				$"cast name {castName} is not found in cast data. please check https://github.com/InuInu2022/cevio-casts/ ",
-				nameof(castName));
-		return _defs;
 	}
 
 	/// <summary>

@@ -238,7 +238,7 @@ public sealed class MainViewModel
 	private Func<ValueTask> ReadyFunc =>
 		async () =>
 		{
-			var defs = await TalkDataConverter
+			var defs = await CastDefManager
 				.GetCastDefinitionsAsync()
 				.ConfigureAwait(true);
 			var targets = defs
