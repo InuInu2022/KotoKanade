@@ -2,9 +2,6 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using FluentAssertions;
-using KotoKanade.Core.Models;
-using LibSasara.Model;
 
 namespace Core;
 

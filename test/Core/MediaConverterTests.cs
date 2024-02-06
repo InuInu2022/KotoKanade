@@ -1,11 +1,5 @@
-using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using FluentAssertions;
-using KotoKanade.Core.Models;
-using LibSasara.Model;
+
 using static KotoKanade.Core.Models.MediaConverter;
 
 namespace Core;
