@@ -15,7 +15,7 @@
   <ui:SettingsExpander
     x:Name="ExportTalkVoiceSettings"
     Header="Talk voice library cast option"
-    IconSource="Setting"
+    IconSource="Contact"
     Description="歌わせるトークボイスと設定"
     >
     <ui:SettingsExpander.Footer>

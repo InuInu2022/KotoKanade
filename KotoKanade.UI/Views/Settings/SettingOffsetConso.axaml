@@ -21,7 +21,7 @@
   <ui:SettingsExpander
     Header="Consonant offset sec."
     Description="子音部分をノートの開始時間からオフセットします。"
-    IconSource="Setting"
+    IconSource="DockLeft"
     Name="ConsonantOffsetSettings"
     >
       <ui:SettingsExpander.Footer>
