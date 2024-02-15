@@ -15,6 +15,7 @@ using KotoKanade.Core.Util;
 using LibSasara;
 using LibSasara.Model;
 using LibSasara.Model.FullContextLabel;
+using LibSasara.Model.Serialize;
 using LibSasara.VoiSona;
 using LibSasara.VoiSona.Model.Talk;
 
@@ -24,8 +25,13 @@ using WanaKanaNet;
 
 namespace KotoKanade.Core.Models;
 
-public static partial class TalkDataConverter
+public sealed partial class TalkDataConverter
 {
+	public TalkDataConverter()
+	{
+	}
+
+	private const int scaleLabLenToMsec = 10000;
 	private static readonly SortedDictionary<int, decimal> defaultTempo = new() { { 0, 120 } };
 
 	public static async ValueTask GenerateFileAsync(
@@ -329,7 +335,8 @@ public static partial class TalkDataConverter
 		return nu;
 	}
 
-	private static (List<Note>, List<LabLine>?) SplitNoteIfSetOption(
+	private static (List<Note>, List<LabLine>?)
+	SplitNoteIfSetOption(
 		SongData data,
 		(bool isSplit, double threthold)? noteSplit,
 		List<Note> notes,
@@ -338,54 +345,125 @@ public static partial class TalkDataConverter
 	{
 		var phonemeIndex = 0;
 		//TODO: labも一緒に分割
-		var n = notes.Select((n,i) =>
+		//ノート単位で計算
+		var retNotes = notes.Select((n,i) =>
 		{
-			var dur = LibSasara.SasaraUtil
-				.ClockToTimeSpan(
-					n.Duration,
-					data.TempoList ?? defaultTempo)
-				.TotalMilliseconds;
+			// 時間をミリ秒で計算
+			var dur = labLines is null
+				//ノートの長さから計算
+				? LibSasara.SasaraUtil
+					.ClockToTimeSpan(
+						n.Duration,
+						data.TempoList ?? defaultTempo)
+					.TotalMilliseconds
+				//音素から
+				: GetDurationByLabLine(n, phonemeIndex)
+				;
+			// 分割閾値の設定
 			var th = noteSplit?.threthold ?? 100000;
 			th = Math.Max(th, 100);
 
+			// 閾値未満の場合、分割なし
 			if (dur < th) {
 				if (labLines is not null)
 				{
-					phonemeIndex += GetPhonemeLabel(GetFullContext([n]))
-						.Split([",","|"], StringSplitOptions.None)
-						.Length;
+					phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
 				}
 				return n;
 			}
 
-			var spCount = (int)Math.Floor(dur / th) + 1;
+			//音素最小値
+			const double minPhLen = 0.025;
 
-			var ph = GetPhonemeLabel(GetFullContext([n]));
-			var sph = ph.Split('|');
-			var add = spCount - sph.Length;
+			// 分割数の計算
+			//lab無しの場合
+			if(labLines is null)
+			{
+				var spCount = (int)Math.Floor(dur / th) + 1;
+				var ph = GetPhonemeLabel(GetFullContext([n]));
+				var sph = ph.Split('|');
+				var add = spCount - sph.Length;
 
-			// If no additional phonemes are needed, return the original note
-			if (add <= 0) {
-				if (labLines is not null)
+				// 追加音素不要なら元のノート返却
+				if (add <= 0) {
+					phonemeIndex += GetPhLen(ph);
+					return n;
+				}
+
+				// 音素分割拡張
+				var (sp, ln) = ExtendPhonemesWithPattern(sph, add, labLines, phonemeIndex);
+				sph = sp;
+				labLines = ln;
+				// 音素と歌詞の更新
+				n.Phonetic = string
+					.Join(',', sph);
+				n.Lyric = GetPronounce(string.Join('|', sph));
+				phonemeIndex += n.Phonetic.Split(',').Length;
+			}
+			//labありの場合
+			else
+			{
+				var lines = GetSpanLabLines(labLines, n, phonemeIndex);
+				var result = lines
+					.Select(ln =>
+					{
+						//分割しても音素最小値より大きくなるなら分割する
+						var msecLen = ln.Length / scaleLabLenToMsec;
+						var isNeedSplit = msecLen > th && msecLen* 2 > minPhLen;
+						return (IsNeedSplit: isNeedSplit, Line: ln);
+					})
+					;
+				// 追加音素不要なら元のノート返却
+				if(result.All(v => !v.IsNeedSplit))
 				{
-					phonemeIndex += ph.Split([",","|"], StringSplitOptions.None).Length;
+					phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
+					return n;
 				}
-				return n;
-			}
+				// 音素分割拡張
+				var sph = GetPhonemeLabel(GetFullContext([n])).Split('|');
+				var (sp, ln) = ExtendLabLines(sph, result, labLines, th, phonemeIndex);
+				sph = sp;
+				labLines = ln;
+				// 音素と歌詞の更新
+				n.Phonetic = string
+					.Join(',', sph);
+				n.Phonetic = n.Phonetic.Replace("|", "", StringComparison.Ordinal);
 
-			// 音素分割拡張
-			var (sp, ln) = ExtendPhonemesWithPattern(sph, add, labLines, phonemeIndex);
-			sph = sp;
-			labLines = ln;
-			n.Phonetic = string
-				.Join(',', sph);
-			n.Lyric = GetPronounce(string.Join('|', sph));
-			phonemeIndex += n.Phonetic.Split(',').Length;
+				var s = string.Join(',', sph);
+				s = s
+					.Replace(",|", "|")
+					.Replace("|,", ",");
+				n.Lyric = GetPronounce(s);
+				phonemeIndex += n.Phonetic.Split(',').Length;
+			}
+			// 分割後のnotes返す
 			return n;
 		})
 		.ToList()
 		;
-		return (n, labLines);
+		return (retNotes, labLines);
+
+		double GetDurationByLabLine(Note note, int phonemeIndex)
+		{
+			var target = GetSpanLabLines(labLines, note, phonemeIndex);
+			if(target is []){ return 0.0; }
+
+			var start = target[0].From;
+			var last = target[^1].To;
+			return (last - start)/scaleLabLenToMsec;
+		}
+		static List<LabLine> GetSpanLabLines(List<LabLine> labLines, Note note, int phonemeIndex)
+		{
+			var ph = GetPhonemeLabel(GetFullContext([note]));
+			int phLen = GetPhLen(ph);
+			var s = phonemeIndex;
+			s = Math.Max(s, 0);
+			var e = s + phLen;
+			e = Math.Min(e, labLines.Count);
+			return labLines[s..e];
+		}
+		static int GetPhLen(string ph)
+			=> ph.Split([",", "|"], StringSplitOptions.None).Length;
 	}
 
 	private static (string[] ph,List<LabLine>? lines) ExtendPhonemesWithPattern(
@@ -395,19 +473,22 @@ public static partial class TalkDataConverter
 		int phonemeIndex
 	)
 	{
-		var check = sph[^1].Split(',')[^1];
+		//最後の音素が対象
+		var target = sph[^1].Split(',')[^1];
+		var targetIndex = sph.Length;
 		phonemeIndex += sph
 			.Sum(s => s.Split(",").Length) - 1;
 		phonemeIndex = phonemeIndex < 0 ? 0 : phonemeIndex;
-		var resultPhonemes = check switch
+		var resultPhonemes = target switch
 		{
 			//ん
 			"N" => add > 1 ?
 			[
-				.. sph,
+				.. sph[..targetIndex],
 				.. Enumerable
 					.Repeat("u", add - 1)
 					.Append("N"),
+				.. sph[targetIndex..],
 			]
 			: sph,
 			//っ
@@ -417,8 +498,9 @@ public static partial class TalkDataConverter
 			//それ以外（母音）
 			string s =>
 			[
-				.. sph,
+				.. sph[..targetIndex],
 				.. Enumerable.Repeat(s, add),
+				.. sph[targetIndex..],
 			],
 		};
 		if(labLines is null){
@@ -426,7 +508,7 @@ public static partial class TalkDataConverter
 		}
 
 		//split lablines
-		switch (check)
+		switch (target)
 		{
 			case "N":
 			{
@@ -469,6 +551,167 @@ public static partial class TalkDataConverter
 			}
 		}
 		return (resultPhonemes, labLines);
+	}
+
+	private static (string[] ph, List<LabLine> lines)
+	ExtendLabLines(
+		string[] moras,
+		IEnumerable<(bool IsNeedSplit, LabLine Line)> targetLines,
+		List<LabLine> baseLabLines,
+		double threthold,
+		int currentPhIndex
+	)
+	{
+		//事前計算した音素リストから対象を分割拡張
+		var flatMoras = moras
+			.Select((m, i) => m
+				.Split(',', StringSplitOptions.None)
+				.Select(v => (Index: i, Moras: m, Phoneme: v)))
+			.SelectMany(m => m);
+		Debug.Assert(flatMoras.Take(targetLines.Count() + 1).Count() == targetLines.Count());
+
+		var combined = targetLines
+			.Zip(flatMoras, (a, b) => (
+				a.IsNeedSplit,
+				a.Line,
+				b.Index,
+				b.Moras,
+				b.Phoneme
+			));
+			//TODO: [d,o]を[d][o]に
+		var result = combined
+			.Select((t) =>
+			{
+				if (!t.IsNeedSplit) {return [(t.Line,t.Moras,t.Index)];}
+
+				int div = (int)Math.Floor(t.Line.Length / scaleLabLenToMsec / threthold) + 1;
+				var line = PatternSplitLine((t.IsNeedSplit, t.Line), div);
+				var mora = PatternSplitMora((t.Line.Phoneme, t.Moras), div);
+
+				return line
+					.Zip(mora, (a, b) => (Line: a, Moras: b, Index:t.Index));
+				//return line;
+			})
+			.ToList()
+			;
+		var flat = result.SelectMany(v => v);
+		//TODO: fix
+		var resultPhonemes = flat
+			.Select(v => v.Line.Phoneme)	//moraだと多い
+			.Select(v => v switch
+			{
+				"a" or "i" or "u" or "e" or "o" or "N"
+					=> $"{v}|",
+				_ => v,
+			})
+			.ToArray()
+			;
+		//var middle = flat.Select(v => v.Line);
+		var afterIdx = currentPhIndex + combined.Count();
+		baseLabLines =
+		[
+			..baseLabLines[..currentPhIndex],
+			..flat.Select(v=>v.Line),
+			..baseLabLines[afterIdx..],
+		];
+
+		return (resultPhonemes, baseLabLines);
+	}
+
+	/// <summary>
+	/// moraをパターン別に分割
+	/// </summary>
+	/// <seealso cref="PatternSplitLine(ValueTuple{bool, LabLine}, int)"/>
+	private static IEnumerable<string>
+	PatternSplitMora
+	(
+		(string Phoneme, string Mora) t,
+		int div
+	)
+	{
+		IEnumerable<string> ret = [t.Phoneme];
+		switch (t.Phoneme)
+		{
+			case "N":
+			{
+				//長すぎる「ん」は間に[u]を分割挿入
+				//mora
+				var moras = Enumerable
+					.Repeat("u", div)
+					.ToArray();
+				moras[0] = "N";
+				moras[^1] = "N";
+				ret = moras;
+				break;
+			}
+			case "cl":
+			{
+				//TODO: cl pattern
+				//長すぎる「っ」は母音を前に付与
+				break;
+			}
+			case "xx" or "sil" or "pau":
+				//do nothing
+				break;
+			case string s:
+			{
+				var moras = Enumerable
+					.Repeat(s, div)
+					.ToArray();
+				moras[0] = t.Phoneme;
+				ret = moras;
+				break;
+			}
+		}
+		return ret;
+	}
+
+	/// <summary>
+	/// <see cref="LabLine"/>をパターン別に分割
+	/// </summary>
+	/// <seealso cref="PatternSplitMora(ValueTuple{string, string}, int)"/>
+	private static IEnumerable<LabLine>
+	PatternSplitLine(
+		(bool IsNeedSplit, LabLine Line) t,
+		int div
+	)
+	{
+		IEnumerable<LabLine> ret = [t.Line];
+		switch (t.Line.Phoneme)
+		{
+			case "N":
+			{
+				//長すぎる「ん」は間に[u]を分割挿入
+
+				//lab
+				var lines = DivideLabLine(t.Line, div)
+					.Select(ln => new LabLine(ln.From, ln.To, "u"))
+					.ToList()
+					;
+				lines[0] = new(lines[0].From, lines[0].To, "N");
+				lines[^1] = new(lines[^1].From, lines[^1].To, "N");
+
+				ret = lines.AsEnumerable();
+				break;
+			}
+			case "cl":
+			{
+				//TODO: cl pattern
+				//長すぎる「っ」は母音を前に付与
+				break;
+			}
+			case "xx" or "sil" or "pau":
+				//do nothing
+				break;
+			case string:
+			{
+				//母音は単純分割
+				var lines = DivideLabLine(t.Line, div);
+				ret = lines;
+				break;
+			}
+		}
+		return ret;
 	}
 
 	private static IEnumerable<LabLine> DivideLabLine(LabLine line, int n)
