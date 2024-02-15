@@ -244,7 +244,7 @@ public sealed partial class TalkDataConverter
 		var timing = labLines is null ? "" : GetDurationsFromLab(labLines);
 		//PIT
 		//楽譜データだけならnote高さから計算
-		//TODO:ccsやwavがあるなら解析して割当
+		//wavがあるなら解析して割当
 		var pitch = f0 is null ? GetPitches(notes, data) : GetF0(f0, timeScaleFactor);
 
 		//フレーズ最初が子音の時のオフセット
