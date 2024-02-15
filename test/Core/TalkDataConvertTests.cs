@@ -169,6 +169,16 @@ public class TalkDataConvertTests
 
 		result
 			.Should().BeEquivalentTo(expect);
+
+		var tdc = new TalkDataConverter();
+		var r2 = DivideLabLineInner(tdc, actual, n);
+		r2.Should().BeEquivalentTo(expect);
+
+		[UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = nameof(DivideLabLine))]
+    	static extern IEnumerable<LabLine> DivideLabLineInner(
+			TalkDataConverter tdc,
+			LabLine labLine,
+			int intValue);
 	}
 
 	private static TRet? CallMethodWithReturn<TRet, TArg>(
