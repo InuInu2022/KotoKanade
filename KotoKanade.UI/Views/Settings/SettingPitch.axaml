@@ -32,7 +32,7 @@
           <Slider
             Name="timeScaleFactorSlider"
             Minimum="0.005"
-            Maximum="0.050"
+            Maximum="0.100"
             Value="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).TimeScaleFactor}"
             TickFrequency="0.001"
             IsSnapToTickEnabled="True"
