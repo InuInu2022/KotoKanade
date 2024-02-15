@@ -12,8 +12,8 @@
 
 ---
 
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![C Sharp 12](https://img.shields.io/badge/C%20Sharp-12-4FC08D.svg?logo=csharp&style=flat)](https://learn.microsoft.com/ja-jp/dotnet/csharp/) ![.NET 8.0](https://img.shields.io/badge/%20.NET-8.0-blue.svg?logo=dotnet&style=flat)
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/inuinu2022/KotoKanade?include_prereleases&label=%F0%9F%9A%80release) ![GitHub all releases](https://img.shields.io/github/downloads/InuInu2022/KotoKanade/total?color=green&label=%E2%AC%87%20downloads) ![GitHub Repo stars](https://img.shields.io/github/stars/InuInu2022/KotoKanade?label=%E2%98%85&logo=github)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![C Sharp 12](https://img.shields.io/badge/C%20Sharp-12-4FC08D.svg?logo=csharp&style=flat)](https://learn.microsoft.com/ja-jp/dotnet/csharp/) ![.NET 8.0](https://img.shields.io/badge/%20.NET-8.0-blue.svg?logo=dotnet&style=flat) [![Made with Avalonia UI](https://img.shields.io/badge/Made_with-Avalonia_UI-blue.svg?logo=&style=flat)](https://avaloniaui.net/)
+![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/inuinu2022/KotoKanade?include_prereleases&label=%F0%9F%9A%80release) ![GitHub all releases](https://img.shields.io/github/downloads/InuInu2022/KotoKanade/total?color=green&label=%E2%AC%87%20downloads) ![GitHub Repo stars](https://img.shields.io/github/stars/InuInu2022/KotoKanade?label=%E2%98%85&logo=github&style=flat)
 [![VoiSona Talk](https://img.shields.io/badge/VoiSona_Talk-1.1-53abdb.svg?logo=&style=flat)](https://voisona.com/talk/)
 
 ## Video
@@ -42,7 +42,11 @@
 
 ## Sample
 
-※旧バージョンで制作したものです
+
+- [【VoiSonaTalk歌唱】Pretender / Official髭男dism【cover/タカハシ/KotoKanade】](https://youtu.be/-GHdryTwpBM)
+- [[タカハシ] １／６の夢旅人２００２ アカペラ / 樋口　了一 [cover/test/VoiSona Talk タカハシ]](https://youtu.be/N3fp7G-e4so)
+
+※以下は旧バージョンで制作したものです
 
 - [【VoiSona Talk歌唱】いかないで / 想太 (offset ver.2)【すずきつづみcover】](https://utaloader.net/music/20231229200356536133)
 - [【VoiSona Talk歌唱】いかないで / 想太 【タカハシcover】](https://utaloader.net/music/20231229204427612049)
