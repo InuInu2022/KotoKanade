@@ -16,7 +16,9 @@ indent_style = space
 indent_size = 2
 dotnet_diagnostic.Proj0005.severity = none
 
-[*.cs]
+[*.{cs,csx}]
+csharp_space_after_cast = true
+csharp_indent_case_contents_when_block = false
 dotnet_diagnostic.MA0026.severity = suggestion
 dotnet_diagnostic.S1135.severity = suggestion
 dotnet_diagnostic.MA0048.severity = suggestion
