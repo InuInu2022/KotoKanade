@@ -55,72 +55,14 @@ public sealed partial class TalkDataConverter
 			.CulcEmoRatesAsync(castName, emotions)
 			.ConfigureAwait(true);
 
-		processed.TempoList ??= defaultTempo;
-		var sw = new Stopwatch();
-		sw.Start();
-
-		ImmutableList<Utterance> us;
-		if (processed.TimingList?.Any() is not true)
-		{
-			us = processed
-				.PhraseList?
-				.AsParallel().AsOrdered()
-				.Select(ToUtteranceWithoutLab(
-					processed,
-					rates,
-					globalParams,
-					splitNote,
-					consonantOffset))
-				.ToImmutableList()
-				?? []
-				;
-		}
-		else if(processed.PitchList?.Any() is not true)
-		{
-			var zipped = processed
-				.PhraseList?
-				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
-
-			us = zipped?
-				.AsParallel().AsOrdered()
-				.Select( tuple => ToUtteranceCore(
-					processed,
-					tuple.note,
-					tuple.LabLine,
-					null,
-					rates,
-					globalParams,
-					splitNote,
-					consonantOffset))
-				.ToImmutableList()
-				?? []
-				;
-		}else{
-			var zipped = processed
-				.PhraseList?
-				.Zip(
-					processed.TimingList,
-					(note, LabLine) => (note, LabLine))
-				.Zip(
-					processed.PitchList,
-					(tuple, f0) => (tuple.note, tuple.LabLine, f0));
-
-			us = zipped?
-				.AsParallel().AsOrdered()
-				.Select( tuple => ToUtteranceCore(
-					processed,
-					tuple.note,
-					tuple.LabLine,
-					tuple.f0,
-					rates,
-					globalParams,
-					splitNote,
-					consonantOffset,
-					timeScaleFactor))
-				.ToImmutableList()
-				?? []
-				;
-		}
+		var us = ProcessSongData(
+			processed,
+			rates,
+			globalParams,
+			splitNote,
+			consonantOffset,
+			timeScaleFactor
+		);
 
 		if (us is null)
 		{
@@ -131,9 +73,6 @@ public sealed partial class TalkDataConverter
 
 		var tstprj = TemplateTalk
 			.ReplaceAllUtterancesAsPrj(us);
-
-		sw.Stop();
-		Debug.WriteLine($"★processed: {sw.ElapsedMilliseconds} msec.");
 
 		if (castName is not null)
 		{
@@ -147,6 +86,84 @@ public sealed partial class TalkDataConverter
 		await LibVoiSona
 			.SaveAsync(exportPath, tstprj.Data.ToArray())
 			.ConfigureAwait(false);
+	}
+
+	private static ImmutableList<Utterance>
+	ProcessSongData(
+		SongData processed,
+		double[]? emotionRates,
+		TalkGlobalParam? globalParams,
+		(bool isSplit, double threthold)? splitNote,
+		decimal consonantOffset,
+		double timeScaleFactor
+	)
+	{
+		processed.TempoList ??= defaultTempo;
+		var sw = new Stopwatch();
+		sw.Start();
+
+		ImmutableList<Utterance> us;
+		if (processed.TimingList?.Any() is not true)
+		{
+			us = processed
+				.PhraseList?
+				.AsParallel().AsOrdered()
+				.Select(ToUtteranceWithoutLab(
+					processed,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.ToImmutableList()
+				?? ImmutableList<Utterance>.Empty;
+		}
+		else if (processed.PitchList?.Any() is not true)
+		{
+			var zipped = processed
+				.PhraseList?
+				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
+
+			us = zipped?
+				.AsParallel().AsOrdered()
+				.Select(tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					null,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.ToImmutableList()
+				?? ImmutableList<Utterance>.Empty;
+		}
+		else
+		{
+			var zipped = processed
+				.PhraseList?
+				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine))
+				.Zip(processed.PitchList, (tuple, f0) => (tuple.note, tuple.LabLine, f0));
+
+			us = zipped?
+				.AsParallel().AsOrdered()
+				.Select(tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					tuple.f0,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset,
+					timeScaleFactor))
+				.ToImmutableList()
+				?? ImmutableList<Utterance>.Empty;
+		}
+
+		sw.Stop();
+		Debug.WriteLine($"★processed: {sw.ElapsedMilliseconds} msec.");
+
+		return us;
 	}
 
 	/// <summary>
