@@ -262,7 +262,9 @@ public sealed partial class TalkDataConverter
 		//PIT
 		//楽譜データだけならnote高さから計算
 		//TODO:ccsやwavがあるなら解析して割当
-		var pitch = f0 is null ? GetPitches(notes, data) : GetF0(f0, timeScaleFactor);
+		var pitch = f0 is null
+			? GetPitches(notes, data)
+			: GetF0(f0, timeScaleFactor);
 
 		//フレーズ最初が子音の時のオフセット
 		var offset = 0.0m;
@@ -965,6 +967,8 @@ public sealed partial class TalkDataConverter
 		double timeScaleFactor = 0.035
 	)
 	{
+		//TODO: 現在はフレーズ単位だが、音素単位に変える
+		//
 		var sb = new StringBuilder(100000);
 		for (int i = 0; i < f0.Count; i++)
 		{
