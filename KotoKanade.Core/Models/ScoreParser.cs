@@ -86,55 +86,88 @@ public static class ScoreParser
 	)
 	{
 		//TODO: optimization
-		if (useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true)
+		bool isTarget = useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true;
+		if (isTarget)
 		{
-				var sw = new Stopwatch();
-				Debug.WriteLine($" ★★Start: {Path.GetFileName(wavPath)}");
-				sw.Start();
+			var sw = SWStart(wavPath);
 			var mc = await MediaConverter
 				.FactoryAsync()
 				.ConfigureAwait(false);
-				sw.Stop();
-				Debug.WriteLine($" ★★ Factory {sw.ElapsedMilliseconds}");
-				sw.Reset();
-				sw.Start();
+			SWFactory(sw);
 			var wav = await mc
-				.ConvertAsync(wavPath)
+				.ConvertAsync(wavPath!)
 				.ConfigureAwait(false);
-				sw.Stop();
-				Debug.WriteLine($" ★★ Convert {sw.ElapsedMilliseconds}");
-				sw.Reset();
-				sw.Start();
+			SWConvert(sw);
 			//estimate by world
 			var hasCached = WavCache
-				.TryGetValue(wavPath, out (int, int, int, double[]) value);
+				.TryGetValue(wavPath!, out (int, int, int, double[]) value);
 			var (fs, nbit, len, x) = hasCached
 				? value
 				: await WorldUtil
 					.ReadWavAsync(wav.Path)
 					.ConfigureAwait(false);
-			if(!hasCached){
-				WavCache.TryAdd(wavPath, (fs, nbit, len, x));
+			if (!hasCached)
+			{
+				WavCache.TryAdd(wavPath!, (fs, nbit, len, x));
 			}
-				sw.Stop();
-				Debug.WriteLine($" ★★ ReadWav {sw.ElapsedMilliseconds}");
-				sw.Reset();
-				sw.Start();
+			SWReadWav(sw);
 			var wp = new WorldParam(fs);
 			var hasCachedEstimated = EstimatedCache
-				.TryGetValue(wavPath, out var cachedEstimated);
+				.TryGetValue(wavPath!, out var cachedEstimated);
 			var estimated = hasCachedEstimated
 				? cachedEstimated
 				: await WorldUtil
 					.EstimateF0Async(x, len, wp)
 					.ConfigureAwait(false);
-			if(!hasCachedEstimated){
-				EstimatedCache.TryAdd(wavPath, estimated!);
+			if (!hasCachedEstimated)
+			{
+				EstimatedCache.TryAdd(wavPath!, estimated!);
 			}
-				sw.Stop();
-				Debug.WriteLine($" ★★ Estimate {sw.ElapsedMilliseconds}");
-				sw.Reset();
-			songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList);
+			SWEstimate(sw);
+			songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList!);
+		}
+
+		static Stopwatch SWStart(string? wavPath)
+		{
+			var sw = new Stopwatch();
+			Debug.WriteLine($" ★★Start: {Path.GetFileName(wavPath)}");
+			sw.Start();
+			return sw;
+		}
+
+		[Conditional("DEBUG")]
+		static void SWFactory(Stopwatch sw)
+		{
+			sw.Stop();
+			Debug.WriteLine($" ★★ Factory {sw.ElapsedMilliseconds}");
+			sw.Reset();
+			sw.Start();
+		}
+
+		[Conditional("DEBUG")]
+		static void SWConvert(Stopwatch sw)
+		{
+			sw.Stop();
+			Debug.WriteLine($" ★★ Convert {sw.ElapsedMilliseconds}");
+			sw.Reset();
+			sw.Start();
+		}
+
+		[Conditional("DEBUG")]
+		static void SWReadWav(Stopwatch sw)
+		{
+			sw.Stop();
+			Debug.WriteLine($" ★★ ReadWav {sw.ElapsedMilliseconds}");
+			sw.Reset();
+			sw.Start();
+		}
+
+		[Conditional("DEBUG")]
+		static void SWEstimate(Stopwatch sw)
+		{
+			sw.Stop();
+			Debug.WriteLine($" ★★ Estimate {sw.ElapsedMilliseconds}");
+			sw.Reset();
 		}
 	}
 
