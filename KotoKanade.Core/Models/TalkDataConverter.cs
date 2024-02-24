@@ -18,7 +18,7 @@ using LibSasara.Model.FullContextLabel;
 using LibSasara.Model.Serialize;
 using LibSasara.VoiSona;
 using LibSasara.VoiSona.Model.Talk;
-
+using MathNet.Numerics.Interpolation;
 using SharpOpenJTalk.Lang;
 
 using WanaKanaNet;
@@ -32,6 +32,7 @@ public sealed partial class TalkDataConverter
 	}
 
 	private const int scaleLabLenToMsec = 10000;
+	private const int scaleLabLenToSec = 10000000;
 	private static readonly SortedDictionary<int, decimal> defaultTempo = new() { { 0, 120 } };
 
 	public static async ValueTask GenerateFileAsync(
@@ -264,7 +265,7 @@ public sealed partial class TalkDataConverter
 		//TODO:ccsやwavがあるなら解析して割当
 		var pitch = f0 is null
 			? GetPitches(notes, data)
-			: GetF0(f0, timeScaleFactor);
+			: GetF0(f0, labLines);
 
 		//フレーズ最初が子音の時のオフセット
 		var offset = 0.0m;
@@ -312,7 +313,7 @@ public sealed partial class TalkDataConverter
 		var start = labLines is null
 			? GetStartTimeString(data, p, offset)
 			: FormattableString
-				.Invariant($"{labLines[0].From/10000000:F3}");
+				.Invariant($"{labLines[0].From/ scaleLabLenToSec:F3}");
 		var nu = new Utterance(
 			text: text,
 			//tsmlを無理やり生成
@@ -964,20 +965,100 @@ public sealed partial class TalkDataConverter
 
 	private static string GetF0(
 		List<decimal> f0,
-		double timeScaleFactor = 0.035
-	)
-	{
+		List<LabLine>? labLines
+	){
 		//TODO: 現在はフレーズ単位だが、音素単位に変える
-		//
+
+		//set immutable
+		var imF0 = f0.ToImmutableArray();
+		var imLabLines = labLines?.ToImmutableList() ?? [];
+
+		//Debug.Assert(labLines is null);
+
+		//音素ごとのf0のlistを算出
+		const double sample = 0.005;
+		var offset = imLabLines[0].From;
+		var phonemePitches = imLabLines
+			.AsParallel().AsOrdered()
+			.Select((ln, i) =>
+			{
+				//slice
+				var sIdx = (int) ((ln.From - offset) / scaleLabLenToSec / sample);
+				var eIdx = (int) ((ln.To - offset) / scaleLabLenToSec / sample);
+				Debug.Assert(sIdx >= 0 && eIdx <= imF0.Length);
+				ReadOnlySpan<decimal> span = imF0
+					.AsSpan()[sIdx..eIdx]
+					;
+
+				if(span.Length<2)
+				{
+					return [(ln.Length, (double)span[0] ,i)];
+				}
+
+				var idx = Enumerable
+					.Range(0, span.Length)
+					.Select(i => i * sample)
+					;
+				var f0Data = span
+					.ToArray()
+					.Select(v => (double) v)
+					;
+
+				//補完データ化
+				var interpolate = LogLinear
+					.Interpolate(
+						idx,
+						f0Data
+					);
+
+				//取り出し
+				var estimated = SplitPointCulclater
+					.EstimateRatios(ln.Length / scaleLabLenToSec);
+
+				var result = estimated
+					.Ratios
+					.Select(v => (
+						v,
+						interpolate
+							.Interpolate(v * ln.Length / scaleLabLenToSec),
+						i
+					))
+					;
+				return result;
+			})
+			.ToImmutableArray()
+			;
+
+		//文字列化
+		return BuildFrameF0String(phonemePitches);
+	}
+
+	private static string BuildFrameF0String(
+		ImmutableArray<IEnumerable<(double v, double, int i)>> phonemePitches)
+	{
 		var sb = new StringBuilder(100000);
-		for (int i = 0; i < f0.Count; i++)
+		for (var i = 0; i < phonemePitches.Length; i++)
 		{
-			var sf = (1.00 + (i * timeScaleFactor))
-				.ToString("F2", CultureInfo.InvariantCulture);
-			var logF0 = Math.Log((double)f0[i]);
-			sb.Append(sf).Append(':').Append(logF0);
-			if (i < f0.Count - 1) sb.Append(',');
+			var phStr = phonemePitches[i]
+				.Select(v =>
+				{
+					var cnt = (v.i + 1 + v.v)
+						.ToString("F3", CultureInfo.InvariantCulture);
+					var logF0 = Math.Log(v.Item2);
+					var isInvalid = double.IsNaN(logF0) || double.IsInfinity(logF0);
+					var strF0 = isInvalid
+						? string.Empty
+						: logF0
+							.ToString("F4", CultureInfo.InvariantCulture);
+					return $"{cnt}:{strF0}";
+				})
+				;
+			sb.Append(
+				CultureInfo.InvariantCulture,
+				$"{string.Join(',', phStr)}");
+			if (i < phonemePitches.Length - 1) sb.Append(',');
 		}
+		Debug.WriteLine(sb.ToString());
 		return sb.ToString();
 	}
 
