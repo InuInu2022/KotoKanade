@@ -52,7 +52,7 @@
       IsIconVisible="True"
       Severity="Warning"
       IsClosable="True"
-      Message="この機能は試験中です。正しく機能しません。" />
+      Message="曲の解析に非常に時間がかかります。" />
     <ScrollViewer
       Grid.Row="2" Grid.Column="0"
       VerticalScrollBarVisibility="Visible"
