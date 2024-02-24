@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Notification;
+using KotoKanade.Views;
 
 namespace KotoKanade.ViewModels;
 

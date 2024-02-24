@@ -5,6 +5,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Avalonia.Notification;
 using CevioCasts;
 using Epoxy;
 using FluentAvalonia.UI.Controls;
@@ -31,6 +32,7 @@ public sealed class MainViewModel
 	public bool IsUseWavFile { get; set; }
 	public string DefaultWav { get; set; } = string.Empty;
 	public Command SelectWav { get; }
+
 	public string? OpenedWavPath { get; set; }
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
@@ -50,11 +52,17 @@ public sealed class MainViewModel
 	public Command ExportFile { get; set; }
 	public bool CanExport { get; set; }
 
+	public INotificationMessageManager Manager { get; }
+		= new NotificationMessageManager();
+	private readonly INotificationMessageManager _notify;
+
 	public MainViewModel()
 	{
 		SelectCcs = Command.Factory.Create(SelectCcsAsync);
 		SelectLab = Command.Factory.Create(SelectLabAsync);
 		SelectWav = Command.Factory.Create(SelectWavAsync);
+
+		_notify = Manager;
 
 		// A handler for window loaded
 		Ready = Command.Factory.Create(ReadyFunc);
@@ -160,6 +168,9 @@ public sealed class MainViewModel
 	private Func<ValueTask> ExportEvent =>
 		async () =>
 		{
+			var loading = _notify
+				.Loading("Now exporting...","変換しています。");
+
 			var path = OpenedCcsPath ?? "";
 			var labPath = OpenedLabPath ?? "";
 			var wavPath = OpenedWavPath ?? "";
@@ -174,16 +185,26 @@ public sealed class MainViewModel
 
 			if (saved is null)
 			{
-				//_notify?.Dismiss(loading!);
+				_notify.Dismiss(loading!);
+				_notify.Warn(
+					"Save directory is not found!",
+					"保存先ディレクトリが見つかりません！");
 				CanExport = true;
 				return;
 			}
 			var saveDir = saved.Path.LocalPath;
 			if (saveDir is null)
 			{
+				_notify.Dismiss(loading!);
+				_notify.Warn(
+					"Save directory is not found!",
+					"保存先ディレクトリが見つかりません！");
 				CanExport = true;
 				return;
 			}
+
+			var sw = new Stopwatch();
+			sw.Start();
 
 			var loadedSong = await ScoreParser
 				.ProcessCcsAsync(
@@ -219,6 +240,12 @@ public sealed class MainViewModel
 				.ConfigureAwait(true);
 
 			CanExport = true;
+			_notify.Dismiss(loading!);
+			sw.Stop();
+			_notify.Info(
+				"Export success! ファイル保存に成功しました。",
+				$"経過時間: {sw.Elapsed.TotalSeconds:F3} sec."
+			);
 
 			decimal GetParam(string name)
 			{
@@ -238,6 +265,9 @@ public sealed class MainViewModel
 	private Func<ValueTask> ReadyFunc =>
 		async () =>
 		{
+			var loading = _notify
+				.Loading("Now awaking...","起動しています。");
+
 			var defs = await CastDefManager
 				.GetAllCastDefsAsync()
 				.ConfigureAwait(true);
@@ -247,6 +277,8 @@ public sealed class MainViewModel
 			TalkCasts = new(targets);
 
 			SelectedCastIndex = 0;
+
+			_notify.Dismiss(loading!);
 			CanExport = true;
 		};
 
