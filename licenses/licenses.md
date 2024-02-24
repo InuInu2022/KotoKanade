@@ -1,11 +1,11 @@
  | Reference                                 | Version                                         | License Type    | License                                                                 | 
  | ----------------------------------------- | ----------------------------------------------- | --------------- | ----------------------------------------------------------------------- | 
- | Avalonia                                  | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Desktop                          | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Diagnostics                      | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Fonts.Inter                      | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Markup.Xaml.Loader               | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Avalonia.Themes.Fluent                    | 11.0.7                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia                                  | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Desktop                          | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Diagnostics                      | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Fonts.Inter                      | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Markup.Xaml.Loader               | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | Avalonia.Themes.Fluent                    | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
  | coverlet.collector                        | 6.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | DotnetWorld                               | 1.2.5                                           |                 | https://raw.githubusercontent.com/yamachu/DotnetWorld/master/LICENSE    | 
  | Epoxy.Avalonia11                          | 1.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                   | 
@@ -13,14 +13,16 @@
  | FluentAvaloniaUI                          | 2.0.5                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | HotAvalonia                               | 1.0.1                                           | LICENSE.md      | https://www.nuget.org/packages/HotAvalonia/1.0.1/License                | 
  | HotAvalonia.Extensions                    | 1.0.1                                           | LICENSE.md      | https://www.nuget.org/packages/HotAvalonia.Extensions/1.0.1/License     | 
+ | MathNet.Numerics                          | 5.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | Microsoft.Bcl.AsyncInterfaces             | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | Microsoft.CodeAnalysis.PublicApiAnalyzers | 3.3.4                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | Microsoft.CSharp                          | 4.7.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
- | Microsoft.NET.Test.Sdk                    | 17.8.0                                          | LICENSE_MIT.txt | https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/17.8.0/License    | 
+ | Microsoft.NET.Test.Sdk                    | 17.9.0                                          | LICENSE_MIT.txt | https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/17.9.0/License    | 
  | MinVer                                    | 4.3.0                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                   | 
  | Newtonsoft.Json                           | 13.0.3                                          | MIT             | https://licenses.nuget.org/MIT                                          | 
  | NLog                                      | 5.2.8                                           | BSD-3-Clause    | https://licenses.nuget.org/BSD-3-Clause                                 | 
  | PolySharp                                 | 1.14.1+a7a92a9ddd050275c91c42b711d22cb41c3fbf3d | MIT             | https://licenses.nuget.org/MIT                                          | 
+ | PrivateProxy                              | 1.0.2                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | PublishAotCompressed                      | 1.0.3                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
  | SharpOpenJTalk.Lang                       | 1.4.0                                           |                 | https://raw.githubusercontent.com/yamachu/SharpOpenJTalk/master/LICENSE | 
  | System.Collections.Immutable              | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                          | 
