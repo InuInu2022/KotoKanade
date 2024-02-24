@@ -17,31 +17,5 @@
     IconSource="Setting"
     Description="音程・ピッチの設定"
     Name="SettingsPitchExpander">
-    <ui:SettingsExpanderItem
-      Content="Time scale factor"
-      Description="ピッチの時間軸における各ピッチ値の間隔を調整するための係数">
-      <ui:SettingsExpanderItem.Footer>
-        <StackPanel
-          VerticalAlignment="Center"
-          Orientation="Horizontal">
-          <TextBlock
-            Text="{Binding #timeScaleFactorSlider.Value, StringFormat='{}{0:0.000}'}"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            />
-          <Slider
-            Name="timeScaleFactorSlider"
-            Minimum="0.005"
-            Maximum="0.100"
-            Value="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).TimeScaleFactor}"
-            TickFrequency="0.001"
-            IsSnapToTickEnabled="True"
-            Width="160"
-            >
-          </Slider>
-
-        </StackPanel>
-      </ui:SettingsExpanderItem.Footer>
-    </ui:SettingsExpanderItem>
   </ui:SettingsExpander>
 </UserControl>
