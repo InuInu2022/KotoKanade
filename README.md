@@ -42,11 +42,18 @@
 
 ## Sample
 
+### ピッチ歌唱指導機能のサンプル
+
+- [【VoiSona Talk歌唱】いかないで / 想太 (ピッチ歌唱指導ver)【すずきつづみcover / KotoKanade】](https://youtu.be/60IfYwDsmow)
+- [【VoiSona Talk歌唱】１／６の夢旅人２００２  / 樋口了一  (アカペラピッチ歌唱指導ver)【タカハシcover/KotoKanade】](https://youtu.be/2sXRQ8-Wj2U)
+- [【VoiSona Talk歌唱】Pretender / Official髭男dism (ピッチ歌唱指導機能ver.)【タカハシ/cover/KotoKanade】](https://youtu.be/rvw4rAfsMzk)
+
+### タイミング歌唱指導のサンプル
 
 - [【VoiSonaTalk歌唱】Pretender / Official髭男dism【cover/タカハシ/KotoKanade】](https://youtu.be/-GHdryTwpBM)
 - [[タカハシ] １／６の夢旅人２００２ アカペラ / 樋口　了一 [cover/test/VoiSona Talk タカハシ]](https://youtu.be/N3fp7G-e4so)
 
-※以下は旧バージョンで制作したものです
+### 以下は旧バージョンで制作したものです
 
 - [【VoiSona Talk歌唱】いかないで / 想太 (offset ver.2)【すずきつづみcover】](https://utaloader.net/music/20231229200356536133)
 - [【VoiSona Talk歌唱】いかないで / 想太 【タカハシcover】](https://utaloader.net/music/20231229204427612049)
@@ -134,10 +141,41 @@
 - ノート分割オプションは常にONを推奨
   - 新エンジンのボイス以外は長い発音が途切れるため
 
-### [WIP]C. Score + Timing + Wav
+### C. Score + Timing + Wav
 
 ピッチに歌唱指導を使って歌わせます。
-WIP
+タイミングだけの歌唱指導と異なり、なめらかに歌うようになります。
+
+※現時点では、合成（解析）に**とても時間がかかります**。一般的な曲の長さですと1分を超えることもあります。
+
+#### C. 用意するもの
+
+- CeVIOの楽譜ファイル(`.ccs` or `.ccst`)
+  - [VoiSona(song)](https://voisona.com/) または [Utaformatix](https://sdercolin.github.io/utaformatix3/)でMIDIなどから変換してください
+- 歌唱指導用のタイミング情報ファイル(`.lab`)
+  - 上記の楽譜ファイルを歌わせた時に同時生成されるもの
+  - CeVIOソング/VoiSona(ソング)などで生成できます
+- 歌唱指導用のボーカル音声ファイル(`.wav / .mp3`など)
+  - 上記とタイミングのあった音声ファイル
+  - 16bit 48kbps wav形式以外もサポートしていますが内部で変換処理が入ります
+
+#### C. 作品投稿の際は…
+
+- 歌唱指導をする際は、ボイスライブラリの利用規約に従ってください
+- 歌唱指導した作品を公開するときは、以下のように元のボイスライブラリがわかるようにしてください
+
+> 歌唱指導 さとうささら（CeVIO AI）
+
+#### C. 制限
+
+- 歌詞は日本語のみ
+- 読み（音素）の差し替えは**NG**
+  - 音素数が異なるとバグります
+- 歌詞の記号は無視されます
+- ノートのアーティキュレーション未対応
+- ノート分割オプションは常にONを推奨
+  - 新エンジンのボイス以外は長い発音が途切れるため
+
 
 ## DL
 
