@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Epoxy;
 using KotoKanade.Core.Util;
 
@@ -24,7 +25,17 @@ public class TabSettingsViewModel
 					AppDomain.CurrentDomain.BaseDirectory,
 					@"licenses\"
 				);
-				await Task.Run(() => Process.Start("explorer.exe", path))
+				var command = string.Empty;
+				if(System.OperatingSystem.IsWindows()){
+					command = "explorer.exe";
+				}else if(System.OperatingSystem.IsMacOS()){
+					command = "open";
+				}else if(System.OperatingSystem.IsLinux()){
+					command = "xdg-open";
+				}else{
+					throw new NotSupportedException("非対応プラットフォームです");
+				}
+				await Task.Run(() => Process.Start(command, path))
 				.ConfigureAwait(false);
 			});
 	}
