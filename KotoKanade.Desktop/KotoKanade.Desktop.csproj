@@ -8,6 +8,7 @@
 
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <SelfContained Condition="'$(Configuration)' == 'Debug'">false</SelfContained>
+    <UseAppHost>true</UseAppHost>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
