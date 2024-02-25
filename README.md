@@ -21,6 +21,10 @@
 - タカハシを歌わせるソフト作ってみた 【KotoKanade】
   - [![タカハシを歌わせるソフト作ってみた 【KotoKanade】](http://img.youtube.com/vi/UzbBSFkNrrE/mqdefault.jpg)](https://youtu.be/UzbBSFkNrrE?si=YhKhG1W6iTgN99QX)
 
+## Blog
+
+- [VoiSona Talkを"歌わせる"ソフト「KotoKanade」リリースしました｜いぬいぬ](https://note.com/inuinu_/n/n0c79f600b5eb)
+
 
 ## 最新版ダウンロード / Download latest
 
@@ -180,8 +184,6 @@
 ## DL
 
 [github Release](https://github.com/InuInu2022/KotoKanade/releases/latest)からDL
-
-## Usage
 
 ## Build
 
