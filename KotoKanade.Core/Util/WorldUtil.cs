@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DotnetWorld.API;
 using DotnetWorld.API.Structs;
 
-namespace SasaraUtil.Models;
+namespace KotoKanade.Core.Models;
 
 public static class WorldUtil
 {

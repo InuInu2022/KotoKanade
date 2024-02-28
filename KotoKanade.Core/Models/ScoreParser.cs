@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LibSasara;
 using LibSasara.Model;
-using SasaraUtil.Models;
+using KotoKanade.Core.Util;
 
 namespace KotoKanade.Core.Models;
 
