@@ -48,6 +48,7 @@
 
 ### ピッチ歌唱指導機能のサンプル
 
+- [【双葉湊音トーク】だんだん早くなる / 40mP【VoiSona Talk歌唱/KotoKanade】 - ニコニコ](https://www.nicovideo.jp/watch/sm43463155)
 - [【VoiSona Talk歌唱】いかないで / 想太 (ピッチ歌唱指導ver)【すずきつづみcover / KotoKanade】](https://youtu.be/60IfYwDsmow)
 - [【VoiSona Talk歌唱】１／６の夢旅人２００２  / 樋口了一  (アカペラピッチ歌唱指導ver)【タカハシcover/KotoKanade】](https://youtu.be/2sXRQ8-Wj2U)
 - [【VoiSona Talk歌唱】Pretender / Official髭男dism (ピッチ歌唱指導機能ver.)【タカハシ/cover/KotoKanade】](https://youtu.be/rvw4rAfsMzk)
