@@ -24,6 +24,7 @@
 ## Blog
 
 - [VoiSona Talkを"歌わせる"ソフト「KotoKanade」リリースしました｜いぬいぬ](https://note.com/inuinu_/n/n0c79f600b5eb)
+- [VoiSona Talkをなめらかに歌わせるようにしてみた【KotoKanade】｜いぬいぬ](https://note.com/inuinu_/n/n1816a04151d7)
 
 
 ## 最新版ダウンロード / Download latest
