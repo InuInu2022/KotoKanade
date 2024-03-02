@@ -45,14 +45,6 @@
         <views:FileFormWav />
       </WrapPanel>
     </StackPanel>
-    <!-- TODO:実装したら外す -->
-    <ui:InfoBar
-      Title="[Experimental]試験機能"
-      IsOpen="True"
-      IsIconVisible="True"
-      Severity="Warning"
-      IsClosable="True"
-      Message="曲の解析に非常に時間がかかります。" />
     <ScrollViewer
       Grid.Row="2" Grid.Column="0"
       VerticalScrollBarVisibility="Visible"
