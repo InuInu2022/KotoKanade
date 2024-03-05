@@ -50,6 +50,7 @@
 ### ピッチ歌唱指導機能のサンプル
 
 - [【双葉湊音トーク】だんだん早くなる / 40mP【VoiSona Talk歌唱/KotoKanade】 - ニコニコ](https://www.nicovideo.jp/watch/sm43463155)
+  - [![【双葉湊音トーク】だんだん早くなる / 40mP【VoiSona Talk歌唱/KotoKanade】](https://img.cdn.nimg.jp/s/nicovideo/thumbnails/43463155/43463155.61285693.original/r1280x720l?key=e564628eb6cb73a72615fba413604df1e4a4cc683fbebdcc8b01b368991ade3e)](https://www.nicovideo.jp/watch/sm43463155)
 - [【VoiSona Talk歌唱】いかないで / 想太 (ピッチ歌唱指導ver)【すずきつづみcover / KotoKanade】](https://youtu.be/60IfYwDsmow)
 - [【VoiSona Talk歌唱】１／６の夢旅人２００２  / 樋口了一  (アカペラピッチ歌唱指導ver)【タカハシcover/KotoKanade】](https://youtu.be/2sXRQ8-Wj2U)
 - [【VoiSona Talk歌唱】Pretender / Official髭男dism (ピッチ歌唱指導機能ver.)【タカハシ/cover/KotoKanade】](https://youtu.be/rvw4rAfsMzk)
@@ -152,7 +153,7 @@
 ピッチに歌唱指導を使って歌わせます。
 タイミングだけの歌唱指導と異なり、なめらかに歌うようになります。
 
-※現時点では、合成（解析）に**とても時間がかかります**。一般的な曲の長さですと1分を超えることもあります。
+※合成（解析）にやや時間が掛かります。性能の良いパソコンで長い曲で10秒程度かかります。
 
 #### C. 用意するもの
 
