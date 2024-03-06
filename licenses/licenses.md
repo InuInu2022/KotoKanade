@@ -1,14 +1,14 @@
  | Reference                                 | Version                                         | License Type    | License                                                                        | 
  | ----------------------------------------- | ----------------------------------------------- | --------------- | ------------------------------------------------------------------------------ | 
- | Avalonia                                  | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | Avalonia.Desktop                          | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | Avalonia.Diagnostics                      | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | Avalonia.Fonts.Inter                      | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | Avalonia.Markup.Xaml.Loader               | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | Avalonia.Themes.Fluent                    | 11.0.9                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | coverlet.collector                        | 6.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia                                  | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia.Desktop                          | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia.Diagnostics                      | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia.Fonts.Inter                      | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia.Markup.Xaml.Loader               | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Avalonia.Themes.Fluent                    | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | coverlet.collector                        | 6.0.1                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | DotnetWorld                               | 1.2.5                                           |                 | https://raw.githubusercontent.com/yamachu/DotnetWorld/master/LICENSE           | 
- | Epoxy.Avalonia11                          | 1.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
+ | Epoxy.Avalonia11                          | 1.13.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
  | FluentAssertions                          | 6.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
  | FluentAvaloniaUI                          | 2.0.5                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | HotAvalonia                               | 1.0.1                                           | LICENSE.md      | https://www.nuget.org/packages/HotAvalonia/1.0.1/License                       | 
@@ -33,5 +33,5 @@
  | WanaKana-net                              | 1.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Xabe.FFmpeg                               | 5.2.6                                           |                 | https://ffmpeg.xabe.net/license.html                                           | 
  | Xabe.FFmpeg.Downloader                    | 5.2.6                                           |                 | https://ffmpeg.xabe.net/license.html                                           | 
- | xunit                                     | 2.6.6                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
- | xunit.runner.visualstudio                 | 2.5.6                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
+ | xunit                                     | 2.7.0                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
+ | xunit.runner.visualstudio                 | 2.5.7                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
