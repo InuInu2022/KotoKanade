@@ -28,6 +28,7 @@
  | SharpOpenJTalk.Lang                       | 1.4.0                                           |                 | https://raw.githubusercontent.com/yamachu/SharpOpenJTalk/master/LICENSE        | 
  | System.Collections.Immutable              | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | System.Dynamic.Runtime                    | 4.3.0                                           | MS-EULA         | http://go.microsoft.com/fwlink/?LinkId=329770                                  | 
+ | System.IO.Hashing                         | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | System.Memory                             | 4.5.5                                           | MIT             | https://github.com/dotnet/corefx/blob/master/LICENSE.TXT                       | 
  | System.Threading.Tasks.Extensions         | 4.5.4                                           | MIT             | https://github.com/dotnet/corefx/blob/master/LICENSE.TXT                       | 
  | WanaKana-net                              | 1.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
