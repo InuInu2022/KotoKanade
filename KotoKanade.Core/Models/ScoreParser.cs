@@ -75,8 +75,8 @@ public static class ScoreParser
 	}
 
 	// caches
-	static readonly ConcurrentDictionary<string, (int, int, int, double[])> WavCache = [];
-	static readonly ConcurrentDictionary<string, WorldParam> EstimatedCache = [];
+	static readonly ConcurrentDictionary<ulong, (int, int, int, double[])> WavCache = [];
+	static readonly ConcurrentDictionary<ulong, WorldParam> EstimatedCache = [];
 
 	private static async ValueTask
 	ProcessPitchAndTimingFromWavAsync(
@@ -85,47 +85,62 @@ public static class ScoreParser
 		SongData songData
 	)
 	{
-		//TODO: optimization
 		bool isTarget = useWav && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath) && songData.TimingList?.Any() == true;
-		if (isTarget)
+		if(!isTarget){ return; }
+
+		var sw = SWStart(wavPath);
+		//get wav hash
+		var fileStream = new FileStream(wavPath!, FileMode.Open);
+		var hasher = new System.IO.Hashing.XxHash3();
+		await using (fileStream.ConfigureAwait(false))
 		{
-			var sw = SWStart(wavPath);
+			await hasher
+				.AppendAsync(fileStream)
+				.ConfigureAwait(false);
+		}
+		var wavHash = hasher.GetCurrentHashAsUInt64();
+		hasher.Reset();
+
+		SWFactory(sw);
+		var hasCached = WavCache
+			.TryGetValue(wavHash, out (int, int, int, double[]) wavCache);
+		MediaConverter.SafeTempFile? wav = default;
+		if (!hasCached)
+		{
 			var mc = await MediaConverter
 				.FactoryAsync()
 				.ConfigureAwait(false);
-			SWFactory(sw);
-			var wav = await mc
+
+			wav = await mc
 				.ConvertAsync(wavPath!)
 				.ConfigureAwait(false);
-			SWConvert(sw);
-			//estimate by world
-			var hasCached = WavCache
-				.TryGetValue(wavPath!, out (int, int, int, double[]) value);
-			var (fs, nbit, len, x) = hasCached
-				? value
-				: await WorldUtil
-					.ReadWavAsync(wav.Path)
-					.ConfigureAwait(false);
-			if (!hasCached)
-			{
-				WavCache.TryAdd(wavPath!, (fs, nbit, len, x));
-			}
-			SWReadWav(sw);
-			var wp = new WorldParam(fs);
-			var hasCachedEstimated = EstimatedCache
-				.TryGetValue(wavPath!, out var cachedEstimated);
-			var estimated = hasCachedEstimated
-				? cachedEstimated
-				: await WorldUtil
-					.EstimateF0Async(x, len, wp)
-					.ConfigureAwait(false);
-			if (!hasCachedEstimated)
-			{
-				EstimatedCache.TryAdd(wavPath!, estimated!);
-			}
-			SWEstimate(sw);
-			songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList!);
 		}
+		SWConvert(sw);
+		//estimate by world
+		var (fs, nbit, len, x) = hasCached
+			? wavCache
+			: await WorldUtil
+				.ReadWavAsync(wav?.Path ?? string.Empty)
+				.ConfigureAwait(false);
+		if (!hasCached)
+		{
+			WavCache.TryAdd(wavHash, (fs, nbit, len, x));
+		}
+		SWReadWav(sw);
+		var wp = new WorldParam(fs);
+		var hasCachedEstimated = EstimatedCache
+			.TryGetValue(wavHash, out var cachedEstimated);
+		var estimated = hasCachedEstimated
+			? cachedEstimated
+			: await WorldUtil
+				.EstimateF0Async(x, len, wp)
+				.ConfigureAwait(false);
+		if (!hasCachedEstimated)
+		{
+			EstimatedCache.TryAdd(wavHash, estimated!);
+		}
+		SWEstimate(sw);
+		songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList!);
 	}
 
 	[Conditional("DEBUG")]
