@@ -126,49 +126,49 @@ public static class ScoreParser
 			SWEstimate(sw);
 			songData.PitchList = SplitF0ByTiming(estimated!, songData.TimingList!);
 		}
+	}
 
-		static Stopwatch SWStart(string? wavPath)
-		{
-			var sw = new Stopwatch();
-			Debug.WriteLine($" ★★Start: {Path.GetFileName(wavPath)}");
-			sw.Start();
-			return sw;
-		}
+	[Conditional("DEBUG")]
+	private static void SWEstimate(Stopwatch sw)
+	{
+		sw.Stop();
+		Debug.WriteLine($" ★★ Estimate {sw.ElapsedMilliseconds}");
+		sw.Reset();
+	}
 
-		[Conditional("DEBUG")]
-		static void SWFactory(Stopwatch sw)
-		{
-			sw.Stop();
-			Debug.WriteLine($" ★★ Factory {sw.ElapsedMilliseconds}");
-			sw.Reset();
-			sw.Start();
-		}
+	[Conditional("DEBUG")]
+	private static void SWReadWav(Stopwatch sw)
+	{
+		sw.Stop();
+		Debug.WriteLine($" ★★ ReadWav {sw.ElapsedMilliseconds}");
+		sw.Reset();
+		sw.Start();
+	}
 
-		[Conditional("DEBUG")]
-		static void SWConvert(Stopwatch sw)
-		{
-			sw.Stop();
-			Debug.WriteLine($" ★★ Convert {sw.ElapsedMilliseconds}");
-			sw.Reset();
-			sw.Start();
-		}
+	[Conditional("DEBUG")]
+	private static void SWConvert(Stopwatch sw)
+	{
+		sw.Stop();
+		Debug.WriteLine($" ★★ Convert {sw.ElapsedMilliseconds}");
+		sw.Reset();
+		sw.Start();
+	}
 
-		[Conditional("DEBUG")]
-		static void SWReadWav(Stopwatch sw)
-		{
-			sw.Stop();
-			Debug.WriteLine($" ★★ ReadWav {sw.ElapsedMilliseconds}");
-			sw.Reset();
-			sw.Start();
-		}
+	[Conditional("DEBUG")]
+	private static void SWFactory(Stopwatch sw)
+	{
+		sw.Stop();
+		Debug.WriteLine($" ★★ Factory {sw.ElapsedMilliseconds}");
+		sw.Reset();
+		sw.Start();
+	}
 
-		[Conditional("DEBUG")]
-		static void SWEstimate(Stopwatch sw)
-		{
-			sw.Stop();
-			Debug.WriteLine($" ★★ Estimate {sw.ElapsedMilliseconds}");
-			sw.Reset();
-		}
+	private static Stopwatch SWStart(string? wavPath)
+	{
+		var sw = new Stopwatch();
+		Debug.WriteLine($" ★★Start: {Path.GetFileName(wavPath)}");
+		sw.Start();
+		return sw;
 	}
 
 	private static async ValueTask
