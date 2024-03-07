@@ -31,7 +31,9 @@
     <PackageReference Include="FluentAvaloniaUI" Version="2.0.5" />
     <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" Version="1.0.1" />
     <PackageReference Include="HotAvalonia.Extensions" Version="1.0.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Notification.Avalonia" Version="2.1.0" />
+    <PackageReference Include="Sandreas.Avalonia.Preferences" Version="0.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\KotoKanade.Core\KotoKanade.Core.csproj" />

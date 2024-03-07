@@ -17,5 +17,47 @@
     IconSource="Setting"
     Description="音程・ピッチの設定"
     Name="SettingsPitchExpander">
+    <ui:SettingsExpander.Footer>
+
+    </ui:SettingsExpander.Footer>
+    <ui:SettingsExpanderItem
+      Content="Use fast estimation"
+      Description="高速解析を行うか">
+      <ui:SettingsExpanderItem.Footer>
+        <ToggleSwitch
+          Name="DoParallelEstimate"
+          IsChecked="{Binding $parent[UserControl;1].((viewmodels:TabScTmgPitViewModel)DataContext).DoParallelEstimate}"
+          OnContent="On"
+          OffContent="OFF"
+          HorizontalAlignment="Right"
+          />
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
+    <ui:SettingsExpanderItem
+      Content="Bottom estimation threthold Hz."
+      Description="解析の時何ヘルツ以上を解析するか">
+      <ui:SettingsExpanderItem.Footer>
+        <StackPanel
+          VerticalAlignment="Center"
+          Orientation="Horizontal">
+          <TextBlock
+            Text="{Binding #bottomThretholdSlider.Value, StringFormat='{}{0:0} hz.'}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            />
+          <Slider
+            Name="bottomThretholdSlider"
+            Minimum="0"
+            Maximum="200"
+            Value="{Binding $parent[UserControl;1].((viewmodels:TabScTmgPitViewModel)DataContext).BottomEstimateThrethold}"
+            TickFrequency="5"
+            IsSnapToTickEnabled="True"
+            Width="160"
+            >
+          </Slider>
+
+        </StackPanel>
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
   </ui:SettingsExpander>
 </UserControl>

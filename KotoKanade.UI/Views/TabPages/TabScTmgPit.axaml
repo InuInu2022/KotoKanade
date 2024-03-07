@@ -9,12 +9,11 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
-             x:DataType="viewmodels:MainViewModel"
+             x:DataType="viewmodels:TabScTmgPitViewModel"
              x:Class="KotoKanade.Views.TabScTmgPit">
   <UserControl.DataContext>
-    <viewmodels:MainViewModel />
+    <viewmodels:TabScTmgPitViewModel />
   </UserControl.DataContext>
-
   <Grid
     RowDefinitions="Auto,3*"
     >
