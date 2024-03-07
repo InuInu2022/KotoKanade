@@ -133,7 +133,7 @@ public static class ScoreParser
 		var estimated = hasCachedEstimated
 			? cachedEstimated
 			: await WorldUtil
-				.EstimateF0Async(x, len, wp)
+				.EstimateF0Async(x, len, wp, doParallel:SettingManager.DoParallelEstimate)
 				.ConfigureAwait(false);
 		if (!hasCachedEstimated)
 		{

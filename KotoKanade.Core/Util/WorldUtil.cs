@@ -12,7 +12,9 @@ public static class WorldUtil
 		double[] x,
 		int audioLength,
 		WorldParam wParam,
-		int nbit = 16
+		int nbit = 16,
+		double bottomPitch = 50.0,
+		bool doParallel = true
 	)
 	{
 		var sw = new Stopwatch();
@@ -21,7 +23,7 @@ public static class WorldUtil
 		var opt = new HarvestOption();
 		DotnetWorld.API.Core.InitializeHarvestOption(opt);
 		opt.frame_period = wParam.FramePeriod;
-		opt.f0_floor = 90.0; //声の周波数の下のライン
+		opt.f0_floor = bottomPitch; //声の周波数の下のライン
 
 		sw.Stop();
 		Console.WriteLine($"[time]Estimate init {sw.Elapsed.TotalSeconds}");
@@ -42,7 +44,10 @@ public static class WorldUtil
 		Console.WriteLine($"[time]GetSamplesForDIO {sw.Elapsed.TotalSeconds}");
 		sw.Restart();
 
-		var seps = SeparateWavData((wParam.SampleRate, nbit, audioLength, x));
+		var seps = doParallel
+			? SeparateWavData((wParam.SampleRate, nbit, audioLength, x))
+			: [(wParam.SampleRate, nbit, audioLength, x)]
+			;
 		var wParams = seps
 			.AsParallel().AsOrdered()
 			.Select(v => EstimateCore(v, opt))
@@ -87,7 +92,7 @@ public static class WorldUtil
 		return sepParam;
 	}
 
-	public static ImmutableArray<WavData> SeparateWavData(WavData wavData)
+	private static ImmutableArray<WavData> SeparateWavData(WavData wavData)
 	{
 		//fix param
 		int retNBit = wavData.nbit;

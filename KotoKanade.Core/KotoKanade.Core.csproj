@@ -22,6 +22,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Sandreas.Avalonia.Preferences" Version="0.0.3" />
     <PackageReference Include="SharpOpenJTalk.Lang" Version="1.4.0" />
     <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageReference Include="System.IO.Hashing" Version="8.0.0" />
