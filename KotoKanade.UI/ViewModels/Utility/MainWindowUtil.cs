@@ -19,4 +19,13 @@ public static class MainWindowUtil
 
 		return default;
 	}
+
+	public static IClassicDesktopStyleApplicationLifetime? GetDesktop()
+	{
+		if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+		{
+			return desktop;
+		}
+		throw new NotSupportedException(nameof(GetDesktop));
+	}
 }

@@ -34,6 +34,13 @@
         <StackPanel
           VerticalAlignment="Center"
           Orientation="Horizontal">
+          <Button
+            Margin="5 0"
+            Command="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).ResetThretholdSplitNote}"
+            CommandParameter="ThretholdSplitNote">
+            <ui:SymbolIcon
+              Symbol="Refresh" FontSize="18" />
+          </Button>
           <TextBlock
             Text="{Binding #thretholdSlider.Value, StringFormat='{}{0:0} msec.'}"
             HorizontalAlignment="Right"

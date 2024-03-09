@@ -28,6 +28,13 @@
         <StackPanel
           VerticalAlignment="Center"
           Orientation="Horizontal">
+          <Button
+            Margin="5 0"
+            Command="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).ResetConsonantOffset}"
+            CommandParameter="ConsonantOffsetSec">
+            <ui:SymbolIcon
+              Symbol="Refresh" FontSize="18" />
+          </Button>
           <TextBlock
             Text="{Binding #consonantSlider.Value, StringFormat='{}{0:0.00} sec.'}"
             HorizontalAlignment="Right"

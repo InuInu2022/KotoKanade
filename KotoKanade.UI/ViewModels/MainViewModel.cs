@@ -35,6 +35,8 @@ public sealed class MainViewModel
 
 	public string? OpenedWavPath { get; set; }
 
+	public int SelectedTab { get; set; }
+
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
 	public ObservableCollection<Cast>? TalkCasts { get; set; }
@@ -44,9 +46,16 @@ public sealed class MainViewModel
 	public int SelectedCastVersionIndex { get; set; }
 	public ObservableCollection<string>? TalkCastVersions { get; set; }
 
-	public bool IsSplitNotes { get; set; } = true;
-	public double ThretholdSplitNote { get; set; } = 250;
-	public decimal ConsonantOffsetSec { get; set; } = -0.05m;
+	public bool IsSplitNotes { get; set; }
+		= SettingManager.DoSplitNotes;
+
+	public double ThretholdSplitNote {get;set;}
+		= SettingManager.ThretholdSplitNote;
+	public Command? ResetThretholdSplitNote { get; }
+
+	public decimal ConsonantOffsetSec { get; set; }
+		= SettingManager.ConsonantOffset;
+	public Command? ResetConsonantOffset { get; }
 	public double TimeScaleFactor { get; set; } = 0.030;
 
 	public Command ExportFile { get; set; }
@@ -70,6 +79,11 @@ public sealed class MainViewModel
 		Close = Command.Factory.Create(CloseEvent);
 
 		ExportFile = Command.Factory.Create(ExportEvent);
+
+		//ResetConsonantOffset = Command.Factory.Create(ResetConsonantEvent);
+
+		ResetConsonantOffset = Command.Factory.Create(ResetParameterEvent);
+		ResetThretholdSplitNote = Command.Factory.Create(ResetParameterEvent);
 
 		Styles = [
 			new("Normal", 12.3),
@@ -282,6 +296,55 @@ public sealed class MainViewModel
 			CanExport = true;
 		};
 
+	private Func<string, ValueTask> ResetParameterEvent => (paramName) =>
+	{
+		switch (paramName)
+		{
+			case nameof(ConsonantOffsetSec):
+				ConsonantOffsetSec = SettingManager.DefaultConsonantOffset;
+				SettingManager.ConsonantOffset = SettingManager.DefaultConsonantOffset;
+				break;
+			case nameof(ThretholdSplitNote):
+				ThretholdSplitNote = SettingManager.DefaultThretholdSplitNote;
+				SettingManager.ThretholdSplitNote = SettingManager.DefaultThretholdSplitNote;
+				break;
+			default:
+				break;
+		}
+		return default;
+	};
+
+	[PropertyChanged(nameof(ConsonantOffsetSec))]
+	[SuppressMessage("","IDE0051")]
+	private ValueTask ConsonantOffsetSecChangedAsync(decimal value)
+	{
+		if (ConsonantOffsetSec == value) return default;
+
+		//ConsonantOffsetSec = value;
+		SettingManager.ConsonantOffset = value;
+		return default;
+	}
+
+	[PropertyChanged(nameof(ThretholdSplitNote))]
+	[SuppressMessage("","IDE0051")]
+	private ValueTask ThretholdSplitNoteChangedAsync(double value)
+	{
+		if (ThretholdSplitNote == value) return default;
+
+		ThretholdSplitNote = value;
+		SettingManager.ThretholdSplitNote = value;
+		return default;
+	}
+
+	[PropertyChanged(nameof(SelectedTab))]
+	[SuppressMessage("","IDE0051")]
+	private ValueTask SelectedTabChangedAsync(int value)
+	{
+		if (SelectedTab == value) return default;
+
+		SettingManager.SelectedTab = value;
+		return default;
+	}
 	[PropertyChanged(nameof(SelectedCastIndex))]
 	[SuppressMessage("", "IDE0051")]
 	private ValueTask SelectedCastIndexChangedAsync(int value)
@@ -305,4 +368,6 @@ public sealed class MainViewModel
 
 		return default;
 	}
+
+
 }

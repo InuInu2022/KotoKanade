@@ -36,6 +36,7 @@
       <TabControl
         Grid.Row="0" Grid.Column="0"
         Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        SelectedIndex="{Binding SelectedTab}"
         >
         <!-- ========================== tab1 =================================== -->
         <TabItem Name="tab1">

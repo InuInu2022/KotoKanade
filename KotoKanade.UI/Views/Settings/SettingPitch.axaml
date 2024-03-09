@@ -40,6 +40,13 @@
         <StackPanel
           VerticalAlignment="Center"
           Orientation="Horizontal">
+          <Button
+            Margin="5 0"
+            Command="{Binding $parent[UserControl;1].((viewmodels:TabScTmgPitViewModel)DataContext).ResetBottomEstimateThrethold}"
+            CommandParameter="BottomEstimateThrethold">
+            <ui:SymbolIcon
+              Symbol="Refresh" FontSize="18" />
+          </Button>
           <TextBlock
             Text="{Binding #bottomThretholdSlider.Value, StringFormat='{}{0:0} hz.'}"
             HorizontalAlignment="Right"

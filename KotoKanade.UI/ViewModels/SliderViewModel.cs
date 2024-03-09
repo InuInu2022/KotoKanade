@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Epoxy;
+using KotoKanade.Core.Models;
 
 namespace KotoKanade.ViewModels;
 

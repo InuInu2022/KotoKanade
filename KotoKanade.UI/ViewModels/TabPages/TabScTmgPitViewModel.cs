@@ -15,9 +15,29 @@ public class TabScTmgPitViewModel
 		set => SettingManager.DoParallelEstimate = value;
 	}
 
-	public static double BottomEstimateThrethold
+	public double BottomEstimateThrethold { get; set; }
+		= SettingManager.BottomEstimateThrethold;
+
+	public Command? ResetBottomEstimateThrethold { get; set; }
+
+	public TabScTmgPitViewModel()
 	{
-		get => SettingManager.BottomEstimateThrethold;
-		set => SettingManager.BottomEstimateThrethold = value;
+		ResetBottomEstimateThrethold = Command.Factory.Create(ResetBottomEstimateThretholdEvent);
+	}
+
+	Func<ValueTask> ResetBottomEstimateThretholdEvent => () =>
+	{
+		BottomEstimateThrethold = SettingManager.DefaultBottomEstimateThrethold;
+		return default;
+	};
+
+	[PropertyChanged(nameof(BottomEstimateThrethold))]
+	[SuppressMessage("","IDE0051")]
+	private ValueTask BottomEstimateThretholdChangedAsync(double value)
+	{
+		if (BottomEstimateThrethold == value) return default;
+
+		SettingManager.BottomEstimateThrethold = value;
+		return default;
 	}
 }

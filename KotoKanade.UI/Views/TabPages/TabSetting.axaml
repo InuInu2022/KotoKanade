@@ -58,6 +58,17 @@
             </ui:SettingsExpanderItem.Footer>
           </ui:SettingsExpanderItem>
         </ui:SettingsExpander>
+        <ui:SettingsExpander
+          Header="App settings"
+          Description=""
+          IconSource="Setting"
+          Name="SettingsExpanderAppSettings">
+          <ui:SettingsExpander.Footer>
+            <WrapPanel>
+              <Button Content="Reset all settings" Margin="5 0" Command="{Binding ResetAllSettings}" />
+            </WrapPanel>
+          </ui:SettingsExpander.Footer>
+        </ui:SettingsExpander>
         <ui:SettingsExpander Header="Useful links"
                      IconSource="Globe"
                      Description="便利なサイトやアプリへのリンク"
