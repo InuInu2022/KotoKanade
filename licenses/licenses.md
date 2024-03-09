@@ -17,6 +17,7 @@
  | Microsoft.Bcl.AsyncInterfaces             | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Microsoft.CodeAnalysis.PublicApiAnalyzers | 3.3.4                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Microsoft.CSharp                          | 4.7.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Microsoft.Extensions.DependencyInjection  | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Microsoft.NET.Test.Sdk                    | 17.9.0                                          | LICENSE_MIT.txt | https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/17.9.0/License           | 
  | MinVer                                    | 4.3.0                                           | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
  | Newtonsoft.Json                           | 13.0.3                                          | MIT             | https://licenses.nuget.org/MIT                                                 | 
@@ -25,6 +26,7 @@
  | PolySharp                                 | 1.14.1+a7a92a9ddd050275c91c42b711d22cb41c3fbf3d | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | PrivateProxy                              | 1.0.2                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | PublishAotCompressed                      | 1.0.3                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | Sandreas.Avalonia.Preferences             | 0.0.3                                           |                 |                                                                                | 
  | SharpOpenJTalk.Lang                       | 1.4.0                                           |                 | https://raw.githubusercontent.com/yamachu/SharpOpenJTalk/master/LICENSE        | 
  | System.Collections.Immutable              | 8.0.0                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | System.Dynamic.Runtime                    | 4.3.0                                           | MS-EULA         | http://go.microsoft.com/fwlink/?LinkId=329770                                  | 
