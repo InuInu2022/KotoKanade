@@ -364,7 +364,6 @@ public sealed partial class TalkDataConverter
 	)
 	{
 		var phonemeIndex = 0;
-		//TODO: labも一緒に分割
 		//ノート単位で計算
 		var retNotes = notes.Select((n,i) =>
 		{
@@ -427,9 +426,17 @@ public sealed partial class TalkDataConverter
 				var result = lines
 					.Select(ln =>
 					{
+						//N以外の子音はそのまま
+						if(PhonemeUtil.IsConsonant(ln.Phoneme)
+						&& !PhonemeUtil.IsNasal(ln.Phoneme))
+						{
+							return (IsNeedSplit: false, Line: ln);
+						}
 						//分割しても音素最小値より大きくなるなら分割する
 						var msecLen = ln.Length / scaleLabLenToMsec;
-						var isNeedSplit = msecLen > th && msecLen* 2 > minPhLen;
+						var isNeedSplit =
+							msecLen > th
+							&& msecLen * 2 > minPhLen;
 						return (IsNeedSplit: isNeedSplit, Line: ln);
 					})
 					;

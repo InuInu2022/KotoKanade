@@ -36,6 +36,7 @@ public sealed class MainViewModel
 	public string? OpenedWavPath { get; set; }
 
 	public int SelectedTab { get; set; }
+		= SettingManager.SelectedTab;
 
 	public FAComboBoxItem? SelectedCastItem { get; set; }
 	public int SelectedCastIndex { get; set; }
@@ -340,7 +341,7 @@ public sealed class MainViewModel
 	[SuppressMessage("","IDE0051")]
 	private ValueTask SelectedTabChangedAsync(int value)
 	{
-		if (SelectedTab == value) return default;
+		//if (SelectedTab == value) return default;
 
 		SettingManager.SelectedTab = value;
 		return default;
