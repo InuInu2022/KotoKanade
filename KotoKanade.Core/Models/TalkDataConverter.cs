@@ -376,7 +376,7 @@ public sealed partial class TalkDataConverter
 						data.TempoList ?? defaultTempo)
 					.TotalMilliseconds
 				//音素から
-				: GetDurationByLabLine(n, phonemeIndex)
+				: GetDurationByLabLine(n, phonemeIndex, labLines)
 				;
 			// 分割閾値の設定
 			var th = noteSplit?.threthold ?? 100000;
@@ -391,107 +391,129 @@ public sealed partial class TalkDataConverter
 				return n;
 			}
 
-			//音素最小値
-			const double minPhLen = 0.025;
-
 			// 分割数の計算
 			//lab無しの場合
 			if(labLines is null)
 			{
-				var spCount = (int)Math.Floor(dur / th) + 1;
-				var ph = GetPhonemeLabel(GetFullContext([n]));
-				var sph = ph.Split('|');
-				var add = spCount - sph.Length;
-
-				// 追加音素不要なら元のノート返却
-				if (add <= 0) {
-					phonemeIndex += GetPhLen(ph);
-					return n;
-				}
-
-				// 音素分割拡張
-				var (sp, ln) = ExtendPhonemesWithPattern(sph, add, labLines, phonemeIndex);
-				sph = sp;
-				labLines = ln;
-				// 音素と歌詞の更新
-				n.Phonetic = string
-					.Join(',', sph);
-				n.Lyric = GetPronounce(string.Join('|', sph));
-				phonemeIndex += n.Phonetic.Split(',').Length;
+				return CulcSplitNumWithoutLab(ref labLines, n, ref phonemeIndex, dur, th);
 			}
 			//labありの場合
 			else
 			{
-				var lines = GetSpanLabLines(labLines, n, phonemeIndex);
-				var result = lines
-					.Select(ln =>
-					{
-						//N以外の子音はそのまま
-						if(PhonemeUtil.IsConsonant(ln.Phoneme)
-						&& !PhonemeUtil.IsNasal(ln.Phoneme))
-						{
-							return (IsNeedSplit: false, Line: ln);
-						}
-						//分割しても音素最小値より大きくなるなら分割する
-						var msecLen = ln.Length / scaleLabLenToMsec;
-						var isNeedSplit =
-							msecLen > th
-							&& msecLen * 2 > minPhLen;
-						return (IsNeedSplit: isNeedSplit, Line: ln);
-					})
-					;
-				// 追加音素不要なら元のノート返却
-				if(result.All(v => !v.IsNeedSplit))
-				{
-					phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
-					return n;
-				}
-				// 音素分割拡張
-				var sph = GetPhonemeLabel(GetFullContext([n])).Split('|');
-				var (sp, ln) = ExtendLabLines(sph, result, labLines, th, phonemeIndex);
-				sph = sp;
-				labLines = ln;
-				// 音素と歌詞の更新
-				n.Phonetic = string
-					.Join(',', sph);
-				n.Phonetic = n.Phonetic.Replace("|", "", StringComparison.Ordinal);
-
-				var s = string.Join(',', sph);
-				s = s
-					.Replace(",|", "|")
-					.Replace("|,", ",");
-				n.Lyric = GetPronounce(s);
-				phonemeIndex += n.Phonetic.Split(',').Length;
+				return CulcSplitNumWithLab(ref labLines, n, ref phonemeIndex, th);
 			}
-			// 分割後のnotes返す
-			return n;
 		})
 		.ToList()
 		;
 		return (retNotes, labLines);
-
-		double GetDurationByLabLine(Note note, int phonemeIndex)
-		{
-			var target = GetSpanLabLines(labLines, note, phonemeIndex);
-			if(target is []){ return 0.0; }
-
-			var start = target[0].From;
-			var last = target[^1].To;
-			return (last - start)/scaleLabLenToMsec;
-		}
-		static List<LabLine> GetSpanLabLines(List<LabLine> labLines, Note note, int phonemeIndex)
-		{
-			var ph = GetPhonemeLabel(GetFullContext([note]));
-			int phLen = GetPhLen(ph);
-			var s = phonemeIndex;
-			s = Math.Max(s, 0);
-			var e = s + phLen;
-			e = Math.Min(e, labLines.Count);
-			return labLines[s..e];
-		}
-		static int GetPhLen(string ph)
-			=> ph.Split([",", "|"], StringSplitOptions.None).Length;
 	}
+
+	// 分割数の計算 labあり
+	private static Note CulcSplitNumWithLab(
+		ref List<LabLine> labLines,
+		Note n,
+		ref int phonemeIndex,
+		double th
+	){
+		const double minPhLen = 0.025;
+		var lines = GetSpanLabLines(labLines, n, phonemeIndex);
+		var result = lines
+			.Select(ln =>
+			{
+				//N以外の子音はそのまま
+				if (PhonemeUtil.IsConsonant(ln.Phoneme)
+				&& !PhonemeUtil.IsNasal(ln.Phoneme))
+				{
+					return (IsNeedSplit: false, Line: ln);
+				}
+				//分割しても音素最小値より大きくなるなら分割する
+				var msecLen = ln.Length / scaleLabLenToMsec;
+				var isNeedSplit =
+					msecLen > th
+					&& msecLen * 2 > minPhLen;
+				return (IsNeedSplit: isNeedSplit, Line: ln);
+			})
+			;
+		// 追加音素不要なら元のノート返却
+		if (result.All(v => !v.IsNeedSplit))
+		{
+			phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
+			return n;
+		}
+		// 音素分割拡張
+		var sph = GetPhonemeLabel(GetFullContext([n])).Split('|');
+		var (sp, ln) = ExtendLabLines(sph, result, labLines, th, phonemeIndex);
+		sph = sp;
+		labLines = ln;
+		// 音素と歌詞の更新
+		n.Phonetic = string
+			.Join(',', sph);
+		n.Phonetic = n.Phonetic.Replace("|", "", StringComparison.Ordinal);
+
+		var s = string.Join(',', sph);
+		s = s
+			.Replace(",|", "|")
+			.Replace("|,", ",");
+		n.Lyric = GetPronounce(s);
+		phonemeIndex += n.Phonetic.Split(',').Length;
+		return n;
+	}
+
+	// 分割数の計算 labなし
+	private static Note CulcSplitNumWithoutLab(
+		ref List<LabLine>? labLines,
+		Note n,
+		ref int phonemeIndex,
+		double dur,
+		double th
+	)
+	{
+		var spCount = (int) Math.Floor(dur / th) + 1;
+		var ph = GetPhonemeLabel(GetFullContext([n]));
+		var sph = ph.Split('|');
+		var add = spCount - sph.Length;
+
+		// 追加音素不要なら元のノート返却
+		if (add <= 0)
+		{
+			phonemeIndex += GetPhLen(ph);
+			return n;
+		}
+
+		// 音素分割拡張
+		var (sp, ln) = ExtendPhonemesWithPattern(sph, add, labLines, phonemeIndex);
+		sph = sp;
+		labLines = ln;
+		// 音素と歌詞の更新
+		n.Phonetic = string
+			.Join(',', sph);
+		n.Lyric = GetPronounce(string.Join('|', sph));
+		phonemeIndex += n.Phonetic.Split(',').Length;
+		return n;
+	}
+
+	private static double GetDurationByLabLine(Note note, int phonemeIndex, List<LabLine> labLines)
+	{
+		var target = GetSpanLabLines(labLines, note, phonemeIndex);
+		if (target is []) { return 0.0; }
+
+		var start = target[0].From;
+		var last = target[^1].To;
+		return (last - start) / scaleLabLenToMsec;
+	}
+
+	private static List<LabLine> GetSpanLabLines(List<LabLine> labLines, Note note, int phonemeIndex)
+	{
+		var ph = GetPhonemeLabel(GetFullContext([note]));
+		int phLen = GetPhLen(ph);
+		var s = phonemeIndex;
+		s = Math.Max(s, 0);
+		var e = s + phLen;
+		e = Math.Min(e, labLines.Count);
+		return labLines[s..e];
+	}
+
+	private static int GetPhLen(string ph) => ph.Split([",", "|"], StringSplitOptions.None).Length;
 
 	private static (string[] ph,List<LabLine>? lines) ExtendPhonemesWithPattern(
 		string[] sph,
