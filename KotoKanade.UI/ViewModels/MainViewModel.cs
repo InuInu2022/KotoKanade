@@ -354,19 +354,51 @@ public sealed class MainViewModel
 
 		var def = TalkCasts[value];
 
+		//version
+		TalkCastVersions = new(def.Versions.OrderDescending());
+		SelectedCastVersionIndex = 0;   //reset
+
+
+
+
+
+		return default;
+	}
+
+	[PropertyChanged(nameof(SelectedCastVersionIndex))]
+	[SuppressMessage("","IDE0051")]
+	private ValueTask SelectedCastVersionIndexChangedAsync(int value)
+	{
+		if (TalkCasts is null) return default;
+		if (value < 0) return default;
+		if (TalkCastVersions is null) return default;
+
+		var def = TalkCasts[SelectedCastIndex];
+
 		//style
 		var list = def
 			.Emotions
 			.Select(e => e.Names.First(n => n.Lang == CevioCasts.Lang.Japanese).Display)
 			.Select(e => new StyleRate(e, 0))
 			;
+		//style order
+		if(def.EmotionOrder is not null)
+		{
+			var version = TalkCastVersions[value];
+			var order = def
+				.EmotionOrder
+				.First(o => string.Equals(o.Version, version, StringComparison.Ordinal))
+				.Order;
+
+			list = order
+				.Select(i => def.Emotions.First(e => string.Equals(e.Id, i, StringComparison.Ordinal)))
+				.Select(e => e!.Names.First(n => n.Lang == CevioCasts.Lang.Japanese).Display)
+				.Select(e => new StyleRate(e, rate: 0))
+				;
+		}
+
 		Styles = new(list);
 		Styles[0].Rate = 100;
-
-		//version
-		TalkCastVersions = new(def.Versions.OrderDescending());
-		SelectedCastVersionIndex = 0;   //reset
-
 		return default;
 	}
 
