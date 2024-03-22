@@ -93,11 +93,12 @@ public sealed class MainViewModel
 		];
 
 		GlobalParams = [
-			new("Speed", 1.5, 0.75, 1, 0.01 ),
-			new("Volume", 7.0, -7.0, 0, 0.01 ),
+			new("Speed", 5.0, 0.2, 1, 0.01 ),
+			new("Volume", 8.0, -8.0, 0, 0.01 ),
 			new("Pitch", 600.0, -600.0, 0, 1 ),
 			new("Alpha", 1.0, -1.0, 0, 0.01 ),
 			new("Into.", 2.0, 0.0, 1.0, 0.01 ),
+			new("Hus.", 20.0, -20.0, 1.0, 0.01 ),
 		];
 	}
 
@@ -247,6 +248,7 @@ public sealed class MainViewModel
 						LogF0Shift = GetParam("Pitch"),
 						AlphaShift = GetParam("Alpha"),
 						LogF0Scale = GetParam("Into."),
+						HuskyShift = GetParam("Hus."),
 					},
 					-ConsonantOffsetSec, //表示と逆
 					TalkCastVersions?[SelectedCastVersionIndex] ?? "",
@@ -358,10 +360,6 @@ public sealed class MainViewModel
 		TalkCastVersions = new(def.Versions.OrderDescending());
 		SelectedCastVersionIndex = 0;   //reset
 
-
-
-
-
 		return default;
 	}
 
@@ -397,10 +395,9 @@ public sealed class MainViewModel
 				;
 		}
 
+		Styles?.Clear();
 		Styles = new(list);
 		Styles[0].Rate = 100;
 		return default;
 	}
-
-
 }
