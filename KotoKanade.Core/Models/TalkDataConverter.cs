@@ -350,6 +350,7 @@ public sealed partial class TalkDataConverter
 			nu.LogF0Shift = globalParams.LogF0Shift;
 			nu.LogF0Scale = globalParams.LogF0Scale;
 			nu.AlphaShift = globalParams.AlphaShift;
+			nu.HuskyShift = globalParams.HuskyShift;
 		}
 		Debug.WriteLine($"u[{text}], start:{nu.Start}");
 		return nu;

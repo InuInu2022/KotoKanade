@@ -19,4 +19,8 @@ public record TalkGlobalParam
 	/// Speed
 	/// </summary>
 	public decimal SpeedRatio { get; init; }
+	/// <summary>
+	/// Hus.
+	/// </summary>
+	public decimal HuskyShift { get; init; }
 }
