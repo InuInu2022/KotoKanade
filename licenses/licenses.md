@@ -6,7 +6,7 @@
  | Avalonia.Fonts.Inter                      | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Avalonia.Markup.Xaml.Loader               | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | Avalonia.Themes.Fluent                    | 11.0.10                                         | MIT             | https://licenses.nuget.org/MIT                                                 | 
- | coverlet.collector                        | 6.0.1                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
+ | coverlet.collector                        | 6.0.2                                           | MIT             | https://licenses.nuget.org/MIT                                                 | 
  | DotnetWorld                               | 1.2.5                                           |                 | https://raw.githubusercontent.com/yamachu/DotnetWorld/master/LICENSE           | 
  | Epoxy.Avalonia11                          | 1.13.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
  | FluentAssertions                          | 6.12.0                                          | Apache-2.0      | https://licenses.nuget.org/Apache-2.0                                          | 
