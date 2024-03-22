@@ -14,7 +14,7 @@
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![C Sharp 12](https://img.shields.io/badge/C%20Sharp-12-4FC08D.svg?logo=csharp&style=flat)](https://learn.microsoft.com/ja-jp/dotnet/csharp/) ![.NET 8.0](https://img.shields.io/badge/%20.NET-8.0-blue.svg?logo=dotnet&style=flat) [![Made with Avalonia UI](https://img.shields.io/badge/Made_with-Avalonia_UI-blue.svg?logo=&style=flat)](https://avaloniaui.net/)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/inuinu2022/KotoKanade?include_prereleases&label=%F0%9F%9A%80release) ![GitHub all releases](https://img.shields.io/github/downloads/InuInu2022/KotoKanade/total?color=green&label=%E2%AC%87%20downloads) ![GitHub Repo stars](https://img.shields.io/github/stars/InuInu2022/KotoKanade?label=%E2%98%85&logo=github&style=flat)
-[![VoiSona Talk](https://img.shields.io/badge/VoiSona_Talk-1.1-53abdb.svg?logo=&style=flat)](https://voisona.com/talk/)
+[![VoiSona Talk](https://img.shields.io/badge/VoiSona_Talk-1.2-53abdb.svg?logo=&style=flat)](https://voisona.com/talk/)
 
 ## Video
 
