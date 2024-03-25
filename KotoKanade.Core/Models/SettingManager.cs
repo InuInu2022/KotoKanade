@@ -96,6 +96,12 @@ public static class SettingManager
 			set => Set(nameof(BottomEstimateThrethold), value);
 		}
 		public const double DefaultBottomEstimateThrethold = 50.0;
+
+		public static bool IsForceUseDownloadedFFMpeg
+		{
+			get => Get(nameof(IsForceUseDownloadedFFMpeg), false);
+			set => Set(nameof(IsForceUseDownloadedFFMpeg), value);
+		}
 	#endregion
 
 }

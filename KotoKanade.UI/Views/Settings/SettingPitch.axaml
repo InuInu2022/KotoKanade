@@ -66,5 +66,18 @@
         </StackPanel>
       </ui:SettingsExpanderItem.Footer>
     </ui:SettingsExpanderItem>
+    <ui:SettingsExpanderItem
+      Content="Force use downloaded FFMpeg"
+      Description="強制的にDLしたFFMpegで変換処理をするか">
+      <ui:SettingsExpanderItem.Footer>
+        <ToggleSwitch
+          Name="IsForceUseDownloadedFFMpeg"
+          IsChecked="{Binding $parent[UserControl;1].((viewmodels:TabScTmgPitViewModel)DataContext).IsForceUseDownloadedFFMpeg}"
+          OnContent="On"
+          OffContent="OFF"
+          HorizontalAlignment="Right"
+          />
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
   </ui:SettingsExpander>
 </UserControl>

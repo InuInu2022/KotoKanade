@@ -18,6 +18,12 @@ public class TabScTmgPitViewModel
 	public double BottomEstimateThrethold { get; set; }
 		= SettingManager.BottomEstimateThrethold;
 
+	public static bool IsForceUseDownloadedFFMpeg
+	{
+		get => SettingManager.IsForceUseDownloadedFFMpeg;
+		set => SettingManager.IsForceUseDownloadedFFMpeg = value;
+	}
+
 	public Command? ResetBottomEstimateThrethold { get; set; }
 
 	public TabScTmgPitViewModel()

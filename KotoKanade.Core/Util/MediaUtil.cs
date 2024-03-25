@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using KotoKanade.Core.Models;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
 
@@ -8,6 +9,9 @@ namespace KotoKanade.Core.Util;
 public static class MediaUtil
 {
 	const string ffmpegDownloadPath = "./lib/ffmpeg/";
+
+	private static readonly NLog.Logger Logger
+		= NLog.LogManager.GetCurrentClassLogger();
 
 	/// <summary>
 	/// まとめてチェック
@@ -19,9 +23,11 @@ public static class MediaUtil
 		CancellationToken ctx = default
 	){
 		//path通ってる？
-		var hasPath = await IsFFMpegInstalledPathAsync(ctx)
+		if(!SettingManager.IsForceUseDownloadedFFMpeg){
+			var hasPath = await IsFFMpegInstalledPathAsync(ctx)
 			.ConfigureAwait(false);
-		if (hasPath){ return true; }
+			if (hasPath){ return true; }
+		}
 
 		//通ってなければ独自パスある？
 		if (HasFFMpegExePath()) { return true; }
@@ -61,6 +67,7 @@ public static class MediaUtil
 		}
 		catch
 		{
+			Logger.Warn("ffmpeg path check error.");
 			return false;
 		}
 	}
@@ -68,21 +75,17 @@ public static class MediaUtil
 	public static bool
 	IsFFMpegDownloaded()
 	{
-		var exists = Directory.Exists(ffmpegDownloadPath);
+		var isDlDirExists = Directory.Exists(ffmpegDownloadPath);
+		var isExePathExists = Path.Exists(FFmpeg.ExecutablesPath);
 
 		if(
-			exists &&
-			!string.Equals(
-				Path.GetFullPath(ffmpegDownloadPath),
-				Path.GetFullPath(FFmpeg.ExecutablesPath),
-				StringComparison.Ordinal
-			)
+			isDlDirExists && !isExePathExists
 		)
 		{
 			FFmpeg.SetExecutablesPath(ffmpegDownloadPath);
 		}
 
-		return exists;
+		return isDlDirExists;
 	}
 
 	public static bool
@@ -97,6 +100,7 @@ public static class MediaUtil
 		IProgress<ProgressInfo>? progress = null
 	)
 	{
+		Logger.Info($"Start download FFMpeg to {ffmpegDownloadPath}");
 		await FFmpegDownloader
 			.GetLatestVersion(
 				FFmpegVersion.Official,
@@ -106,7 +110,9 @@ public static class MediaUtil
 			.ConfigureAwait(false);
 		FFmpeg.SetExecutablesPath(ffmpegDownloadPath);
 		if(!Directory.Exists(ffmpegDownloadPath)){
-			throw new DirectoryNotFoundException("downloaded ffmpeg path not found or cannot access!");
+			const string msg = $"downloaded ffmpeg path ({ffmpegDownloadPath}) not found or cannot access!";
+			Logger.Error(msg);
+			throw new DirectoryNotFoundException(msg);
 		}
 	}
 }
