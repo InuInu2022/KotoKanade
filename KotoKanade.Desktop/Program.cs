@@ -38,7 +38,9 @@ public static class Program
 		}
 		catch (Exception ex)
 		{
-			Logger.Fatal(ex, "Main App Error!");
+			Logger.Fatal(ex, $"Main App Error!\n{ex.Message}");
+			Logger.Error(ex.InnerException);
+			Logger.Error(ex.StackTrace);
 			return 1;
 		}
 		finally
