@@ -109,6 +109,7 @@ public static class MediaUtil
 			)
 			.ConfigureAwait(false);
 		FFmpeg.SetExecutablesPath(ffmpegDownloadPath);
+		Logger.Info("Finish download FFMpeg.");
 		if(!Directory.Exists(ffmpegDownloadPath)){
 			const string msg = $"downloaded ffmpeg path ({ffmpegDownloadPath}) not found or cannot access!";
 			Logger.Error(msg);
