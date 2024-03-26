@@ -176,11 +176,14 @@ public sealed partial class TalkDataConverter
 		var path = Path.Combine(
 			System.AppDomain.CurrentDomain.BaseDirectory,
 			"lib/open_jtalk_dic_utf_8-1.11/");
+		var userdic = Path.Combine(
+			System.AppDomain.CurrentDomain.BaseDirectory,
+			"lib/userdic/user.dic"
+		);
 		_ = await Task
 			.Run(() =>
 			{
-				//_jtalk = new OpenJTalkAPI();
-				return _jtalk.Initialize(path);
+				return _jtalk.Initialize(path, userdic);
 			})
 			.ConfigureAwait(false);
 	}
