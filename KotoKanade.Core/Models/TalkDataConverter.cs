@@ -181,10 +181,7 @@ public sealed partial class TalkDataConverter
 			"lib/userdic/user.dic"
 		);
 		_ = await Task
-			.Run(() =>
-			{
-				return _jtalk.Initialize(path, userdic);
-			})
+			.Run(() => _jtalk.Initialize(path, userdic))
 			.ConfigureAwait(false);
 	}
 
