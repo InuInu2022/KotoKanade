@@ -1308,11 +1308,6 @@ public sealed partial class TalkDataConverter
 		var concated = string
 			.Concat(p.Select(n => n.Lyric));
 
-		//TODO: ユーザー辞書対応
-		concated = concated
-			.Replace(
-			"クヮ", "クワ");
-
 		if (string.IsNullOrEmpty(concated))
 		{
 			concated = "ラ";
