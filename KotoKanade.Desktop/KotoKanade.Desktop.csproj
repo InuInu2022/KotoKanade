@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
 
+    <ApplicationIcon>../KotoKanade.UI/Assets/appicon/icon.ico</ApplicationIcon>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <SelfContained Condition="'$(Configuration)' == 'Debug'">false</SelfContained>
     <UseAppHost>true</UseAppHost>
