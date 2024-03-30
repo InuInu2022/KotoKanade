@@ -369,37 +369,62 @@ public sealed partial class TalkDataConverter
 		var filtered = basePhonemes
 			.Lines
 			.Where(v => !PhonemeUtil.IsNoSounds(v));
-		var tmp = FullContextLabUtil
-			.SplitByMora(basePhonemes.Lines.Cast<FCLabLineJa>())
+		var basePhraseMoras = FullContextLabUtil
+			.SplitByMora(filtered.Cast<FCLabLineJa>());
+		var tmp = basePhraseMoras
 			.Select((v,i) => $"{i}[{string.Join(',',v.Select(v2 => v2.Phoneme))}]")
 			;
 		Debug.WriteLine($"BASE PH: {GetPhonemeLabel(basePhonemes)}");
-		Debug.WriteLine($"BASE PH: {GetPronounce(GetPhonemeLabel(basePhonemes))}");
+		Debug.WriteLine($"BASE PR: {GetPronounce(GetPhonemeLabel(basePhonemes))}");
 		Debug.WriteLine(string.Join("\n", tmp));
+
 		var baseIndex = 0;
+		var moraIndex = 0;
 		var phonemeIndex = 0;
 		//ノート単位で計算
 		var retNotes = notes.Select((n,i) =>
 		{
 			//分割前の音素数計算
-			var baseNote = GetPhonemeLabel(GetFullContext([n]));
-			var basePhonemeCount = GetPhLen(baseNote);
+			var notefc = GetFullContext([n])
+				.Lines
+				.Where(v => !PhonemeUtil.IsNoSounds(v));
+			//var baseNote = GetPhonemeLabel(notefc);
+			//TODO: 「へ」を[h,e]と[e]でずれる
+			//var basePhonemeCount = GetPhLen(baseNote);
+			var noteMoraCount = FullContextLabUtil
+				.SplitByMora(notefc.Cast<FCLabLineJa>())
+				.Count;
 
 			#region compare
+			/*
 			var baseNotePhonemes = filtered
 				.Skip(baseIndex)
 				.Take(basePhonemeCount)
 				.Cast<FCLabLineJa>()
 				;
-			var baseMoras = FullContextLabUtil
-				.SplitByMora(baseNotePhonemes);
-			var s = string.Join("|",
-				baseMoras.Select(v => string.Join(",", v.Select(v2 => v2.Phoneme))));
+			*/
+			var baseNoteMoras = basePhraseMoras
+				.Skip(moraIndex)
+				.Take(noteMoraCount)
+				.ToList()
+				;
+			var basePhonemeCount = baseNoteMoras
+				.Sum(v => v.Count);
+
 			#endregion
 
-			Debug.WriteLine($"Compare n[{i}]:{baseNote}  phrase:{s}");
+			var b = string.Join("|",
+				FullContextLabUtil
+					.SplitByMora(notefc.Cast<FCLabLineJa>())
+					.Select(v => string.Join(",", v.Select(v2 => v2.Phoneme)))
+				);
+			var s = string.Join("|",
+				baseNoteMoras.Select(v => string.Join(",", v.Select(v2 => v2.Phoneme))));
+
+			Debug.WriteLine($"Compare n[{i}]:{b}  phrase:{s}");
 
 			baseIndex += basePhonemeCount;
+			moraIndex += noteMoraCount;
 
 			// 時間をミリ秒で計算
 			var dur = labLines is null
@@ -428,9 +453,9 @@ public sealed partial class TalkDataConverter
 			// 分割数の計算
 			return labLines is null
 				//lab無しの場合
-				? CulcSplitNumWithoutLab(ref labLines, n, ref phonemeIndex, dur, th, baseMoras)
+				? CulcSplitNumWithoutLab(ref labLines, n, ref phonemeIndex, dur, th, baseNoteMoras)
 				//lab有りの場合
-				: CulcSplitNumWithLab(ref labLines, n, ref phonemeIndex, th, baseMoras);
+				: CulcSplitNumWithLab(ref labLines, n, ref phonemeIndex, th, baseNoteMoras);
 		})
 		.ToList()
 		;
