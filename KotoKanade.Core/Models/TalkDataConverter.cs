@@ -364,10 +364,43 @@ public sealed partial class TalkDataConverter
 		List<LabLine>? labLines = null
 	)
 	{
+		//事前に分割前で発音を取得
+		var basePhonemes = GetFullContext(notes);
+		var filtered = basePhonemes
+			.Lines
+			.Where(v => !PhonemeUtil.IsNoSounds(v));
+		var tmp = FullContextLabUtil
+			.SplitByMora(basePhonemes.Lines.Cast<FCLabLineJa>())
+			.Select((v,i) => $"{i}[{string.Join(',',v.Select(v2 => v2.Phoneme))}]")
+			;
+		Debug.WriteLine($"BASE PH: {GetPhonemeLabel(basePhonemes)}");
+		Debug.WriteLine($"BASE PH: {GetPronounce(GetPhonemeLabel(basePhonemes))}");
+		Debug.WriteLine(string.Join("\n", tmp));
+		var baseIndex = 0;
 		var phonemeIndex = 0;
 		//ノート単位で計算
 		var retNotes = notes.Select((n,i) =>
 		{
+			//分割前の音素数計算
+			var baseNote = GetPhonemeLabel(GetFullContext([n]));
+			var basePhonemeCount = GetPhLen(baseNote);
+
+			#region compare
+			var baseNotePhonemes = filtered
+				.Skip(baseIndex)
+				.Take(basePhonemeCount)
+				.Cast<FCLabLineJa>()
+				;
+			var baseMoras = FullContextLabUtil
+				.SplitByMora(baseNotePhonemes);
+			var s = string.Join("|",
+				baseMoras.Select(v => string.Join(",", v.Select(v2 => v2.Phoneme))));
+			#endregion
+
+			Debug.WriteLine($"Compare n[{i}]:{baseNote}  phrase:{s}");
+
+			baseIndex += basePhonemeCount;
+
 			// 時間をミリ秒で計算
 			var dur = labLines is null
 				//ノートの長さから計算
@@ -387,22 +420,17 @@ public sealed partial class TalkDataConverter
 			if (dur < th) {
 				if (labLines is not null)
 				{
-					phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
+					phonemeIndex += basePhonemeCount;
 				}
 				return n;
 			}
 
 			// 分割数の計算
-			//lab無しの場合
-			if(labLines is null)
-			{
-				return CulcSplitNumWithoutLab(ref labLines, n, ref phonemeIndex, dur, th);
-			}
-			//labありの場合
-			else
-			{
-				return CulcSplitNumWithLab(ref labLines, n, ref phonemeIndex, th);
-			}
+			return labLines is null
+				//lab無しの場合
+				? CulcSplitNumWithoutLab(ref labLines, n, ref phonemeIndex, dur, th, baseMoras)
+				//lab有りの場合
+				: CulcSplitNumWithLab(ref labLines, n, ref phonemeIndex, th, baseMoras);
 		})
 		.ToList()
 		;
@@ -414,7 +442,8 @@ public sealed partial class TalkDataConverter
 		ref List<LabLine> labLines,
 		Note n,
 		ref int phonemeIndex,
-		double th
+		double th,
+		IList<List<FCLabLineJa>> baseMoras
 	){
 		const double minPhLen = 0.025;
 		var lines = GetSpanLabLines(labLines, n, phonemeIndex);
@@ -438,11 +467,14 @@ public sealed partial class TalkDataConverter
 		// 追加音素不要なら元のノート返却
 		if (result.All(v => !v.IsNeedSplit))
 		{
-			phonemeIndex += GetPhLen(GetPhonemeLabel(GetFullContext([n])));
+			phonemeIndex += baseMoras.Sum(m => m.Count);//GetPhLen(GetPhonemeLabel(GetFullContext([n])));
 			return n;
 		}
 		// 音素分割拡張
-		var sph = GetPhonemeLabel(GetFullContext([n])).Split('|');
+		var sph = baseMoras
+			.Select(m=>string.Join(',', m.Select(p=>p.Phoneme)))
+			.ToArray()
+			;//GetPhonemeLabel(GetFullContext([n])).Split('|');
 		var (sp, ln) = ExtendLabLines(sph, result, labLines, th, phonemeIndex);
 		sph = sp;
 		labLines = ln;
@@ -453,8 +485,8 @@ public sealed partial class TalkDataConverter
 
 		var s = string.Join(',', sph);
 		s = s
-			.Replace(",|", "|")
-			.Replace("|,", ",");
+			.Replace(",|", "|", StringComparison.Ordinal)
+			.Replace("|,", ",", StringComparison.Ordinal);
 		n.Lyric = GetPronounce(s);
 		phonemeIndex += n.Phonetic.Split(',').Length;
 		return n;
@@ -466,18 +498,21 @@ public sealed partial class TalkDataConverter
 		Note n,
 		ref int phonemeIndex,
 		double dur,
-		double th
+		double th,
+		IList<List<FCLabLineJa>> baseMoras
 	)
 	{
 		var spCount = (int) Math.Floor(dur / th) + 1;
-		var ph = GetPhonemeLabel(GetFullContext([n]));
-		var sph = ph.Split('|');
+		//var ph = GetPhonemeLabel(GetFullContext([n]));
+		var sph = baseMoras
+			.Select(m => string.Join(',', m.Select(p => p.Phoneme)))
+			.ToArray();//ph.Split('|');
 		var add = spCount - sph.Length;
 
 		// 追加音素不要なら元のノート返却
 		if (add <= 0)
 		{
-			phonemeIndex += GetPhLen(ph);
+			phonemeIndex += baseMoras.Sum(m => m.Count);//GetPhLen(ph);
 			return n;
 		}
 
