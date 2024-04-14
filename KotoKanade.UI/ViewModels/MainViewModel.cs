@@ -16,6 +16,7 @@ namespace KotoKanade.ViewModels;
 [ViewModel]
 public sealed class MainViewModel
 {
+	private bool isNotReady { get; set; } = true;
 	public Command Ready { get; }
 	public Command Close { get; }
 	public string Title { get; private set; } = "test";
@@ -127,6 +128,8 @@ public sealed class MainViewModel
 			AutoSearchFile("lab");
 		}
 
+		CanExport = CheckExportable();
+
 		void AutoSearchFile(string extension)
 		{
 			var search = Path.ChangeExtension(OpenedCcsPath, extension);
@@ -160,6 +163,7 @@ public sealed class MainViewModel
 		pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
 		OpenedLabPath = pathes[0];
 		DefaultLab = Path.GetFileName(pathes[0]);
+		CanExport = CheckExportable();
 	}
 
 	private async ValueTask SelectWavAsync()
@@ -179,6 +183,7 @@ public sealed class MainViewModel
 			.ForEach(f => Debug.WriteLine($"path: {f}"));
 		OpenedWavPath = pathes[0];
 		DefaultWav = Path.GetFileName(pathes[0]);
+		CanExport = CheckExportable();
 	}
 
 	private Func<ValueTask> ExportEvent =>
@@ -199,20 +204,11 @@ public sealed class MainViewModel
 				targetFileTypes: "VoiSonaTalkプロジェクトファイル"
 			).ConfigureAwait(true);
 
-			if (saved is null)
+			var saveDir = saved?.Path.LocalPath;
+			if (saved is null || saveDir is null)
 			{
 				_notify.Dismiss(loading!);
-				_notify.Warn(
-					"Save directory is not found!",
-					"保存先ディレクトリが見つかりません！");
-				CanExport = true;
-				return;
-			}
-			var saveDir = saved.Path.LocalPath;
-			if (saveDir is null)
-			{
-				_notify.Dismiss(loading!);
-				_notify.Warn(
+				_notify.Error(
 					"Save directory is not found!",
 					"保存先ディレクトリが見つかりません！");
 				CanExport = true;
@@ -231,6 +227,17 @@ public sealed class MainViewModel
 					IsUseWavFile
 				)
 				.ConfigureAwait(true);
+
+			var validated = SongDataValidater
+				.Validate(loadedSong, IsUseLabFile, IsUseWavFile);
+			if(!validated.IsValid)
+			{
+				DisplayInvalidAndReturn(
+					loading, sw, validated,
+					path, labPath, wavPath
+				);
+				return;
+			}
 
 			var isSplit = IsSplitNotes;
 
@@ -275,6 +282,40 @@ public sealed class MainViewModel
 			}
 		};
 
+	private void DisplayInvalidAndReturn(
+		INotificationMessage loading,
+		Stopwatch sw,
+		ValidatedResult validated,
+		string path,
+		string labPath,
+		string wavPath
+	)
+	{
+		_notify.Dismiss(loading!);
+		var reason = validated.Type switch
+		{
+			ResultType.BadPhrase => $"'{Path.GetFileName(path)}'のノーツに問題があります（ノーツが空、等）。",
+			ResultType.LabNotFound => $"タイミング情報ファイルの指定がないか、データに問題があります。('{Path.GetFileName(labPath)}')",
+			ResultType.WavNotFound => $"音声ファイルの指定がないか、データに問題があります。('{Path.GetFileName(wavPath)}')",
+			ResultType.TimingDataCountExcept
+				=> "タイミング情報ファイルのデータに問題があります。期待された長さと異なります。「音素の置き換え」等が原因の可能性があります。",
+			ResultType.PitchDataCountExcept
+				=> "音声ファイルから解析したピッチのデータに問題があります。期待された長さと異なります。異なる曲や調声の歌唱データを指定していることなどが原因の可能性があります。",
+			ResultType.TimingAndPitchCountExcept
+				=> "タイミング情報ファイルと音声ファイルの解析結果の長さが一致しません。別の曲や調声のファイルを指定している事が原因の可能性があります。",
+			_ => "データに想定外の問題があります。",
+		};
+		_notify.Error(
+			"Invalid song data is found!",
+			$"読み込んだソングデータに問題があります。{reason}");
+		CanExport = true;
+		sw.Stop();
+		_notify.Warn(
+			"Export failure...",
+			$"経過時間: {sw.Elapsed.TotalSeconds:F3} sec."
+		);
+	}
+
 	private static Func<ValueTask> CloseEvent =>
 		TalkDataConverter
 				.DisposeOpenJTalkAsync;
@@ -293,10 +334,12 @@ public sealed class MainViewModel
 				.Where(c => c.Product is Product.VoiSona && c.Category is Category.TextVocal);
 			TalkCasts = new(targets);
 
-			SelectedCastIndex = 0;
+			SelectedCastIndex =
+				SettingManager.SelectedTab;
 
 			_notify.Dismiss(loading!);
-			CanExport = true;
+			CanExport = CheckExportable();
+			isNotReady = false;
 		};
 
 	private Func<string, ValueTask> ResetParameterEvent => (paramName) =>
@@ -316,6 +359,30 @@ public sealed class MainViewModel
 		}
 		return default;
 	};
+
+	bool CheckExportable()
+	{
+		if (OpenedCcsPath is null or [])
+		{
+			return false;
+		}
+		else if (IsUseLabFile && OpenedLabPath is null or [])
+		{
+			return false;
+		}
+		else if (IsUseWavFile && OpenedWavPath is null or [])
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private enum TabIndex
+	{
+		ScoreOnly = 0,
+		ScoreAndTiming = 1,
+		ScoreTimingPitch = 2,
+	}
 
 	[PropertyChanged(nameof(ConsonantOffsetSec))]
 	[SuppressMessage("","IDE0051")]
@@ -343,8 +410,25 @@ public sealed class MainViewModel
 	[SuppressMessage("","IDE0051")]
 	private ValueTask SelectedTabChangedAsync(int value)
 	{
-		//if (SelectedTab == value) return default;
+		if(isNotReady){ return default; }
 
+		//force
+		switch (value)
+		{
+			case (int)TabIndex.ScoreOnly:
+				IsUseLabFile = false;
+				IsUseWavFile = false;
+				break;
+			case (int)TabIndex.ScoreAndTiming:
+				IsUseLabFile = true;
+				IsUseWavFile = false;
+				break;
+			case (int)TabIndex.ScoreTimingPitch:
+				IsUseLabFile = false;
+				IsUseWavFile = true;
+				break;
+		}
+		CanExport = CheckExportable();
 		SettingManager.SelectedTab = value;
 		return default;
 	}
