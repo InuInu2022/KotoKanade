@@ -201,6 +201,10 @@
   - ノートを分割する基準値
 - Use fast estimation
   - 高速解析をやるかどうか
+- Auto tuning bottom estimation threthold
+  - 試験機能
+  - 解析対象の最小値を自動で判定するか
+  - デフォルトはOFFです
 - Bottom estimation threthold Hz.
   - 解析対象の最小値(Hz.)
   - 大きくすると解析が速くなりますが、低い音が正しく解析できなくなります
