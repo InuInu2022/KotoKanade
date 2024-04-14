@@ -34,8 +34,23 @@
       </ui:SettingsExpanderItem.Footer>
     </ui:SettingsExpanderItem>
     <ui:SettingsExpanderItem
+      Content="Auto tuning bottom estimation threthold"
+      Description="楽譜から自動で解析値の最小を計算するか">
+      <ui:SettingsExpanderItem.Footer>
+        <ToggleSwitch
+          Name="DoAutoTuneThresholdButton"
+          IsChecked="{Binding $parent[UserControl;1].((viewmodels:TabScTmgPitViewModel)DataContext).DoAutoTuneThreshold}"
+          OnContent="Auto"
+          OffContent="Manual"
+          HorizontalAlignment="Right"
+          />
+      </ui:SettingsExpanderItem.Footer>
+    </ui:SettingsExpanderItem>
+    <ui:SettingsExpanderItem
       Content="Bottom estimation threthold Hz."
-      Description="解析の時何ヘルツ以上を解析するか">
+      Description="解析の時何ヘルツ以上を解析するか"
+      IsEnabled="{Binding !#DoAutoTuneThresholdButton.IsChecked}"
+      >
       <ui:SettingsExpanderItem.Footer>
         <StackPanel
           VerticalAlignment="Center"

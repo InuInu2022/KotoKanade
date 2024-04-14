@@ -130,10 +130,20 @@ public static class ScoreParser
 		var wp = new WorldParam(fs);
 		var hasCachedEstimated = EstimatedCache
 			.TryGetValue(wavHash, out var cachedEstimated);
+		var bottom = SettingManager.DoAutoTuneThreshold
+			? songData.GetBottomPitch()
+			: SettingManager.BottomEstimateThrethold;
+		bottom = Math.Min(bottom, 70.0);
+		if(SettingManager.DoAutoTuneThreshold)
+		{
+			SettingManager.BottomEstimateThrethold = bottom;
+		}
 		var estimated = hasCachedEstimated
 			? cachedEstimated
 			: await WorldUtil
-				.EstimateF0Async(x, len, wp, doParallel:SettingManager.DoParallelEstimate)
+				.EstimateF0Async(x, len, wp,
+					bottomPitch:bottom,
+					doParallel:SettingManager.DoParallelEstimate)
 				.ConfigureAwait(false);
 		if (!hasCachedEstimated)
 		{

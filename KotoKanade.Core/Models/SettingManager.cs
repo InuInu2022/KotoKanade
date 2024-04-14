@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Preferences;
 
@@ -7,6 +7,7 @@ namespace KotoKanade.Core.Models;
 public static class SettingManager
 {
 	private static readonly Preferences _pref = new();
+    public static event EventHandler<PropertyChangedEventArgs>? PropertyChanged;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	static T? Get<T>(string name, T defaultValue)
@@ -14,7 +15,10 @@ public static class SettingManager
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	static void Set<T>(string name, T value)
-		=> _pref.Set(name, value);
+	{
+		_pref.Set(name, value);
+		PropertyChanged?.Invoke(null, new PropertyChangedEventArgs(name));
+	}
 
 	public static async ValueTask ResetAllAsync(
 		CancellationToken ctx = default
@@ -86,22 +90,28 @@ public static class SettingManager
 	public const decimal DefaultConsonantOffset = -0.05m;
 
 	#region ModeC
-		public static bool DoParallelEstimate {
-			get => Get(nameof(DoParallelEstimate), true);
-			set => Set(nameof(DoParallelEstimate), value);
-		}
+	public static bool DoParallelEstimate {
+		get => Get(nameof(DoParallelEstimate), true);
+		set => Set(nameof(DoParallelEstimate), value);
+	}
 
-		public static double BottomEstimateThrethold {
-			get => Get(nameof(BottomEstimateThrethold), DefaultBottomEstimateThrethold);
-			set => Set(nameof(BottomEstimateThrethold), value);
-		}
-		public const double DefaultBottomEstimateThrethold = 50.0;
+	public static double BottomEstimateThrethold {
+		get => Get(nameof(BottomEstimateThrethold), DefaultBottomEstimateThrethold);
+		set => Set(nameof(BottomEstimateThrethold), value);
+	}
 
-		public static bool IsForceUseDownloadedFFMpeg
-		{
-			get => Get(nameof(IsForceUseDownloadedFFMpeg), false);
-			set => Set(nameof(IsForceUseDownloadedFFMpeg), value);
-		}
+	public const double DefaultBottomEstimateThrethold = 50.0;
+
+	public static bool DoAutoTuneThreshold {
+		get => Get(nameof(DoAutoTuneThreshold), false);
+		set => Set(nameof(DoAutoTuneThreshold), value);
+	}
+
+	public static bool IsForceUseDownloadedFFMpeg
+	{
+		get => Get(nameof(IsForceUseDownloadedFFMpeg), false);
+		set => Set(nameof(IsForceUseDownloadedFFMpeg), value);
+	}
 	#endregion
 
 }

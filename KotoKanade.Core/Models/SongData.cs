@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LibSasara;
 using LibSasara.Model;
 
 namespace KotoKanade.Core.Models;
@@ -34,4 +35,22 @@ public sealed record SongData{
 	//g Husky
 	//Volume => VOL
 	//Alpha => ALP
+
+	/// <summary>
+	/// 楽譜データの最小値を求める
+	/// </summary>
+	/// <returns></returns>
+	public double GetBottomPitch(
+		double offset = 5.0
+	)
+	{
+		if(PhraseList is null){
+			return SettingManager.DefaultBottomEstimateThrethold;
+		}
+
+		var minHz = PhraseList
+			.SelectMany(v => v)
+			.Min(n => SasaraUtil.OctaveStepToFreq(n.PitchOctave, n.PitchStep));
+		return minHz - offset;
+	}
 }

@@ -15,8 +15,16 @@ public class TabScTmgPitViewModel
 		set => SettingManager.DoParallelEstimate = value;
 	}
 
-	public double BottomEstimateThrethold { get; set; }
-		= SettingManager.BottomEstimateThrethold;
+	public static bool DoAutoTuneThreshold
+	{
+		get => SettingManager.DoAutoTuneThreshold;
+		set => SettingManager.DoAutoTuneThreshold = value;
+	}
+
+	public double BottomEstimateThrethold {
+		get => SettingManager.BottomEstimateThrethold;
+		set => SettingManager.BottomEstimateThrethold = value;
+	}
 
 	public static bool IsForceUseDownloadedFFMpeg
 	{
