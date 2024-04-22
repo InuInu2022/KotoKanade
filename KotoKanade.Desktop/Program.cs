@@ -2,7 +2,7 @@
 // Copyright (c) InuInu. All rights reserved.
 // </copyright>
 
-using System;
+using System.Globalization;
 using Avalonia;
 using NLog;
 using NLog.Config;
@@ -41,6 +41,15 @@ public static class Program
 			Logger.Fatal(ex, $"Main App Error!\n{ex.Message}");
 			Logger.Error(ex.InnerException);
 			Logger.Error(ex.StackTrace);
+			Logger.Error(ex.HResult);
+			var os = Environment.OSVersion;
+			Logger.Info($"""
+				-----
+				Platform: {os.Platform}
+				OS Version: {os.VersionString}
+				CPU counts: {Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture)}
+				-----
+				""");
 			return 1;
 		}
 		finally

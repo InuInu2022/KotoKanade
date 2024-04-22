@@ -63,6 +63,9 @@ public sealed class MainViewModel
 	public Command ExportFile { get; set; }
 	public bool CanExport { get; set; }
 
+	private static readonly NLog.Logger Logger
+		= NLog.LogManager.GetCurrentClassLogger();
+
 	public INotificationMessageManager Manager { get; }
 		= new NotificationMessageManager();
 	private readonly INotificationMessageManager _notify;
@@ -241,31 +244,46 @@ public sealed class MainViewModel
 
 			var isSplit = IsSplitNotes;
 
-			await TalkDataConverter
-				.GenerateFileAsync(
-					loadedSong,
-					saveDir,
-					TalkCasts?[SelectedCastIndex].Names[0].Display,
-					(isSplit, ThretholdSplitNote),
-					Styles?.Select(s => s.Rate).ToArray(),
-					globalParams: new()
-					{
-						SpeedRatio = GetParam("Speed"),
-						C0Shift = GetParam("Volume"),
-						LogF0Shift = GetParam("Pitch"),
-						AlphaShift = GetParam("Alpha"),
-						LogF0Scale = GetParam("Into."),
-						HuskyShift = GetParam("Hus."),
-					},
-					-ConsonantOffsetSec, //表示と逆
-					TalkCastVersions?[SelectedCastVersionIndex] ?? "",
-					timeScaleFactor: TimeScaleFactor
-				)
-				.ConfigureAwait(true);
+			try
+			{
+				await TalkDataConverter
+					.GenerateFileAsync(
+						loadedSong,
+						saveDir,
+						TalkCasts?[SelectedCastIndex].Names[0].Display,
+						(isSplit, ThretholdSplitNote),
+						Styles?.Select(s => s.Rate).ToArray(),
+						globalParams: new()
+						{
+							SpeedRatio = GetParam("Speed"),
+							C0Shift = GetParam("Volume"),
+							LogF0Shift = GetParam("Pitch"),
+							AlphaShift = GetParam("Alpha"),
+							LogF0Scale = GetParam("Into."),
+							HuskyShift = GetParam("Hus."),
+						},
+						-ConsonantOffsetSec, //表示と逆
+						TalkCastVersions?[SelectedCastVersionIndex] ?? "",
+						timeScaleFactor: TimeScaleFactor
+					)
+					.ConfigureAwait(true);
+			}
+			catch (System.Exception e)
+			{
+				_notify.Dismiss(loading!);
+				_notify.Error(
+					"Export failure! ファイル保存に失敗しました。",
+					$"経過時間: {sw.Elapsed.TotalSeconds:F3} sec. \n message: {e.Message}"
+				);
+				Logger.Fatal(e);
+				return;
+			}
+			finally{
+				CanExport = true;
+				sw.Stop();
+			}
 
-			CanExport = true;
 			_notify.Dismiss(loading!);
-			sw.Stop();
 			_notify.Info(
 				"Export success! ファイル保存に成功しました。",
 				$"経過時間: {sw.Elapsed.TotalSeconds:F3} sec."

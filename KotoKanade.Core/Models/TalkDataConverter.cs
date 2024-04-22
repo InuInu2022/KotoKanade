@@ -1,21 +1,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using CevioCasts;
-
 using KotoKanade.Core.Util;
-
-using LibSasara;
 using LibSasara.Model;
 using LibSasara.Model.FullContextLabel;
-using LibSasara.Model.Serialize;
 using LibSasara.VoiSona;
 using LibSasara.VoiSona.Model.Talk;
 using MathNet.Numerics.Interpolation;
@@ -30,6 +23,9 @@ public sealed partial class TalkDataConverter
 	public TalkDataConverter()
 	{
 	}
+
+	private static readonly NLog.Logger Logger
+		= NLog.LogManager.GetCurrentClassLogger();
 
 	private const int scaleLabLenToMsec = 10000;
 	private const int scaleLabLenToSec = 10000000;
@@ -65,9 +61,11 @@ public sealed partial class TalkDataConverter
 			timeScaleFactor
 		);
 
-		if (us is null)
+		if (us is null or [])
 		{
-			await Console.Error.WriteLineAsync("解析に失敗しました。。。")
+			const string msg = "解析に失敗しました。。。";
+			Logger.Error(msg);
+			await Console.Error.WriteLineAsync(msg)
 				.ConfigureAwait(false);
 			return;
 		}
@@ -106,59 +104,115 @@ public sealed partial class TalkDataConverter
 		ImmutableList<Utterance> us;
 		if (processed.TimingList?.Any() is not true)
 		{
-			us = processed
+			ImmutableList<List<Note>> pl = processed
 				.PhraseList?
-				.AsParallel().AsOrdered()
-				.Select(ToUtteranceWithoutLab(
-					processed,
-					emotionRates,
-					globalParams,
-					splitNote,
-					consonantOffset))
 				.ToImmutableList()
-				?? ImmutableList<Utterance>.Empty;
+				?? [];
+			try
+			{
+				us = pl
+					.AsParallel().AsOrdered()
+					.WithDegreeOfParallelism(Environment.ProcessorCount)
+					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+					.Select(ToUtteranceWithoutLab(
+						processed,
+						emotionRates,
+						globalParams,
+						splitNote,
+						consonantOffset))
+					.AsSequential()
+					.ToImmutableList()
+					?? ImmutableList<Utterance>.Empty;
+			}
+			catch (AggregateException e)
+			{
+				Logger.Info("error at mode A");
+				foreach (var ex in e.InnerExceptions)
+				{
+					Logger.Error(ex.Message);
+					if (ex is IndexOutOfRangeException)
+						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
+				}
+				throw;
+			}
 		}
 		else if (processed.PitchList?.Any() is not true)
 		{
 			var zipped = processed
 				.PhraseList?
-				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine));
+				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine))
+				.ToImmutableList();
 
-			us = zipped?
-				.AsParallel().AsOrdered()
-				.Select(tuple => ToUtteranceCore(
-					processed,
-					tuple.note,
-					tuple.LabLine,
-					null,
-					emotionRates,
-					globalParams,
-					splitNote,
-					consonantOffset))
-				.ToImmutableList()
-				?? ImmutableList<Utterance>.Empty;
+			try
+			{
+				us = zipped?
+					.AsParallel().AsOrdered()
+					.WithDegreeOfParallelism(Environment.ProcessorCount)
+					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+					.Select(tuple => ToUtteranceCore(
+						processed,
+						tuple.note,
+						tuple.LabLine,
+						null,
+						emotionRates,
+						globalParams,
+						splitNote,
+						consonantOffset))
+					.AsSequential()
+					.ToImmutableList()
+					?? ImmutableList<Utterance>.Empty;
+			}
+			catch (AggregateException e)
+			{
+				Logger.Info("error at mode B");
+				foreach (var ex in e.InnerExceptions)
+				{
+					Logger.Error(ex.Message);
+					if (ex is IndexOutOfRangeException)
+						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
+				}
+				throw;
+			}
 		}
 		else
 		{
 			var zipped = processed
 				.PhraseList?
 				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine))
-				.Zip(processed.PitchList, (tuple, f0) => (tuple.note, tuple.LabLine, f0));
+				.Zip(processed.PitchList, (tuple, f0) => (tuple.note, tuple.LabLine, f0))
+				.ToImmutableList();
 
-			us = zipped?
-				.AsParallel().AsOrdered()
-				.Select(tuple => ToUtteranceCore(
-					processed,
-					tuple.note,
-					tuple.LabLine,
-					tuple.f0,
-					emotionRates,
-					globalParams,
-					splitNote,
-					consonantOffset,
-					timeScaleFactor))
-				.ToImmutableList()
-				?? ImmutableList<Utterance>.Empty;
+			try
+			{
+				us = zipped?
+					.AsParallel().AsOrdered()
+					.WithDegreeOfParallelism(Environment.ProcessorCount)
+					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+					.Select(tuple => ToUtteranceCore(
+						processed,
+						tuple.note,
+						tuple.LabLine,
+						tuple.f0,
+						emotionRates,
+						globalParams,
+						splitNote,
+						consonantOffset,
+						timeScaleFactor))
+					.AsSequential()
+					.ToImmutableList()
+					?? ImmutableList<Utterance>.Empty;
+			}
+			catch (AggregateException e)
+			{
+				Logger.Info("error at mode C");
+				foreach (var ex in e.InnerExceptions)
+				{
+					Logger.Error(ex.Message);
+					if (ex is IndexOutOfRangeException)
+						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
+				}
+				throw;
+			}
 		}
 
 		sw.Stop();
@@ -233,7 +287,7 @@ public sealed partial class TalkDataConverter
 		//「っ」対応
 		notes = ManageCloseConsonant(notes);
 		//lab音素をnote由来に合わせて分割
-		if (labLines is not null)
+		if (labLines?.Count > 0)
 		{
 			var (nNotes, nLines) = ManageSameNoteVowels((notes, labLines));
 			notes = nNotes;
@@ -387,6 +441,11 @@ public sealed partial class TalkDataConverter
 				.SplitByMora(notefc.Cast<FCLabLineJa>())
 				.Count;
 
+			if(basePhraseMoras.Count <= moraIndex || basePhraseMoras.Count < moraIndex + noteMoraCount){
+				Debug.Fail("ノート分割で範囲外アクセス");
+				Logger.Error($"ノート分割で範囲外アクセス({nameof(SplitNoteIfSetOption)})");
+				return n;
+			}
 			var baseNoteMoras = basePhraseMoras
 				.Skip(moraIndex)
 				.Take(noteMoraCount)
@@ -723,6 +782,12 @@ public sealed partial class TalkDataConverter
 			;
 		//var middle = flat.Select(v => v.Line);
 		var afterIdx = currentPhIndex + combined.Count();
+		if(baseLabLines.Count <= currentPhIndex
+			|| baseLabLines.Count <= afterIdx)
+		{
+			Debug.Fail("範囲外アクセス発生");
+			return (resultPhonemes, baseLabLines);
+		}
 		baseLabLines =
 		[
 			..baseLabLines[..currentPhIndex],
@@ -865,9 +930,10 @@ public sealed partial class TalkDataConverter
 			}
 			//「ー」の時は前のノートの母音歌詞に置換
 			var prev = p[i - 1];
-			var ph = GetPhonemeLabel(GetFullContext(new List<Note> { prev }))
-				.Split('|')[^1]
-				.Split(',')[^1]
+			var ph = GetPhonemeLabel(GetFullContext([prev]))
+				.Split('|').LastOrDefault()?
+				.Split(',').LastOrDefault()
+				?? "a"
 				;
 			var last = IsInvalidPhoneme(ph) ? "a" : ph;
 			p[i].Lyric = lyric
@@ -900,8 +966,8 @@ public sealed partial class TalkDataConverter
 			//「っ」始まりの時は前のノートの最後の母音を冒頭に付与
 			var prev = p[i - 1];
 			var ph = GetPhonemeLabel(GetFullContext([prev]))
-				.Split('|')[^1]
-				.Split(',')[^1]
+				.Split('|').LastOrDefault()?
+				.Split(',').LastOrDefault() ?? "a"
 				;
 			var last = IsInvalidPhoneme(ph) ? "a" : ph;
 			p[i].Lyric = $"{GetPronounce(last)}{lyric}";
@@ -948,6 +1014,8 @@ public sealed partial class TalkDataConverter
 				{
 					//lab側が違っていれば前の音素を分割して長さ合わせる
 					var prevIndex = notePhIndex + j - 1;
+					prevIndex = Math.Max(prevIndex, 0);
+					prevIndex = Math.Min(prevIndex, nl.lines.Count);
 					var prev = nl.lines[prevIndex];
 
 					//前後に分ける
@@ -1235,7 +1303,7 @@ public sealed partial class TalkDataConverter
 	{
 		var tempo = song.TempoList ?? defaultTempo;
 		var timings = notes
-			.AsParallel().AsSequential()
+			//.AsParallel().AsSequential()
 			.Select((n, i) =>
 			{
 				//オフセット準備
@@ -1293,8 +1361,9 @@ public sealed partial class TalkDataConverter
 	{
 		var s = lines
 			.Select((line, i)
-				=> FormattableString
-					.Invariant($"{i+1}:{line.Length / 10000000:F3}")
+				=> string.Create(
+					CultureInfo.InvariantCulture,
+					$"{i+1}:{line.Length / 10000000:F3}")
 			)
 			;
 		return string.Join(',', s);
@@ -1313,13 +1382,16 @@ public sealed partial class TalkDataConverter
 
 	private static bool Check1stConsoPhoneme(Note n)
 	{
-		var result = GetPhonemeLabel(GetFullContext([n]))
-			.Split('|')[0]
-			.Split(',')[0];
+		var result = GetPhonemeLabel(GetFullContext([n]));
+		var pipe = result.Split('|');
+		if(pipe.Length == 0){ return false; }
+		var comma = pipe[0].Split(',');
+		if(comma.Length == 0){ return false; }
+		var check = comma[0];
 		return PhonemeUtil
-				.IsConsonant(result)
+				.IsConsonant(check)
 			&& !string
-				.Equals(result, "N", StringComparison.Ordinal);
+				.Equals(check, "N", StringComparison.Ordinal);
 	}
 
 	/// <summary>
