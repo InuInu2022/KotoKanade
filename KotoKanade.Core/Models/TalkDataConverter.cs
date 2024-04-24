@@ -127,9 +127,12 @@ public sealed partial class TalkDataConverter
 			catch (AggregateException e)
 			{
 				Logger.Info("error at mode A");
+				Logger.Error(e.Message);
 				foreach (var ex in e.InnerExceptions)
 				{
 					Logger.Error(ex.Message);
+					Logger.Error($"Exception Type: {ex.GetType().Name}");
+        			Logger.Error($"Stack Trace: {ex.StackTrace}");
 					if (ex is IndexOutOfRangeException)
 						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
 				}
@@ -1230,7 +1233,7 @@ public sealed partial class TalkDataConverter
 		var mCount = fcLabel
 			.Lines
 			.Cast<FCLabLineJa>()
-			.First()?
+			.FirstOrDefault()?
 			.UtteranceInfo?
 			.Mora
 			?? 0
@@ -1238,7 +1241,6 @@ public sealed partial class TalkDataConverter
 		var ac = Enumerable
 			.Range(0, mCount > 1 ? mCount - 1 : 0)
 			.Select(s => "h")
-			//.ToArray()
 			;
 		return $"l{string.Concat(ac)}";
 	}

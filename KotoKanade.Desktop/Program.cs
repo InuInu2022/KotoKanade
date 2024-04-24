@@ -33,6 +33,14 @@ public static class Program
 		{
 			InitLogger();
 			Logger.Info("App starting...");
+			var os = Environment.OSVersion;
+			Logger.Info($"""
+				-----
+				Platform: {os.Platform}
+				OS Version: {os.VersionString}
+				CPU counts: {Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture)}
+				-----
+				""");
 		  	return BuildAvaloniaApp().
 				StartWithClassicDesktopLifetime(args);
 		}
@@ -42,14 +50,6 @@ public static class Program
 			Logger.Error(ex.InnerException);
 			Logger.Error(ex.StackTrace);
 			Logger.Error(ex.HResult);
-			var os = Environment.OSVersion;
-			Logger.Info($"""
-				-----
-				Platform: {os.Platform}
-				OS Version: {os.VersionString}
-				CPU counts: {Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture)}
-				-----
-				""");
 			return 1;
 		}
 		finally

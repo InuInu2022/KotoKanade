@@ -638,6 +638,6 @@ public static class SplitPointCulclater
 		// 測定結果と与えられた期間の差分を計算し、最も近いものを返す
 		return measurementResults
 			.OrderBy(result => Math.Abs(result.Interval - arbitraryInterval))
-			.First();
+			.FirstOrDefault();
 	}
 }
