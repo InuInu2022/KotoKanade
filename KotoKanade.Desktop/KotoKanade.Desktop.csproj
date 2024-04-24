@@ -15,7 +15,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <PublishAot>false</PublishAot>
     <PublishSingleFile>true</PublishSingleFile>
-    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishReadyToRun>true</PublishReadyToRun>
     <TrimMode>full</TrimMode>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
@@ -26,7 +26,7 @@
     <EventSourceSupport>false</EventSourceSupport>
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
     <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
-    <StackTraceSupport>false</StackTraceSupport>
+    <StackTraceSupport>true</StackTraceSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <OptimizationPreference>Speed</OptimizationPreference>
     <SelfContained>true</SelfContained>
