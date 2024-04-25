@@ -57,8 +57,7 @@ public sealed partial class TalkDataConverter
 			rates,
 			globalParams,
 			splitNote,
-			consonantOffset,
-			timeScaleFactor
+			consonantOffset
 		);
 
 		if (us is null or [])
@@ -93,8 +92,7 @@ public sealed partial class TalkDataConverter
 		double[]? emotionRates,
 		TalkGlobalParam? globalParams,
 		(bool isSplit, double threthold)? splitNote,
-		decimal consonantOffset,
-		double timeScaleFactor
+		decimal consonantOffset
 	)
 	{
 		processed.TempoList ??= defaultTempo;
@@ -104,124 +102,203 @@ public sealed partial class TalkDataConverter
 		ImmutableList<Utterance> us;
 		if (processed.TimingList?.Any() is not true)
 		{
-			ImmutableList<List<Note>> pl = processed
-				.PhraseList?
-				.ToImmutableList()
-				?? [];
-			try
-			{
-				us = pl
-					.AsParallel().AsOrdered()
-					.WithDegreeOfParallelism(Environment.ProcessorCount)
-					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
-					.Select(ToUtteranceWithoutLab(
-						processed,
-						emotionRates,
-						globalParams,
-						splitNote,
-						consonantOffset))
-					.AsSequential()
-					.ToImmutableList()
-					?? ImmutableList<Utterance>.Empty;
-			}
-			catch (AggregateException e)
-			{
-				Logger.Info("error at mode A");
-				Logger.Error(e.Message);
-				foreach (var ex in e.InnerExceptions)
-				{
-					Logger.Error(ex.Message);
-					Logger.Error($"Exception Type: {ex.GetType().Name}");
-        			Logger.Error($"Stack Trace: {ex.StackTrace}");
-					if (ex is IndexOutOfRangeException)
-						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
-				}
-				throw;
-			}
+			us = ProcessModeA(processed, emotionRates, globalParams, splitNote, consonantOffset);
 		}
 		else if (processed.PitchList?.Any() is not true)
 		{
-			var zipped = processed
-				.PhraseList?
-				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine))
-				.ToImmutableList();
-
-			try
-			{
-				us = zipped?
-					.AsParallel().AsOrdered()
-					.WithDegreeOfParallelism(Environment.ProcessorCount)
-					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
-					.Select(tuple => ToUtteranceCore(
-						processed,
-						tuple.note,
-						tuple.LabLine,
-						null,
-						emotionRates,
-						globalParams,
-						splitNote,
-						consonantOffset))
-					.AsSequential()
-					.ToImmutableList()
-					?? ImmutableList<Utterance>.Empty;
-			}
-			catch (AggregateException e)
-			{
-				Logger.Info("error at mode B");
-				foreach (var ex in e.InnerExceptions)
-				{
-					Logger.Error(ex.Message);
-					if (ex is IndexOutOfRangeException)
-						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
-				}
-				throw;
-			}
+			us = ProcessModeB(processed, emotionRates, globalParams, splitNote, consonantOffset);
 		}
 		else
 		{
-			var zipped = processed
-				.PhraseList?
-				.Zip(processed.TimingList, (note, LabLine) => (note, LabLine))
-				.Zip(processed.PitchList, (tuple, f0) => (tuple.note, tuple.LabLine, f0))
-				.ToImmutableList();
-
-			try
-			{
-				us = zipped?
-					.AsParallel().AsOrdered()
-					.WithDegreeOfParallelism(Environment.ProcessorCount)
-					.WithMergeOptions(ParallelMergeOptions.NotBuffered)
-					.Select(tuple => ToUtteranceCore(
-						processed,
-						tuple.note,
-						tuple.LabLine,
-						tuple.f0,
-						emotionRates,
-						globalParams,
-						splitNote,
-						consonantOffset,
-						timeScaleFactor))
-					.AsSequential()
-					.ToImmutableList()
-					?? ImmutableList<Utterance>.Empty;
-			}
-			catch (AggregateException e)
-			{
-				Logger.Info("error at mode C");
-				foreach (var ex in e.InnerExceptions)
-				{
-					Logger.Error(ex.Message);
-					if (ex is IndexOutOfRangeException)
-						Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
-				}
-				throw;
-			}
+			us = ProcessModeC(processed, emotionRates, globalParams, splitNote, consonantOffset);
 		}
 
 		sw.Stop();
 		Debug.WriteLine($"★processed: {sw.ElapsedMilliseconds} msec.");
 
 		return us;
+	}
+
+	/// <summary>
+	/// notes only
+	/// </summary>
+	/// <param name="processed"></param>
+	/// <param name="emotionRates"></param>
+	/// <param name="globalParams"></param>
+	/// <param name="splitNote"></param>
+	/// <param name="consonantOffset"></param>
+	/// <returns></returns>
+	private static ImmutableList<Utterance> ProcessModeA(
+		SongData processed,
+		double[]? emotionRates,
+		TalkGlobalParam? globalParams,
+		(bool isSplit, double threthold)? splitNote,
+		decimal consonantOffset
+	)
+	{
+		ImmutableList<Utterance> us;
+		ImmutableList<List<Note>> pl = processed
+			.PhraseList?
+			.ToImmutableList()
+			?? [];
+		try
+		{
+			us = pl
+				.AsParallel().AsOrdered()
+				.WithDegreeOfParallelism(Environment.ProcessorCount)
+				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+				.Select(ToUtteranceWithoutLab(
+					processed,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.AsSequential()
+				.ToImmutableList()
+				?? [];
+		}
+		catch (AggregateException e)
+		{
+			Logger.Info("error at mode A");
+			LogErrorWithInnerException(e);
+			throw;
+		}
+		catch (Exception e)
+		{
+			Logger.Error($"msg: {e.Message}, {e.GetType().Name}, {e.StackTrace}, {e.HResult}");
+			throw;
+		}
+
+		return us;
+	}
+
+	/// <summary>
+	/// notes and timing
+	/// </summary>
+	/// <param name="processed"></param>
+	/// <param name="emotionRates"></param>
+	/// <param name="globalParams"></param>
+	/// <param name="splitNote"></param>
+	/// <param name="consonantOffset"></param>
+	/// <returns></returns>
+	private static ImmutableList<Utterance> ProcessModeB(
+		SongData processed,
+		double[]? emotionRates,
+		TalkGlobalParam? globalParams,
+		(bool isSplit, double threthold)? splitNote,
+		decimal consonantOffset
+	)
+	{
+		ImmutableList<Utterance> us;
+		var zipped = processed
+			.PhraseList?
+			.Zip(processed.TimingList!, (note, LabLine) => (note, LabLine))
+			.ToImmutableList();
+
+		try
+		{
+			us = zipped?
+				.AsParallel().AsOrdered()
+				.WithDegreeOfParallelism(Environment.ProcessorCount)
+				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+				.Select(tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					null,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.AsSequential()
+				.ToImmutableList()
+				?? [];
+		}
+		catch (AggregateException e)
+		{
+			Logger.Info("error at mode B");
+			LogErrorWithInnerException(e);
+			throw;
+		}
+		catch (Exception e)
+		{
+			Logger.Error($"msg: {e.Message}, {e.GetType().Name}, {e.StackTrace}, {e.HResult}");
+			throw;
+		}
+
+		return us;
+	}
+
+	/// <summary>
+	/// notes, timing, and pitches
+	/// </summary>
+	/// <param name="processed"></param>
+	/// <param name="emotionRates"></param>
+	/// <param name="globalParams"></param>
+	/// <param name="splitNote"></param>
+	/// <param name="consonantOffset"></param>
+	/// <returns></returns>
+	private static ImmutableList<Utterance> ProcessModeC(
+		SongData processed,
+		double[]? emotionRates,
+		TalkGlobalParam? globalParams,
+		(bool isSplit, double threthold)? splitNote,
+		decimal consonantOffset
+	)
+	{
+		ImmutableList<Utterance> us;
+		var zipped = processed
+			.PhraseList?
+			.Zip(processed.TimingList!, (note, LabLine) => (note, LabLine))
+			.Zip(processed.PitchList!, (tuple, f0) => (tuple.note, tuple.LabLine, f0))
+			.ToImmutableList();
+
+		try
+		{
+			us = zipped?
+				.AsParallel().AsOrdered()
+				.WithDegreeOfParallelism(Environment.ProcessorCount)
+				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+				.Select(tuple => ToUtteranceCore(
+					processed,
+					tuple.note,
+					tuple.LabLine,
+					tuple.f0,
+					emotionRates,
+					globalParams,
+					splitNote,
+					consonantOffset))
+				.AsSequential()
+				.ToImmutableList()
+				?? [];
+		}
+		catch (AggregateException e)
+		{
+			Logger.Info("error at mode C");
+			LogErrorWithInnerException(e);
+			throw;
+		}
+		catch (Exception e)
+		{
+			Logger.Error($"msg: {e.Message}, {e.GetType().Name}, {e.StackTrace}, {e.HResult}");
+			throw;
+		}
+
+		return us;
+	}
+
+	private static void LogErrorWithInnerException(AggregateException e)
+	{
+		Logger.Error(e.Message);
+		foreach (var ex in e.Flatten().InnerExceptions)
+		{
+			Logger.Error($"-Message: {ex.Message}");
+			Logger.Error($"-Exception Type: {ex.GetType().Name}");
+			Logger.Error($"-Stack Trace: {ex.StackTrace}");
+			Logger.Error($"-HResult: {ex.HResult}");
+			if (ex is IndexOutOfRangeException)
+				Logger.Error($"The data source is corrupt. Query stopped. {ex.Source}");
+		}
 	}
 
 	/// <summary>
@@ -277,8 +354,7 @@ public sealed partial class TalkDataConverter
 		double[]? emotionRates = null,
 		TalkGlobalParam? globalParams = null,
 		(bool isSplit, double threthold)? noteSplit = null,
-		decimal consonantOffset = 0.0m,
-		double timeScaleFactor = 0.035
+		decimal consonantOffset = 0.0m
 	)
 	{
 		//フレーズをセリフ化
@@ -447,6 +523,7 @@ public sealed partial class TalkDataConverter
 			if(basePhraseMoras.Count <= moraIndex || basePhraseMoras.Count < moraIndex + noteMoraCount){
 				Debug.Fail("ノート分割で範囲外アクセス");
 				Logger.Error($"ノート分割で範囲外アクセス({nameof(SplitNoteIfSetOption)})");
+				Logger.Info($"note:{n.Lyric}, basePhraseMoras.Count:{basePhraseMoras.Count}, moraIndex:{moraIndex}, noteMoraCount:{noteMoraCount}");
 				return n;
 			}
 			var baseNoteMoras = basePhraseMoras
@@ -1361,12 +1438,19 @@ public sealed partial class TalkDataConverter
 	[SuppressMessage("", "S6618")]
 	private static string GetDurationsFromLab(List<LabLine> lines)
 	{
+		if(lines is null or []){
+			return "1:0";
+		}
 		var s = lines
-			.Select((line, i)
-				=> string.Create(
+			.Select((line, i) =>
+			{
+				var val = line.Length == 0
+					? 0
+					: line.Length / 10000000;
+				return string.Create(
 					CultureInfo.InvariantCulture,
-					$"{i+1}:{line.Length / 10000000:F3}")
-			)
+					$"{i + 1}:{val:F3}");
+			})
 			;
 		return string.Join(',', s);
 	}
