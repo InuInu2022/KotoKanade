@@ -1,19 +1,16 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using LibSasara;
 using LibSasara.Model;
-using KotoKanade.Core.Util;
 
 namespace KotoKanade.Core.Models;
 
 public static class ScoreParser
 {
+	private static readonly NLog.Logger Logger
+		= NLog.LogManager.GetCurrentClassLogger();
 	/// <summary>
 	/// songのccs/ccstデータを解析する
 	/// </summary>
@@ -45,7 +42,9 @@ public static class ScoreParser
 			.FirstOrDefault();
 		if (trackset is null || song is null)
 		{
-			await Console.Error.WriteLineAsync($"Error!: ソングデータがありません: {path}")
+			var msg = $"Error!: ソングデータがありません: {path}";
+			Logger.Error(msg);
+			await Console.Error.WriteLineAsync(msg)
 				.ConfigureAwait(false);
 			return new SongData();
 		}
