@@ -144,6 +144,7 @@ public sealed partial class TalkDataConverter
 		try
 		{
 			us = pl
+				.Where(n => n.Count != 0)
 				.AsParallel().AsOrdered()
 				.WithDegreeOfParallelism(Environment.ProcessorCount)
 				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
@@ -198,6 +199,7 @@ public sealed partial class TalkDataConverter
 		try
 		{
 			us = zipped?
+				.Where(n => n.note.Count != 0)
 				.AsParallel().AsOrdered()
 				.WithDegreeOfParallelism(Environment.ProcessorCount)
 				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
@@ -256,6 +258,7 @@ public sealed partial class TalkDataConverter
 		try
 		{
 			us = zipped?
+				.Where(n => n.note.Count != 0)
 				.AsParallel().AsOrdered()
 				.WithDegreeOfParallelism(Environment.ProcessorCount)
 				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
@@ -290,6 +293,7 @@ public sealed partial class TalkDataConverter
 	private static void LogErrorWithInnerException(AggregateException e)
 	{
 		Logger.Error(e.Message);
+		Logger.Info($"Environment.ProcessorCount:{Environment.ProcessorCount}");
 		foreach (var ex in e.Flatten().InnerExceptions)
 		{
 			Logger.Error($"-Message: {ex.Message}");
@@ -402,7 +406,13 @@ public sealed partial class TalkDataConverter
 
 		//フレーズ最初が子音の時のオフセット
 		var offset = 0.0m;
-		var firstPh = phoneme.Split('|')[0].Split(',')[0];
+		var firstPh = string.IsNullOrEmpty(phoneme)
+			? string.Empty
+			: phoneme
+				.Split('|')
+				.FirstOrDefault()?
+				.Split(',')
+				.FirstOrDefault() ?? string.Empty;
 		if (PhonemeUtil.IsConsonant(firstPh))
 		{
 			//とりあえず 固定値
@@ -1344,6 +1354,7 @@ public sealed partial class TalkDataConverter
 	private static FullContextLab GetFullContext(IEnumerable<Note> notes)
 	{
 		//_jtalk ??= new OpenJTalkAPI();
+		if(!notes.Any()){ return new(string.Empty); }
 
 		var lyrics = GetPhraseText(notes);
 		if (fcLabelCache
@@ -1528,6 +1539,7 @@ public sealed partial class TalkDataConverter
 	/// <returns></returns>
 	private static string GetPhraseText(IEnumerable<Note> p)
 	{
+		if(!p.Any()) { return string.Empty; }
 		var concated = string
 			.Concat(p.Select(n => n.Lyric));
 
