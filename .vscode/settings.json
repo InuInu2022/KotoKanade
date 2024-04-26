@@ -9,7 +9,8 @@
         "symbolIcon.functionForeground":"#fff200c5",
         "symbolIcon.methodForeground":"#f5f2b4"
     },
-    "sarif-viewer.connectToGithubCodeScanning": "off" //,
+    "sarif-viewer.connectToGithubCodeScanning": "off",
+    "cosine.AIModel": "Smarter" //,
     //"markiscodecoverage.searchCriteria": "test/TestResults/*/coverage.lconv",
     //"dotnet-test-explorer.testProjectPath": "test/test.csproj"
 }
