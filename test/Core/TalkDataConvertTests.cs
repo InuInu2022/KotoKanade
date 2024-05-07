@@ -181,6 +181,32 @@ public class TalkDataConvertTests
 			int intValue);
 	}
 
+	public static readonly TheoryData<IList<Note>, SongData, string>
+	GetSplittedTimingData = new()
+	{
+		{
+			[new Note()],
+			new SongData(),
+			"0.005,0.000,0.125"
+		},
+	};
+
+	[Theory]
+	[MemberData(nameof(GetSplittedTimingData))]
+	public void GetSplittedTiming(
+		IList<Note> actual,
+		SongData songData,
+		string expect
+	)
+	{
+		var result = CallMethodWithReturn<
+			string,
+			object[]
+		>(nameof(GetSplittedTiming), [actual, songData, 0.0m]);
+
+		result.Should().Be(expect);
+	}
+
 	private static TRet? CallMethodWithReturn<TRet, TArg>(
 		string methodName,
 		TArg arg

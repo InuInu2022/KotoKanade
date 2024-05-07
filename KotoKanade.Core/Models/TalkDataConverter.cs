@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -872,12 +873,13 @@ public sealed partial class TalkDataConverter
 			;
 		//var middle = flat.Select(v => v.Line);
 		var afterIdx = currentPhIndex + combined.Count();
+		/*
 		if(baseLabLines.Count <= currentPhIndex
 			|| baseLabLines.Count <= afterIdx)
 		{
 			Debug.Fail("範囲外アクセス発生");
 			return (resultPhonemes, baseLabLines);
-		}
+		}*/
 		baseLabLines =
 		[
 			..baseLabLines[..currentPhIndex],
@@ -1066,7 +1068,7 @@ public sealed partial class TalkDataConverter
 	}
 
 	private static (List<Note> notes, List<LabLine> lines) ManageSameNoteVowels(
-		(List<Note> notes, List<LabLine> lines) nl
+		(IReadOnlyList<Note> notes, IReadOnlyList<LabLine> lines) nl
 	)
 	{
 		//同じノートで母音が続いている場合はlab側の母音を分割
@@ -1074,10 +1076,16 @@ public sealed partial class TalkDataConverter
 		char[] sep = ['|', ','];
 		int notePhIndex = 0;
 
+		var retNotes = new List<Note>(nl.notes);
+		var retLines = new List<LabLine>(nl.lines);
 		for(var i = 0; i < nl.notes.Count; i++)
 		{
 			var lyric = nl.notes[i].Lyric;
-			if (lyric is null) continue;
+			if (lyric is null)
+			{
+				continue;
+			}
+
 			var ph = GetPhonemeLabel(GetFullContext([nl.notes[i]]));
 			ReadOnlySpan<string> span = ph.Split(sep);
 			for(var j = 0; j < span.Length; j++){
@@ -1091,8 +1099,8 @@ public sealed partial class TalkDataConverter
 				{
 					//lab側の長さが短いときは最後の音素を分割
 					var (last1, last2) = SplitLabLine(nl.lines[^1]);
-					nl.lines = [
-						..nl.lines[..^1],
+					retLines = [
+						..retLines[..^1],
 						last1,
 						last2,
 					];
@@ -1100,7 +1108,7 @@ public sealed partial class TalkDataConverter
 				}
 
 				if (!string.Equals(tPh, labPh, StringComparison.Ordinal)
-					&& IsSameVowels(j, tPh, nl.lines, notePhIndex))
+					&& IsSameVowels(j, tPh, retLines, notePhIndex))
 				{
 					//lab側が違っていれば前の音素を分割して長さ合わせる
 					var prevIndex = notePhIndex + j - 1;
@@ -1113,17 +1121,17 @@ public sealed partial class TalkDataConverter
 
 					//分割した音素を差し込む
 					var next = notePhIndex + j;
-					nl.lines = [
-						..nl.lines[..prevIndex],
-							bPrev, aPrev,
-							..nl.lines[next..],
-						];
+					retLines = [
+						..retLines[..prevIndex],
+						bPrev, aPrev,
+						..retLines[next..],
+					];
 				}
 			}
 			notePhIndex += span.Length;
 		}
 
-		return (nl.notes,nl.lines);
+		return (retNotes, retLines);
 	}
 
 	private static bool IsSameVowels(int j, string tPh, List<LabLine> ln, int notePhIndex)
@@ -1166,7 +1174,8 @@ public sealed partial class TalkDataConverter
 		SongData data)
 	{
 		var tempo = data.TempoList ?? defaultTempo;
-		List<(TimeSpan start, TimeSpan end, double logF0, int counts)> d = notes
+		ImmutableList<(TimeSpan start, TimeSpan end, double logF0, int counts)> d = notes
+			.ToImmutableList()
 			.ConvertAll(n =>
 			(
 				start: LibSasara.SasaraUtil
@@ -1364,13 +1373,18 @@ public sealed partial class TalkDataConverter
 			return cachedLabel;
 		}
 
-		var text = Enumerable.Empty<string>();
+		var text = Enumerable.Empty<string>().ToList();
 		lock (_jtalk)
 		{
-			text = _jtalk.GetLabels(lyrics);
+			foreach (var s in SplitString(lyrics))
+			{
+				var chunk = _jtalk.GetLabels(s);
+				text.AddRange(chunk);
+			}
+			//text = _jtalk.GetLabels(lyrics);
 		}
 
-		if (text is null)
+		if (text is [])
 		{
 			return new(string.Empty);
 		}
@@ -1378,6 +1392,40 @@ public sealed partial class TalkDataConverter
 		var ret = new FullContextLab(string.Join('\n', text));
 		fcLabelCache.TryAdd(lyrics, ret);
 		return ret;
+	}
+
+	static ReadOnlyCollection<string> SplitString(string text)
+	{
+		const int chunkMax = 100;
+		if (text.Length <= chunkMax)
+		{
+			return new ReadOnlyCollection<string>([text]);
+		}
+		var span = text.AsSpan();
+		var splitCount = span.Length / chunkMax;
+		var index = 0;
+		var ret = new List<string>();
+		for (var i = 0; i < splitCount; i++)
+		{
+			var chunk = span.Slice(index, chunkMax);
+			index += chunkMax;
+			for(var j = 0; j < chunk.Length; j++)
+			{
+				if (!IsNotSplittable(chunk[^(j+1)..^j]))
+				{
+					index -= j;
+					break;
+				}
+			}
+			ret.Add(chunk.ToString());
+		}
+		ret.Add(span[index..].ToString());
+		return ret.AsReadOnly();
+
+		static bool IsNotSplittable(ReadOnlySpan<char> check)
+		{
+			return NotSplitRegex().IsMatch(check);
+		}
 	}
 
 	/// <summary>
@@ -1393,6 +1441,7 @@ public sealed partial class TalkDataConverter
 	{
 		var tempo = song.TempoList ?? defaultTempo;
 		var timings = notes
+			.ToImmutableList()
 			//.AsParallel().AsSequential()
 			.Select((n, i) =>
 			{
@@ -1430,6 +1479,7 @@ public sealed partial class TalkDataConverter
 				//ノートあたりの長さを音素数で等分
 				var nLen = (decimal)(end - start);
 				nLen = isConso1stPh ? nLen - (offset * 1000) : nLen;
+				Debug.WriteLine($"nLen[{n.Lyric}]: {nLen}");
 				var sub = nLen / repeat;
 				var len = Enumerable
 					.Range(0, repeat)
@@ -1505,9 +1555,10 @@ public sealed partial class TalkDataConverter
 			//母音音素一つになるので1
 			return 1;
 		}
+		const int minCount = 1;
 		if (n.Lyric is null)
 		{
-			return 1;
+			return minCount;
 		}
 
 		var isCached = fcLabelCache
@@ -1520,12 +1571,18 @@ public sealed partial class TalkDataConverter
 			: GetFullContext([n]);
 		fcLabelCache.TryAdd(n.Lyric, fcLabel);
 
-		return fcLabel
+		if(fcLabel.Lines.Count == 0)
+		{
+			return minCount;
+		}
+
+		var ret = fcLabel
 			.Lines
 			.Cast<FCLabLineJa>()
 			.Select(s => s.Phoneme)
 			//前後sil除外
 			.Count(s => !string.Equals(s, "sil", StringComparison.Ordinal));
+		return Math.Max(minCount, ret);
 	}
 
 	/// <summary>
@@ -1587,6 +1644,9 @@ public sealed partial class TalkDataConverter
 		matchTimeoutMilliseconds: 1000)]
 	private static partial Regex SpecialLabelRegexClass();
 	private static readonly Regex SpecialLabelRegex = SpecialLabelRegexClass();
+
+	[GeneratedRegex("[ぁぃぅぇぉァィゥェォゕゖヵヶゃゅょャュョゎヮっッんンー]", RegexOptions.Compiled,1000)]
+	private static partial Regex NotSplitRegex();
 #else
 	private static readonly Regex SpecialLabelRegex
 		= new(
