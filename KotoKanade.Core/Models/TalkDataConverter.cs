@@ -571,6 +571,8 @@ public sealed partial class TalkDataConverter
 				{
 					phonemeIndex += basePhonemeCount;
 				}
+				//フレーズ側の音素に置き換え
+				n.Phonetic = GetPhoneticFromMora(baseNoteMoras);
 				return n;
 			}
 
@@ -584,6 +586,18 @@ public sealed partial class TalkDataConverter
 		.ToList()
 		;
 		return (retNotes, labLines);
+	}
+
+	private static string GetPhoneticFromMora(
+		IEnumerable<List<FCLabLineJa>> baseNoteMoras
+	)
+	{
+		var ph = baseNoteMoras
+			.Select(m => string.Join(',', m.Select(p => p.Phoneme)));
+		var s = string
+			.Join(',', ph)
+			.Replace("|", "", StringComparison.Ordinal);
+		return s;
 	}
 
 	[Conditional("DEBUG")]
@@ -615,6 +629,7 @@ public sealed partial class TalkDataConverter
 			baseNoteMoras.Select(v => string.Join(",", v.Select(v2 => v2.Phoneme))));
 
 		Debug.WriteLine($"Compare n[{i}]:{b}  phrase:{s}");
+		Debug.WriteLineIf(!string.Equals(b, s, StringComparison.Ordinal), $"Diff! {b} != {s}");
 	}
 
 	// 分割数の計算 labあり
@@ -647,7 +662,9 @@ public sealed partial class TalkDataConverter
 		// 追加音素不要なら元のノート返却
 		if (result.All(v => !v.IsNeedSplit))
 		{
-			phonemeIndex += baseMoras.Sum(m => m.Count);//GetPhLen(GetPhonemeLabel(GetFullContext([n])));
+			phonemeIndex += baseMoras.Sum(m => m.Count);
+			//フレーズ側の音素に置き換え
+			n.Phonetic = GetPhoneticFromMora(baseMoras);
 			return n;
 		}
 		// 音素分割拡張
@@ -692,7 +709,9 @@ public sealed partial class TalkDataConverter
 		// 追加音素不要なら元のノート返却
 		if (add <= 0)
 		{
-			phonemeIndex += baseMoras.Sum(m => m.Count);//GetPhLen(ph);
+			phonemeIndex += baseMoras.Sum(m => m.Count);
+			//フレーズ側の音素に置き換え
+			n.Phonetic = GetPhoneticFromMora(baseMoras);
 			return n;
 		}
 
@@ -747,7 +766,7 @@ public sealed partial class TalkDataConverter
 		var resultPhonemes = target switch
 		{
 			//ん
-			"N" => add > 1 ?
+			"N" => add > 2 ?
 			[
 				.. sph[..targetIndex],
 				.. Enumerable
@@ -777,7 +796,8 @@ public sealed partial class TalkDataConverter
 		{
 			case "N":
 			{
-				if (add <= 1){ break;}
+				//「ンン」にならないようにadd <= 2はskip
+				if (add <= 2){ break;}
 				if(labLines.Count <= phonemeIndex){
 						phonemeIndex = labLines.Count - 1;
 				}
@@ -908,6 +928,7 @@ public sealed partial class TalkDataConverter
 			{
 				//長すぎる「ん」は間に[u]を分割挿入
 				//mora
+				if(div <= 2){ break; }
 				var moras = Enumerable
 					.Repeat("u", div)
 					.ToArray();
@@ -954,6 +975,7 @@ public sealed partial class TalkDataConverter
 			case "N":
 			{
 				//長すぎる「ん」は間に[u]を分割挿入
+				if(div <= 2){ break; }
 
 				//lab
 				var lines = DivideLabLine(t.Line, div)
