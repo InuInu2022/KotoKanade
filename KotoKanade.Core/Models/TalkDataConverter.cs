@@ -1385,7 +1385,7 @@ public sealed partial class TalkDataConverter
 	private static FullContextLab GetFullContext(IEnumerable<Note> notes)
 	{
 		//_jtalk ??= new OpenJTalkAPI();
-		if(!notes.Any()){ return new(string.Empty); }
+		if(notes?.Any() != true) { return new(string.Empty); }
 
 		var lyrics = GetPhraseText(notes);
 		if (fcLabelCache
@@ -1394,6 +1394,8 @@ public sealed partial class TalkDataConverter
 			//キャッシュがあればキャッシュを返す
 			return cachedLabel;
 		}
+
+		if(lyrics is "" or []){ return new(string.Empty); }
 
 		var text = Enumerable.Empty<string>().ToList();
 		lock (_jtalk)
