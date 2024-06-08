@@ -13,10 +13,14 @@
   <ItemGroup>
     <ProjectReference Include="..\lib\LibSasara\LibSasara\LibSasara.csproj" />
     <ProjectReference Include="..\lib\LibSasara\LibSasara.VoiSona\LibSasara.VoiSona.csproj" />
+    <ProjectReference Include="..\lib\cevio-casts\languages\csharp\CevioCasts\CevioCasts.csproj" />
+    <ProjectReference Include="..\lib\cevio-casts\languages\csharp\CevioCasts.UpdateChecker\CevioCasts.UpdateChecker.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DotnetWorld" Version="1.2.5" />
+    <PackageReference Include="GithubReleaseDownloader" Version="1.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Mayerch1.GithubUpdateCheck" Version="1.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NLog" Version="5.3.1" />
     <PackageReference Include="PolySharp" Version="1.14.1">

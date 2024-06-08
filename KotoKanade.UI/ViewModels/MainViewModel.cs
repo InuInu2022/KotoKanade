@@ -5,18 +5,20 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Avalonia.Controls;
 using Avalonia.Notification;
 using CevioCasts;
 using Epoxy;
 using FluentAvalonia.UI.Controls;
 using KotoKanade.Core.Models;
+using KotoKanade.Core.Util;
 
 namespace KotoKanade.ViewModels;
 
 [ViewModel]
 public sealed class MainViewModel
 {
-	private bool isNotReady { get; set; } = true;
+	private bool IsNotReady { get; set; } = true;
 	public Command Ready { get; }
 	public Command Close { get; }
 	public string Title { get; private set; } = "test";
@@ -54,7 +56,7 @@ public sealed class MainViewModel
 	public double ThretholdSplitNote {get;set;}
 		= SettingManager.ThretholdSplitNote;
 	public Command? ResetThretholdSplitNote { get; }
-
+	public Command? GotoSettingTab { get; private set; }
 	public decimal ConsonantOffsetSec { get; set; }
 		= SettingManager.ConsonantOffset;
 	public Command? ResetConsonantOffset { get; }
@@ -63,10 +65,14 @@ public sealed class MainViewModel
 	public Command ExportFile { get; set; }
 	public bool CanExport { get; set; }
 
+	public bool HasCastDataUpdate { get; set; }
+	public bool HasAppUpdate { get; set; }
+	public bool HasUpdate { get; set; }
+
 	private static readonly NLog.Logger Logger
 		= NLog.LogManager.GetCurrentClassLogger();
 
-	public INotificationMessageManager Manager { get; }
+	public static INotificationMessageManager Manager { get; }
 		= new NotificationMessageManager();
 	private readonly INotificationMessageManager _notify;
 
@@ -89,6 +95,11 @@ public sealed class MainViewModel
 
 		ResetConsonantOffset = Command.Factory.Create(ResetParameterEvent);
 		ResetThretholdSplitNote = Command.Factory.Create(ResetParameterEvent);
+
+		GotoSettingTab = Command.Factory.Create(() => {
+			SelectedTab = (int) TabIndex.Setting;
+			return default;
+		});
 
 		Styles = [
 			new("Normal", 12.3),
@@ -342,23 +353,71 @@ public sealed class MainViewModel
 		async () =>
 		{
 			var loading = _notify
-				.Loading("Now awaking...","起動しています。");
+				.Loading("Now awaking...", "起動しています。");
 
-			var defs = await CastDefManager
-				.GetAllCastDefsAsync()
+			//load defs
+
+			await LoadCastDataAsync()
 				.ConfigureAwait(true);
-			var targets = defs
-				.Casts
-				.Where(c => c.Product is Product.VoiSona && c.Category is Category.TextVocal);
-			TalkCasts = new(targets);
 
 			SelectedCastIndex =
 				SettingManager.SelectedTab;
 
-			_notify.Dismiss(loading!);
+			try
+			{
+				await CheckAsync()
+					.ConfigureAwait(true);
+			}
+			catch (System.Exception e)
+			{
+				_notify.Warn(
+			"Update check failure",
+			$"更新確認ができませんでした… 理由:{e.Message}"
+				);
+			}
+			finally
+			{
+				HasUpdate = HasCastDataUpdate || HasAppUpdate;
+				_notify.Dismiss(loading!);
+			}
+
 			CanExport = CheckExportable();
-			isNotReady = false;
+			IsNotReady = false;
 		};
+
+	public async ValueTask LoadCastDataAsync(bool forceReload = false)
+	{
+		Definitions? defs = default;
+		if(forceReload)
+		{
+			defs = await CastDefManager
+				.ReloadCastDefsAsync()
+				.ConfigureAwait(true);
+		}else
+		{
+			defs = await CastDefManager
+				.GetAllCastDefsAsync()
+				.ConfigureAwait(true);
+		}
+
+		var targets = defs
+			.Casts
+			.Where(c => c.Product is Product.VoiSona && c.Category is Category.TextVocal);
+		TalkCasts = new(targets);
+	}
+
+	public async ValueTask CheckAsync()
+	{
+		//app update check
+		HasAppUpdate = await UpdateChecker
+			.Build()
+			.IsAvailableAsync()
+			.ConfigureAwait(true);
+		//def update check
+		HasCastDataUpdate = await CastDefManager
+			.HasUpdateAsync()
+			.ConfigureAwait(true);
+	}
 
 	private Func<string, ValueTask> ResetParameterEvent => (paramName) =>
 	{
@@ -400,6 +459,7 @@ public sealed class MainViewModel
 		ScoreOnly = 0,
 		ScoreAndTiming = 1,
 		ScoreTimingPitch = 2,
+		Setting = 3,
 	}
 
 	[PropertyChanged(nameof(ConsonantOffsetSec))]
@@ -428,7 +488,7 @@ public sealed class MainViewModel
 	[SuppressMessage("","IDE0051")]
 	private ValueTask SelectedTabChangedAsync(int value)
 	{
-		if(isNotReady){ return default; }
+		if(IsNotReady){ return default; }
 
 		//force
 		switch (value)

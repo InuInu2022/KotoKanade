@@ -125,6 +125,12 @@
                 FontFamily="{StaticResource SymbolThemeFontFamily}"
                 VerticalAlignment="Center"
               />
+              <ui:InfoBadge
+                Name="updateInfoIcon"
+                IsVisible="{Binding HasUpdate}"
+                Classes="Attention Icon"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right" />
             </StackPanel>
           </TabItem.Header>
           <views:TabSetting />
@@ -150,6 +156,22 @@
           HorizontalAlignment="Right"
           Orientation="Horizontal"
           >
+          <ui:InfoBar
+            Title="Update:更新があります"
+            IsOpen="{Binding HasUpdate}"
+            IsClosable="True"
+            HorizontalAlignment="Left">
+            <ui:InfoBar.ActionButton>
+              <Button
+                Content="Check"
+                Command="{Binding GotoSettingTab}" />
+            </ui:InfoBar.ActionButton>
+            <ui:InfoBar.Transitions>
+              <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:1.5"/>
+              </Transitions>
+            </ui:InfoBar.Transitions>
+          </ui:InfoBar>
           <!-- IsChecked="{Binding IsOpenWithCeVIO}" -->
           <ToggleSwitch
             IsVisible="False"

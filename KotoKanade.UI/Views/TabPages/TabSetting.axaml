@@ -15,6 +15,10 @@
     <viewmodels:TabSettingsViewModel />
   </UserControl.DataContext>
 
+  <epoxy:EventBinder.Events>
+    <epoxy:Event EventName="Loaded" Command="{Binding Ready}" />
+  </epoxy:EventBinder.Events>
+
   <Grid
     RowDefinitions="Auto,3*"
     >
@@ -25,7 +29,6 @@
       DockPanel.Dock="Top"
       Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}"
       Margin="1, 5"
-      ToolTip.Tip="ソングのCeVIOのプロジェクトファイル (.ccs/.ccst) を選択してください。"
       >
       <TextBlock Text="各種設定" />
     </StackPanel>
@@ -54,6 +57,78 @@
                 <ui:HyperlinkButton Content="Manual" NavigateUri="https://github.com/InuInu2022/KotoKanade"  />
                 <ui:HyperlinkButton Content="ニコニ・コモンズ" NavigateUri="https://commons.nicovideo.jp/works/nc326561" />
                 <Button Content="License" Margin="5 0" Command="{Binding OpenLicense}" />
+              </WrapPanel>
+            </ui:SettingsExpanderItem.Footer>
+          </ui:SettingsExpanderItem>
+        </ui:SettingsExpander>
+        <!-- update -->
+        <ui:SettingsExpander
+          Header="Updates"
+          Description="アプリやデータのアップデート情報"
+          IconSource="Important"
+          Name="SettingsExpanderDataUpdates">
+          <ui:SettingsExpander.Footer>
+            <ui:InfoBadge
+             Classes="Attention Icon"
+             IsVisible="{Binding $parent[UserControl;1].((viewmodels:MainViewModel)DataContext).HasUpdate}"
+             HorizontalAlignment="Right" />
+          </ui:SettingsExpander.Footer>
+          <ui:SettingsExpanderItem
+            Content="KotoKanade ver."
+            Description="{Binding AppVer}">
+            <ui:SettingsExpanderItem.Footer>
+              <WrapPanel>
+                <ui:InfoBar
+                  Title="Update:更新があります"
+                  IsOpen="{Binding $parent[UserControl;1].((viewmodels:MainViewModel)DataContext).HasAppUpdate}"
+                  IsClosable="False"
+                  Message="{Binding LatestAppVer}">
+                  <ui:InfoBar.ActionButton>
+                    <ui:HyperlinkButton
+                      Content="Go to Download link"
+                      NavigateUri="{Binding AppDownloadPath}"
+                      HorizontalAlignment="Right"
+                       />
+                  </ui:InfoBar.ActionButton>
+                </ui:InfoBar>
+                <ui:InfoBar
+                  Title="Latest:最新です"
+                  IsOpen="{Binding !$parent[UserControl;1].((viewmodels:MainViewModel)DataContext).HasAppUpdate}"
+                  IsClosable="False"
+                  Severity="Success"
+                  Message="{Binding LatestAppVer}"
+                  >
+                </ui:InfoBar>
+              </WrapPanel>
+            </ui:SettingsExpanderItem.Footer>
+          </ui:SettingsExpanderItem>
+          <ui:SettingsExpanderItem
+            Content="Cast data ver."
+            Description="{Binding CastDataVersion}">
+            <ui:SettingsExpanderItem.Footer>
+              <WrapPanel>
+                <ui:InfoBar
+                  Title="Update:更新があります"
+                  IsOpen="{Binding $parent[UserControl;1].((viewmodels:MainViewModel)DataContext).HasCastDataUpdate}"
+                  IsClosable="False"
+                  Message="{Binding LatestCastDataVersion}">
+                  <ui:InfoBar.ActionButton>
+                    <Button
+                      Content="Update"
+                      HorizontalAlignment="Right"
+                      Command="{Binding DownloadCastData}"
+                      >
+                    </Button>
+                  </ui:InfoBar.ActionButton>
+                </ui:InfoBar>
+                <ui:InfoBar
+                  Title="Latest:最新です"
+                  IsOpen="{Binding !$parent[UserControl;1].((viewmodels:MainViewModel)DataContext).HasCastDataUpdate}"
+                  IsClosable="False"
+                  Severity="Success"
+                  Message="{Binding LatestCastDataVersion}"
+                  >
+                </ui:InfoBar>
               </WrapPanel>
             </ui:SettingsExpanderItem.Footer>
           </ui:SettingsExpanderItem>

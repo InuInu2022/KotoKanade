@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CevioCasts;
+using CevioCasts.UpdateChecker;
 using LibSasara.VoiSona.Model.Talk;
 
 namespace KotoKanade.Core.Models;
@@ -11,13 +13,32 @@ public static class CastDefManager
 	[ThreadStatic]
 	private static Definitions? loadedDefinitions;
 
+	/// <summary>
+	/// ボイスライブラリのデータを読み込む。既に読み込み済みならそれを返す。
+	/// </summary>
+	/// <seealso cref="ReloadCastDefsAsync(CancellationToken)"/>
 	public static async ValueTask<Definitions>
 	GetAllCastDefsAsync(
 		CancellationToken token = default
 	)
 	{
-		if (loadedDefinitions is not null) { return loadedDefinitions; }
+		return loadedDefinitions ?? await LoadCastDefsAsync(token)
+			.ConfigureAwait(false);
+	}
 
+	/// <summary>
+	/// 強制的にボイスライブラリのデータを読み込む。jsonデータを更新した後などに使う。
+	/// </summary>
+	/// <seealso cref="GetAllCastDefsAsync(CancellationToken)"/>
+	public static ValueTask<Definitions>
+	ReloadCastDefsAsync(CancellationToken token = default)
+	{
+		return LoadCastDefsAsync(token);
+	}
+
+	private static async ValueTask<Definitions>
+	LoadCastDefsAsync(CancellationToken token = default)
+	{
 		var path = Path.Combine(
 			AppDomain.CurrentDomain.BaseDirectory,
 			"lib/data.json"
@@ -28,10 +49,10 @@ public static class CastDefManager
 		var defs = Definitions.FromJson(jsonString);
 		if (defs is null)
 		{
-			#pragma warning disable PH_P007 // Unused Cancellation Token
+#pragma warning disable PH_P007 // Unused Cancellation Token
 			await Console.Error.WriteLineAsync($"invalid cast definitions data: {path}")
 				.ConfigureAwait(false);
-			#pragma warning restore PH_P007 // Unused Cancellation Token
+#pragma warning restore PH_P007 // Unused Cancellation Token
 			ThrowInvalidException(path);
 		}
 		loadedDefinitions = defs;
@@ -41,6 +62,37 @@ public static class CastDefManager
 		static void ThrowInvalidException(string path)
 		{
 			throw new InvalidDataException($"invalid cast definitions data: {path}");
+		}
+	}
+
+	public static async ValueTask<string> GetVersionAsync(
+		CancellationToken token = default
+	)
+	{
+		var def = await GetAllCastDefsAsync(token)
+			.ConfigureAwait(false);
+
+		return def.Version;
+	}
+
+	public static async ValueTask<string> GetRepositoryVersionAsync(
+		CancellationToken token = default
+	)
+	{
+		var defs = await GetAllCastDefsAsync(token)
+			.ConfigureAwait(false);
+		var update = GithubRelease
+			.Build(defs);
+		try
+		{
+			var version = await update
+				.GetRepositoryVersionAsync()
+				.ConfigureAwait(false);
+			return version.ToString();
+		}
+		catch (System.Exception)
+		{
+			throw;
 		}
 	}
 
@@ -68,6 +120,71 @@ public static class CastDefManager
 				$"cast name {castName} is not found in cast data. please check https://github.com/InuInu2022/cevio-casts/ ",
 				nameof(castName));
 		return _cast;
+	}
+
+	public static async ValueTask<bool> HasUpdateAsync(
+		CancellationToken token = default
+	)
+	{
+		var defs = await GetAllCastDefsAsync(token)
+			.ConfigureAwait(false);
+		var update = GithubRelease
+			.Build(defs);
+		return await update
+			.IsAvailableAsync()
+			.ConfigureAwait(false);
+	}
+
+	public static async ValueTask UpdateDefinitionAsync(
+		IProgress<double>? progress = default,
+		CancellationToken token = default
+	)
+	{
+		var defs = await GetAllCastDefsAsync(token)
+			.ConfigureAwait(false);
+		var update = GithubRelease
+			.Build(defs);
+		var tempPath = Path.GetTempPath();
+		Debug.WriteLine($"temp download: {tempPath}");
+		await update
+			.DownloadAsync(
+				tempPath,//"lib/data.json",
+				percent: progress,
+				cancellationToken: token
+			)
+			.ConfigureAwait(false);
+
+		var destPath = Path.Combine(
+			AppDomain.CurrentDomain.BaseDirectory,
+			"lib/data.json"
+		);
+
+		try
+		{
+			var tempStream = new FileStream(
+				Path.Combine(tempPath,"data.json"),
+				FileMode.Open,
+				FileAccess.Read,
+				FileShare.Read,
+				4096,
+				FileOptions.Asynchronous);
+			var destStream = new FileStream(
+				destPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous);
+			await using (tempStream.ConfigureAwait(false))
+			{
+				await using (destStream.ConfigureAwait(false))
+				{
+					await tempStream
+						.CopyToAsync(destStream, token)
+						.ConfigureAwait(false);
+				}
+			}
+		}
+		catch (System.Exception e)
+		{
+			Debug.WriteLine($"{e.Message}");
+			throw;
+		}
 	}
 
 	internal static async ValueTask<Voice>

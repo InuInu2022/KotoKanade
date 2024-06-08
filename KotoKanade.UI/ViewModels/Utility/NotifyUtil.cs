@@ -100,7 +100,9 @@ public static class NotifyUtil
 	public static INotificationMessage Loading(
 		this INotificationMessageManager manager,
 		string header,
-		string message
+		string message,
+		bool isIndeterminate = true,
+		DownloadProgress? progress = null
 	)
 	{
 		return manager
@@ -118,8 +120,11 @@ public static class NotifyUtil
 					BorderThickness = new Thickness(0),
 					Foreground = new SolidColorBrush(Color.FromArgb(128, 128, 128, 255)),
 					Background = Brushes.Transparent,
-					IsIndeterminate = true,
-					IsHitTestVisible = false
+					IsIndeterminate = isIndeterminate,
+					IsHitTestVisible = false,
+					Minimum = 0.0,
+					Maximum = 1.0,
+					Value = progress?.Value ?? 0,
 				})
 			.Animates(true)
 			.Queue();

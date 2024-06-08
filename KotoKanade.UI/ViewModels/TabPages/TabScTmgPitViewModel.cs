@@ -21,6 +21,7 @@ public class TabScTmgPitViewModel
 		set => SettingManager.DoAutoTuneThreshold = value;
 	}
 
+	[SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "<保留中>")]
 	public double BottomEstimateThrethold {
 		get => SettingManager.BottomEstimateThrethold;
 		set => SettingManager.BottomEstimateThrethold = value;
