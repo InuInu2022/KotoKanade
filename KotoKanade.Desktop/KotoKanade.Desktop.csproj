@@ -64,6 +64,8 @@
     <Delete Files="$(OutputPath)/publish/$(AssemblyName).Core.pdb" />
     <Delete Files="$(OutputPath)/publish/KotoKanade.UI.pdb" />
     <Delete Files="$(OutputPath)/publish/KotoKanade.Core.pdb" />
+    <Delete Files="$(OutputPath)/publish/CevioCasts.pdb" />
+    <Delete Files="$(OutputPath)/publish/CevioCasts.UpdateChecker.pdb" />
     <Delete Files="$(OutputPath)/publish/*.pdb" />
     <Delete Files="$(OutputPath)/publish/*.xml" />
     <Delete Files="$(OutputPath)/publish/LibSasara.xml" />
