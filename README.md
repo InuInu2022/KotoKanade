@@ -49,7 +49,7 @@
 
 アプリかボイスライブラリの情報([cast-data](https://github.com/InuInu2022/cevio-casts))に更新があるとアプリ上に通知が入ります。
 
-![update checker](.\images\KotoKanade_UpdateCheck.PNG)
+![update checker](./images/KotoKanade_UpdateCheck.PNG)
 
 - アプリのダウンロード
   - アプリの更新があると通知され、アプリの上からダウンロードできます
