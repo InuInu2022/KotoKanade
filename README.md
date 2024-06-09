@@ -12,7 +12,7 @@
 
 ---
 
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![C Sharp 12](https://img.shields.io/badge/C%20Sharp-12-4FC08D.svg?logo=csharp&style=flat)](https://learn.microsoft.com/ja-jp/dotnet/csharp/) ![.NET 8.0](https://img.shields.io/badge/%20.NET-8.0-blue.svg?logo=dotnet&style=flat) [![Made with Avalonia UI](https://img.shields.io/badge/Made_with-Avalonia_UI-blue.svg?logo=&style=flat)](https://avaloniaui.net/)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![C Sharp 12](https://img.shields.io/badge/C%20Sharp-12-4FC08D.svg?logo=csharp&style=flat)](https://learn.microsoft.com/ja-jp/dotnet/csharp/) ![.NET 8.0](https://img.shields.io/badge/%20.NET-8.0-blue.svg?logo=dotnet&style=flat) [![Made with Avalonia UI](https://img.shields.io/badge/Made_with-Avalonia_UI-blue.svg?logo=&style=flat)](https://avaloniaui.net/)  [![Made with Epoxy](https://img.shields.io/badge/Made_with-Epoxy-blue.svg?style=flat)](https://github.com/kekyo/Epoxy)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/inuinu2022/KotoKanade?include_prereleases&label=%F0%9F%9A%80release) ![GitHub all releases](https://img.shields.io/github/downloads/InuInu2022/KotoKanade/total?color=green&label=%E2%AC%87%20downloads) ![GitHub Repo stars](https://img.shields.io/github/stars/InuInu2022/KotoKanade?label=%E2%98%85&logo=github&style=flat)
 [![VoiSona Talk](https://img.shields.io/badge/VoiSona_Talk-1.2-53abdb.svg?logo=&style=flat)](https://voisona.com/talk/)
 
@@ -34,7 +34,7 @@
 - ダウンロード方法
   - 上から一番新しい物を選んでzipファイルをダウンロードして展開して使ってください
   - アップデートはそのまま上書きしてください
-  - アンインストールは解凍したフォルダをまるごと消してください
+  - アンインストールは展開したフォルダをまるごと消してください
 
 - サポートOS
   - Windows10/11
@@ -44,6 +44,21 @@
 - [ニコニ・コモンズ nc326561](https://commons.nicovideo.jp/works/nc326561)
   - ニコニコ動画等で投稿する作品で使用した場合、利用登録してくださるとうれしいです
   - ※登録は必須ではありません
+
+## アップデート通知・更新 / Update apps and cast data
+
+アプリかボイスライブラリの情報([cast-data](https://github.com/InuInu2022/cevio-casts))に更新があるとアプリ上に通知が入ります。
+
+![update checker](.\images\KotoKanade_UpdateCheck.PNG)
+
+- アプリのダウンロード
+  - アプリの更新があると通知され、アプリの上からダウンロードできます
+  - 設定タブの `Go to download link` をクリックするとgithubからアプリのzipファイルをダウンロードします
+    - 展開して上書きして使ってください
+
+- ボイスライブラリの情報(cast-data)更新
+  - ボイスライブラリの情報に更新があると通知され、アプリの上から更新できます
+  - ⚠ソングボイスライブラリの情報も含まれるため、トークボイスライブラリの情報だけを使っているKotoKanadeでは **更新しても変化がない場合があります**
 
 ## Sample
 
@@ -222,7 +237,8 @@
 
 ## DL
 
-[github Release](https://github.com/InuInu2022/KotoKanade/releases/latest)からDL
+1. [github Release](https://github.com/InuInu2022/KotoKanade/releases/latest)からDL
+2. 【v1.0.0-beta.13以降】本来アプデがある場合はアプリ上からDLできます
 
 ## Build
 
