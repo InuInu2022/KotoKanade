@@ -52,10 +52,11 @@ public sealed class UpdateChecker
 	/// </summary>
 	/// <returns>アップデートが利用可能の場合はtrue、利用不可の場合はfalse。</returns>
 	public Task<bool>
-	IsAvailableAsync() =>
-		update.IsUpdateAvailableAsync(
-			AppUtil.GetAppVer()
-		);
+	IsAvailableAsync()
+	{
+		var v = "v" + AppUtil.GetAppVer();
+		return update.IsUpdateAvailableAsync(v);
+	}
 
 	public async ValueTask<string> GetDownloadUrlAsync()
 	{
