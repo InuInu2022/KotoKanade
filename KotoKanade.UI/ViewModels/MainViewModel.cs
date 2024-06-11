@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Notification;
 using CevioCasts;
 using Epoxy;
@@ -22,6 +23,9 @@ public sealed class MainViewModel
 	public Command Ready { get; }
 	public Command Close { get; }
 	public string Title { get; private set; } = "test";
+
+	public Well FileDropTarget { get; }
+		= Well.Factory.Create<Grid>();
 
 	public string DefaultCcs { get; set; } = string.Empty;
 	public string? OpenedCcsPath { get; set; }
@@ -91,6 +95,8 @@ public sealed class MainViewModel
 
 		ExportFile = Command.Factory.Create(ExportEvent);
 
+		FileDropTarget.Add(DragDrop.DropEvent, DropFileEventAsync);
+
 		//ResetConsonantOffset = Command.Factory.Create(ResetConsonantEvent);
 
 		ResetConsonantOffset = Command.Factory.Create(ResetParameterEvent);
@@ -117,6 +123,53 @@ public sealed class MainViewModel
 		];
 	}
 
+	private async ValueTask DropFileEventAsync(DragEventArgs args)
+	{
+		var list = args.Data.GetFiles();
+		if(list is null){ return; }
+
+		var pathes = await Task
+			.Run(() => list.Select(v => v.Path.LocalPath).ToList().AsReadOnly())
+			.ConfigureAwait(true);
+		if (pathes is not { Count: > 0 }) { return; }
+
+		var ccs = pathes
+			.FirstOrDefault(p => p.EndsWith(".ccs", StringComparison.OrdinalIgnoreCase) || p.EndsWith(".ccst", StringComparison.OrdinalIgnoreCase));
+		if(ccs is not null)
+		{
+			OpenedCcsPath = ccs;
+			DefaultCcs = Path.GetFileName(OpenedCcsPath);
+		}
+
+		if (IsUseWavFile){
+			var wav = pathes
+				.FirstOrDefault(p => p.EndsWith(".wav", StringComparison.OrdinalIgnoreCase));
+			if(wav is not null)
+			{
+				OpenedWavPath = wav;
+				DefaultWav = Path.GetFileName(OpenedWavPath);
+			}else
+			{
+				AutoSearchFile("wav");
+			}
+		}
+		if (IsUseLabFile || IsUseWavFile)
+		{
+			var lab = pathes
+				.FirstOrDefault(p => p.EndsWith(".lab", StringComparison.OrdinalIgnoreCase));
+			if(lab is not null)
+			{
+				OpenedLabPath = lab;
+				DefaultLab = Path.GetFileName(OpenedLabPath);
+			}else
+			{
+				AutoSearchFile("lab");
+			}
+		}
+
+		CanExport = CheckExportable();
+	}
+
 	private async ValueTask SelectCcsAsync()
 	{
 		var songCcs = await StorageUtil.OpenCevioFileAsync(
@@ -129,36 +182,45 @@ public sealed class MainViewModel
 			.GetPathesFromOpenedFiles(songCcs);
 		if (pathes is not { Count: > 0 }) { return; }
 
-		pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
+		//pathes.ToList().ForEach(f => Debug.WriteLine($"path: {f}"));
 		OpenedCcsPath = pathes[0];
 		DefaultCcs = Path.GetFileName(pathes[0]);
 
+		SelectAutoFiles();
+
+		CanExport = CheckExportable();
+	}
+
+	private void SelectAutoFiles()
+	{
 		//auto file select (same name file only)
 		if (IsUseWavFile)
 		{
 			AutoSearchFile("wav");
 		}
-		if (IsUseLabFile || IsUseWavFile){
+		if (IsUseLabFile || IsUseWavFile)
+		{
 			AutoSearchFile("lab");
 		}
+	}
 
-		CanExport = CheckExportable();
+	private void AutoSearchFile(string extension)
+	{
+		var search = Path.ChangeExtension(OpenedCcsPath, extension);
+		if(search is null){ return; }
 
-		void AutoSearchFile(string extension)
+		var isExists = File.Exists(search);
+		if (isExists)
 		{
-			var search = Path.ChangeExtension(OpenedCcsPath, extension);
-			var isExists = File.Exists(search);
-			if(isExists){
-				if(string.Equals(extension, "wav", StringComparison.Ordinal))
-				{
-					OpenedWavPath = search;
-					DefaultWav = Path.GetFileName(search);
-				}
-				else if(string.Equals(extension, "lab", StringComparison.Ordinal))
-				{
-					OpenedLabPath = search;
-					DefaultLab = Path.GetFileName(search);
-				}
+			if (string.Equals(extension, "wav", StringComparison.Ordinal))
+			{
+				OpenedWavPath = search;
+				DefaultWav = Path.GetFileName(search);
+			}
+			else if (string.Equals(extension, "lab", StringComparison.Ordinal))
+			{
+				OpenedLabPath = search;
+				DefaultLab = Path.GetFileName(search);
 			}
 		}
 	}
