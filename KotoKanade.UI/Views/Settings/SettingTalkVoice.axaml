@@ -9,6 +9,7 @@
              xmlns:sty="using:FluentAvalonia.Styling"
              xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives"
+             xmlns:ccs="using:CevioCasts"
              x:DataType="viewmodels:MainViewModel"
              x:Class="KotoKanade.Views.SettingTalkVoice">
 
@@ -35,12 +36,9 @@
           IsTextSearchEnabled="True"
           MinWidth="200"
           SelectedIndex="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).SelectedCastIndex}"
+          ItemsSource="{Binding $parent[UserControl;2].((viewmodels:MainViewModel)DataContext).TalkCasts}"
+          DisplayMemberBinding="{Binding Names[0].Display,DataType=ccs:Cast}"
           >
-          <ui:FAComboBoxItem Content="田中傘" />
-          <ui:FAComboBoxItem Content="さとうささら" />
-          <ui:FAComboBoxItem Content="すずきつづみ" />
-          <ui:FAComboBoxItem Content="タカハシ" />
-          <ui:FAComboBoxItem Content="双葉湊音" />
         </ui:FAComboBox>
       </StackPanel>
     </ui:SettingsExpander.Footer>
