@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
@@ -14,11 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Browser" Version="11.0.0" />
+    <PackageReference Include="Avalonia.Browser" Version="11.0.13" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\KotoKanade.UI\KotoKanade.UI.csproj" />
   </ItemGroup>
-    
+
 </Project>
