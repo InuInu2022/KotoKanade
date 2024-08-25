@@ -567,6 +567,8 @@ public sealed class MainViewModel
 				IsUseLabFile = false;
 				IsUseWavFile = true;
 				break;
+			default:
+				throw new ArgumentException("Unsupported value",nameof(value));
 		}
 		CanExport = CheckExportable();
 		SettingManager.SelectedTab = value;
