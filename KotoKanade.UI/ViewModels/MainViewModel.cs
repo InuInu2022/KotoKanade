@@ -581,7 +581,7 @@ public sealed class MainViewModel
 	[SuppressMessage("", "IDE0051")]
 	private ValueTask SelectedCastIndexChangedAsync(int value)
 	{
-		if (TalkCasts is null) return default;
+		if (TalkCasts is null || value < 0) return default;
 
 		var def = TalkCasts[value];
 
