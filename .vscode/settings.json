@@ -10,7 +10,10 @@
         "symbolIcon.methodForeground":"#f5f2b4"
     },
     "sarif-viewer.connectToGithubCodeScanning": "off",
-    "cosine.AIModel": "Smarter" //,
+    "cosine.AIModel": "Smarter",
+    "cSpell.words": [
+        "Mayerch"
+    ] //,
     //"markiscodecoverage.searchCriteria": "test/TestResults/*/coverage.lconv",
     //"dotnet-test-explorer.testProjectPath": "test/test.csproj"
 }
