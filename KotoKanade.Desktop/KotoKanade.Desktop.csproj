@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
 
@@ -42,7 +42,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DefineConstants>$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
     <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
   </PropertyGroup>
 
@@ -125,13 +124,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.0.13" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.0.13" />
-    <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="Avalonia.Markup.Xaml.Loader" Version="11.0.13" />
-    <PackageReference Condition="$(DefineConstants.Contains(ENABLE_XAML_HOT_RELOAD))" Include="HotAvalonia" Version="1.1.1" />
-    <PackageReference Include="HotAvalonia.Extensions" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="NLog" Version="5.3.4" />
-    <PackageReference Include="PublishAotCompressed" Version="1.0.3" />
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageReference Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" />
+    <PackageReference Include="NLog" Version="5.4.0" />
+    <PackageReference Include="PublishAotCompressed" Version="1.0.5" />
   </ItemGroup>
 
   <ItemGroup>

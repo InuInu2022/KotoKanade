@@ -5,7 +5,6 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Converters;
-using HotAvalonia;
 
 using KotoKanade.Views;
 
@@ -15,7 +14,6 @@ public sealed class App : Application
 {
 	public override void Initialize()
 	{
-		this.EnableHotReload(); // Ensure this line **precedes** `AvaloniaXamlLoader.Load(this);`
 		AvaloniaXamlLoader.Load(this);
 	}
 
