@@ -12,6 +12,11 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
 
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <StripSymbols>false</StripSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <AdditionalFiles Include="*.??proj" Visible="false" />
@@ -25,7 +30,7 @@
     <PackageReference Include="Avalonia" Version="11.3.0" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.13" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="Epoxy.Avalonia11" Version="1.16.0" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.3.0" />
     <PackageReference  Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" />
