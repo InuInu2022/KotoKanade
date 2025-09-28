@@ -312,24 +312,180 @@ public sealed partial class TalkDataConverter
 	/// <seealso cref="DisposeOpenJTalkAsync"/>
 	private static async ValueTask InitOpenJTalkAsync()
 	{
-		var path = Path.Combine(
-			System.AppDomain.CurrentDomain.BaseDirectory,
-			"lib/open_jtalk_dic_utf_8-1.11/");
-		var userdic = Path.Combine(
-			System.AppDomain.CurrentDomain.BaseDirectory,
-			"lib/userdic/user.dic"
-		);
-		_ = await Task
-			.Run(() => _jtalk.Initialize(path, userdic))
+		var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+		var originalDicPath = Path.Combine(baseDir, "lib/open_jtalk_dic_utf_8-1.11/");
+		var originalUserdicPath = Path.Combine(baseDir, "lib/userdic/user.dic");
+
+		// パスに非ASCII文字が含まれているかチェック
+		if (ContainsNonAsciiChars(baseDir))
+		{
+			Logger.Warn($"Application path contains non-ASCII characters: {baseDir}");
+			
+			// 既存の一時辞書フォルダをチェック
+			if (_tempDictionaryPath is not null && Directory.Exists(_tempDictionaryPath))
+			{
+				Logger.Info($"Reusing existing temporary dictionary: {_tempDictionaryPath}");
+				originalDicPath = Path.Combine(_tempDictionaryPath, "dic");
+				originalUserdicPath = Path.Combine(_tempDictionaryPath, "user.dic");
+				
+				// ユーザー辞書が存在しない場合は空文字列に設定
+				if (!File.Exists(originalUserdicPath))
+				{
+					originalUserdicPath = string.Empty;
+				}
+			}
+			else
+			{
+				Logger.Info("Copying OpenJTalk dictionary to temporary directory for compatibility");
+				
+				// 一時フォルダに辞書をコピー
+				var (tempDicPath, tempUserdicPath) = await CopyDictionaryToTempAsync(originalDicPath, originalUserdicPath).ConfigureAwait(false);
+				originalDicPath = tempDicPath;
+				originalUserdicPath = tempUserdicPath;
+			}
+		}
+
+		// パスの存在確認
+		if (!Directory.Exists(originalDicPath))
+		{
+			Logger.Error($"OpenJTalk dictionary directory not found: {originalDicPath}");
+			throw new DirectoryNotFoundException($"OpenJTalk辞書が見つかりません: {originalDicPath}");
+		}
+
+		if (!File.Exists(originalUserdicPath) && !string.IsNullOrEmpty(originalUserdicPath))
+		{
+			Logger.Warn($"User dictionary not found: {originalUserdicPath}");
+			originalUserdicPath = string.Empty;
+		}
+
+		// 初期化実行（戻り値をチェック）
+		var result = await Task
+			.Run(() => _jtalk.Initialize(originalDicPath, originalUserdicPath))
 			.ConfigureAwait(false);
+
+		if (!result)
+		{
+			Logger.Error($"OpenJTalk initialization failed. Dictionary: {originalDicPath}");
+			throw new InvalidOperationException(
+				"OpenJTalk辞書の初期化に失敗しました。" +
+				$"辞書パス: {originalDicPath}");
+		}
+
+		Logger.Info($"OpenJTalk initialized successfully. Dictionary: {originalDicPath}");
+	}
+
+	private static bool ContainsNonAsciiChars(string path)
+	{
+		return path.Any(c => c > 127);
+	}
+
+	private static string? _tempDictionaryPath;
+
+	private static async ValueTask<(string dicPath, string userdicPath)> CopyDictionaryToTempAsync(
+		string originalDicPath,
+		string originalUserdicPath)
+	{
+		try
+		{
+			// 既存の一時フォルダがあるかチェック
+			if (_tempDictionaryPath is not null && Directory.Exists(_tempDictionaryPath))
+			{
+				Logger.Info($"Temporary dictionary already exists: {_tempDictionaryPath}");
+				var existingDicPath = Path.Combine(_tempDictionaryPath, "dic");
+				var existingUserdicPath = Path.Combine(_tempDictionaryPath, "user.dic");
+				
+				// 辞書フォルダの存在確認
+				if (Directory.Exists(existingDicPath))
+				{
+					var userdicPath = File.Exists(existingUserdicPath) ? existingUserdicPath : string.Empty;
+					return (existingDicPath, userdicPath);
+				}
+			}
+
+			// 一意なテンポラリフォルダを作成
+			var tempDir = Path.Combine(Path.GetTempPath(), $"KotoKanade_OpenJTalk_{Guid.NewGuid():N}");
+			Directory.CreateDirectory(tempDir);
+			_tempDictionaryPath = tempDir;
+
+			var tempDicPath = Path.Combine(tempDir, "dic");
+			var tempUserdicPath = Path.Combine(tempDir, "user.dic");
+
+			// 辞書フォルダをコピー
+			if (Directory.Exists(originalDicPath))
+			{
+				await Task.Run(() => CopyDirectory(originalDicPath, tempDicPath)).ConfigureAwait(false);
+				Logger.Info($"Dictionary copied to: {tempDicPath}");
+			}
+			else
+			{
+				throw new DirectoryNotFoundException($"Original dictionary not found: {originalDicPath}");
+			}
+
+			// ユーザー辞書をコピー
+			if (File.Exists(originalUserdicPath))
+			{
+				await Task.Run(() => File.Copy(originalUserdicPath, tempUserdicPath)).ConfigureAwait(false);
+				Logger.Info($"User dictionary copied to: {tempUserdicPath}");
+			}
+			else
+			{
+				tempUserdicPath = string.Empty;
+				Logger.Info("No user dictionary to copy");
+			}
+
+			return (tempDicPath, tempUserdicPath);
+		}
+		catch (Exception ex)
+		{
+			Logger.Error($"Failed to copy dictionary to temp directory: {ex.Message}");
+			throw new InvalidOperationException("辞書ファイルの一時コピーに失敗しました。", ex);
+		}
+	}
+
+	private static void CopyDirectory(string sourceDir, string destinationDir)
+	{
+		Directory.CreateDirectory(destinationDir);
+
+		// ファイルをコピー
+		foreach (var file in Directory.GetFiles(sourceDir))
+		{
+			var fileName = Path.GetFileName(file);
+			var destFile = Path.Combine(destinationDir, fileName);
+			File.Copy(file, destFile);
+		}
+
+		// サブディレクトリを再帰的にコピー
+		foreach (var subDir in Directory.GetDirectories(sourceDir))
+		{
+			var dirName = Path.GetFileName(subDir);
+			var destSubDir = Path.Combine(destinationDir, dirName);
+			CopyDirectory(subDir, destSubDir);
+		}
 	}
 
 	public static async ValueTask DisposeOpenJTalkAsync()
 	{
 		await Task.Run(_jtalk.Dispose)
 			.ConfigureAwait(false);
-	}
 
+		// 一時辞書フォルダのクリーンアップ
+		if (_tempDictionaryPath is not null && Directory.Exists(_tempDictionaryPath))
+		{
+			try
+			{
+				await Task.Run(() => Directory.Delete(_tempDictionaryPath, true)).ConfigureAwait(false);
+				Logger.Info($"Cleaned up temporary dictionary: {_tempDictionaryPath}");
+			}
+			catch (Exception ex)
+			{
+				Logger.Warn($"Failed to cleanup temporary dictionary: {ex.Message}");
+			}
+			finally
+			{
+				_tempDictionaryPath = null;
+			}
+		}
+	}
 
 	private static Func<List<Note>, Utterance>
 	ToUtteranceWithoutLab(
@@ -1388,31 +1544,37 @@ public sealed partial class TalkDataConverter
 		if(notes?.Any() != true) { return new(string.Empty); }
 
 		var lyrics = GetPhraseText(notes);
-		if (fcLabelCache
-			.TryGetValue(lyrics, out var cachedLabel))
+		if (fcLabelCache.TryGetValue(lyrics, out var cachedLabel))
 		{
-			//キャッシュがあればキャッシュを返す
 			return cachedLabel;
 		}
 
-		if(lyrics is "" or []){ return new(string.Empty); }
+		if(lyrics is "" or []) { return new(string.Empty); }
 
-		var text = Enumerable.Empty<string>().ToList();
+		var text = new List<string>();
 		lock (_jtalk)
 		{
 			foreach (var s in SplitString(lyrics))
 			{
 				var chunk = _jtalk.GetLabels(s);
-				text.AddRange(chunk);
+				// nullチェックを追加（元のエラーの原因を修正）
+				if (chunk is not null)
+				{
+					text.AddRange(chunk);
+				}
+				else
+				{
+					Logger.Warn($"OpenJTalk returned null for text: '{s}'");
+				}
 			}
-			//text = _jtalk.GetLabels(lyrics);
 		}
 
-		if (text is [])
+		if (text.Count == 0)
 		{
-			return new(string.Empty);
+			Logger.Warn($"No phoneme labels generated for lyrics: '{lyrics}'");
+			return new FullContextLab(string.Empty);
 		}
-		//キャッシュを残して保存
+
 		var ret = new FullContextLab(string.Join('\n', text));
 		fcLabelCache.TryAdd(lyrics, ret);
 		return ret;

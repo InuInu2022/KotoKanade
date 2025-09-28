@@ -21,18 +21,18 @@
     <PackageReference Include="GithubReleaseDownloader" Version="1.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Mayerch1.GithubUpdateCheck" Version="1.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NLog" Version="5.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NLog" Version="6.0.4" />
     <PackageReference Include="PolySharp" Version="1.15.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Sandreas.Avalonia.Preferences" Version="0.0.3" />
     <PackageReference Include="SharpOpenJTalk.Lang" Version="1.4.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.5" />
-    <PackageReference Include="System.IO.Hashing" Version="9.0.5" />
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.9" />
+    <PackageReference Include="System.IO.Hashing" Version="9.0.9" />
     <PackageReference Include="WanaKana-net" Version="1.0.0" />
-    <PackageReference Include="Xabe.FFmpeg" Version="6.0.1" />
-    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.1" />
+    <PackageReference Include="Xabe.FFmpeg" Version="6.0.2" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.2" />
   </ItemGroup>
 </Project>
